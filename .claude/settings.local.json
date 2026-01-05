@@ -32,7 +32,9 @@
       "Bash(dir:*)",
       "Bash(git init:*)",
       "Bash(git remote add:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Implement 8 authorized extensions with complete documentation\n\nImplemented 8 extensions following strict non-regression principles:\n\nExtensions:\n1. Seasonal flight program management\n2. Scheduled vs. off-program flight distinction\n3. Aircraft version and configuration tracking\n4. Detailed passenger categories \\(14 categories, classes, medical needs\\)\n5. Detailed freight management with dangerous goods \\(DGR\\)\n6. CRV cancellation status with full traceability\n7. In-app notification service with multi-channel support\n8. Proactive SLA monitoring and alerting system\n\nTechnical impact:\n- 15 files modified \\(minimal changes\\)\n- 22 new files created \\(isolated\\)\n- 61 new API routes added\n- ~4,310 lines of code added\n- 2 new MongoDB collections \\(programmevolsaisonniers, notifications\\)\n- 0 database migrations required \\(100% backward compatible\\)\n\nDocumentation:\n- 5 complete non-regression justifications \\(Extensions 1, 5, 6, 7, 8\\)\n- 1 final synthesis document \\(all 8 extensions\\)\n- 1 global technical justification with 26 user stories\n- All documents in docs/extensions/ and docs/\n\nKey guarantees:\n✅ 100% backward compatibility - all existing documents work without migration\n✅ 100% isolation - each extension in separate files\n✅ 100% reversibility - each extension can be rolled back independently\n✅ 0 destructive modifications - no existing fields modified or deleted\n✅ 0 mandatory dependencies - extensions are optional \\(except Extension 8 → 7\\)\n\nAll extensions validated and production-ready.\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)"
     ]
   }
 }
