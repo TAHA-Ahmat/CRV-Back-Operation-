@@ -25,8 +25,10 @@ import { protect, authorize } from '../middlewares/auth.middleware.js';
 const router = express.Router();
 
 /**
- * IMPORTANT: Toutes les routes nécessitent l'authentification JWT
- * Le middleware protect ajoute req.user avec les informations de l'utilisateur connecté
+ * 🔒 PHASE 1 AJUSTÉE - Référentiel officiel
+ *
+ * SLA = Décisions de gestion opérationnelle (MANAGER)
+ * QUALITE: Lecture des rapports SLA, configuration, vérifications
  */
 
 // ========== ROUTES NON-PARAMÉTRISÉES (avant /:id) ==========
@@ -34,38 +36,38 @@ const router = express.Router();
 /**
  * @route   GET /api/sla/rapport
  * @desc    Obtenir le rapport SLA complet (CRV + Phases)
- * @access  Private (MANAGER, ADMIN)
+ * @access  Private (DÉCISION CRITIQUE: MANAGER uniquement)
  */
-router.get('/rapport', protect, authorize('MANAGER', 'ADMIN'), obtenirRapportSLA);
+router.get('/rapport', protect, authorize('MANAGER'), obtenirRapportSLA);
 
 /**
  * @route   GET /api/sla/configuration
  * @desc    Obtenir la configuration SLA actuelle
- * @access  Private
+ * @access  Private (Tous: opérationnels + QUALITE)
  */
 router.get('/configuration', protect, obtenirConfiguration);
 
 /**
  * @route   PUT /api/sla/configuration
  * @desc    Configurer les SLA personnalisés
- * @access  Private (ADMIN)
+ * @access  Private (DÉCISION CRITIQUE: MANAGER uniquement)
  * @body    { CRV: {...}, PHASE: {...} }
  */
-router.put('/configuration', protect, authorize('ADMIN'), configurerSLA);
+router.put('/configuration', protect, authorize('MANAGER'), configurerSLA);
 
 /**
  * @route   POST /api/sla/surveiller/crv
  * @desc    Surveiller tous les CRV actifs et envoyer des alertes
- * @access  Private (MANAGER, ADMIN)
+ * @access  Private (DÉCISION CRITIQUE: MANAGER uniquement)
  */
-router.post('/surveiller/crv', protect, authorize('MANAGER', 'ADMIN'), surveillerCRV);
+router.post('/surveiller/crv', protect, authorize('MANAGER'), surveillerCRV);
 
 /**
  * @route   POST /api/sla/surveiller/phases
  * @desc    Surveiller toutes les phases actives et envoyer des alertes
- * @access  Private (MANAGER, ADMIN)
+ * @access  Private (DÉCISION CRITIQUE: MANAGER uniquement)
  */
-router.post('/surveiller/phases', protect, authorize('MANAGER', 'ADMIN'), surveillerPhases);
+router.post('/surveiller/phases', protect, authorize('MANAGER'), surveillerPhases);
 
 // ========== ROUTES PARAMÉTRISÉES (après /:id) ==========
 

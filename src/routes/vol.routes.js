@@ -13,7 +13,8 @@ import { validate } from '../middlewares/validation.middleware.js';
 
 const router = express.Router();
 
-router.post('/', protect, authorize('SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER', 'ADMIN'), [
+// 🔒 PHASE 1 AJUSTÉE - Périmètre opérationnel unifié (AGENT, CHEF, SUPERVISEUR, MANAGER)
+router.post('/', protect, [
   body('numeroVol').notEmpty().withMessage('Numéro de vol requis'),
   body('typeOperation').isIn(['ARRIVEE', 'DEPART', 'TURN_AROUND']).withMessage('Type d\'opération invalide'),
   body('compagnieAerienne').notEmpty().withMessage('Compagnie aérienne requise'),
@@ -26,7 +27,7 @@ router.get('/', protect, listerVols);
 
 router.get('/:id', protect, obtenirVol);
 
-router.patch('/:id', protect, authorize('SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER', 'ADMIN'), mettreAJourVol);
+router.patch('/:id', protect, mettreAJourVol);
 
 // ========== EXTENSION 2 - Routes pour distinction vol programmé / hors programme ==========
 // NON-RÉGRESSION: Ces routes sont NOUVELLES et n'affectent AUCUNE route existante ci-dessus
@@ -34,25 +35,25 @@ router.patch('/:id', protect, authorize('SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER',
 /**
  * @route   POST /api/vols/:id/lier-programme
  * @desc    Lier un vol à un programme saisonnier
- * @access  Private (SUPERVISEUR, CHEF_EQUIPE, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { programmeVolId: string }
  */
-router.post('/:id/lier-programme', protect, authorize('SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER', 'ADMIN'), volProgrammeController.lierVolAuProgramme);
+router.post('/:id/lier-programme', protect, volProgrammeController.lierVolAuProgramme);
 
 /**
  * @route   POST /api/vols/:id/marquer-hors-programme
  * @desc    Marquer un vol comme hors programme
- * @access  Private (SUPERVISEUR, CHEF_EQUIPE, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { typeVolHorsProgramme: string, raison?: string }
  */
-router.post('/:id/marquer-hors-programme', protect, authorize('SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER', 'ADMIN'), volProgrammeController.marquerVolHorsProgramme);
+router.post('/:id/marquer-hors-programme', protect, volProgrammeController.marquerVolHorsProgramme);
 
 /**
  * @route   POST /api/vols/:id/detacher-programme
  * @desc    Détacher un vol d'un programme saisonnier
- * @access  Private (SUPERVISEUR, CHEF_EQUIPE, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  */
-router.post('/:id/detacher-programme', protect, authorize('SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER', 'ADMIN'), volProgrammeController.detacherVolDuProgramme);
+router.post('/:id/detacher-programme', protect, volProgrammeController.detacherVolDuProgramme);
 
 /**
  * @route   GET /api/vols/:id/suggerer-programmes

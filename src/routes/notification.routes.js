@@ -26,8 +26,12 @@ import { protect, authorize } from '../middlewares/auth.middleware.js';
 const router = express.Router();
 
 /**
- * IMPORTANT: Toutes les routes nécessitent l'authentification JWT
- * Le middleware protect ajoute req.user avec les informations de l'utilisateur connecté
+ * 🔒 PHASE 1 AJUSTÉE - Référentiel officiel
+ *
+ * Notifications:
+ * - Lecture/Gestion personnelle: Tous (opérationnels + QUALITE)
+ * - Création notification système: MANAGER (décision de communication)
+ * - ADMIN gelé: Ne crée plus de notifications métier
  */
 
 // ========== ROUTES NON-PARAMÉTRISÉES (avant /:id) ==========
@@ -63,11 +67,11 @@ router.get('/', protect, obtenirMesNotifications);
 
 /**
  * @route   POST /api/notifications
- * @desc    Créer une notification (ADMIN uniquement)
- * @access  Private (ADMIN)
+ * @desc    Créer une notification système
+ * @access  Private (DÉCISION CRITIQUE: MANAGER uniquement)
  * @body    Données de la notification
  */
-router.post('/', protect, authorize('ADMIN'), creerNotification);
+router.post('/', protect, authorize('MANAGER'), creerNotification);
 
 // ========== ROUTES PARAMÉTRISÉES (après /:id) ==========
 

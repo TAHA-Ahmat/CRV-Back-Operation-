@@ -32,7 +32,7 @@ const personneSchema = new mongoose.Schema({
   },
   fonction: {
     type: String,
-    enum: ['AGENT_ESCALE', 'SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER', 'ADMIN'],
+    enum: ['AGENT_ESCALE', 'CHEF_EQUIPE', 'SUPERVISEUR', 'MANAGER', 'QUALITE', 'ADMIN'],
     required: true
   },
   specialites: [{
@@ -43,6 +43,24 @@ const personneSchema = new mongoose.Schema({
     type: String,
     enum: ['ACTIF', 'ABSENT', 'CONGE', 'INACTIF'],
     default: 'ACTIF'
+  },
+  // 🔒 PHASE 1 - Workflow validation compte utilisateur
+  statutCompte: {
+    type: String,
+    enum: ['EN_ATTENTE', 'VALIDE', 'SUSPENDU', 'DESACTIVE'],
+    default: 'VALIDE', // PHASE 1: validation automatique (pas de workflow manuel encore)
+    required: true
+  },
+  // Date validation compte (si workflow manuel activé plus tard)
+  dateValidationCompte: {
+    type: Date,
+    default: null
+  },
+  // Validé par (si workflow manuel activé plus tard)
+  valideParUserId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Personne',
+    default: null
   },
   telephone: String,
   dateEmbauche: Date

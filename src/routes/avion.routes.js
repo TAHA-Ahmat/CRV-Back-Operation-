@@ -17,8 +17,9 @@ import { protect, authorize } from '../middlewares/auth.middleware.js';
 const router = express.Router();
 
 /**
- * IMPORTANT: Toutes les routes nécessitent l'authentification JWT
- * Le middleware protect ajoute req.user avec les informations de l'utilisateur connecté
+ * 🔒 PHASE 1 AJUSTÉE - Référentiel officiel
+ * Périmètre opérationnel unifié pour AGENT, CHEF, SUPERVISEUR, MANAGER
+ * QUALITE: Lecture seule (historique, comparaison, statistiques)
  */
 
 // ========== ROUTES POUR GESTION DE CONFIGURATION ==========
@@ -26,20 +27,20 @@ const router = express.Router();
 /**
  * @route   PUT /api/avions/:id/configuration
  * @desc    Mettre à jour la configuration d'un avion
- * @access  Private (SUPERVISEUR, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { sieges, equipements, moteurs, caracteristiquesTechniques, remarques }
  */
-router.put('/:id/configuration', protect, authorize('SUPERVISEUR', 'MANAGER', 'ADMIN'), avionConfigurationController.mettreAJourConfiguration);
+router.put('/:id/configuration', protect, avionConfigurationController.mettreAJourConfiguration);
 
 // ========== ROUTES POUR GESTION DES VERSIONS ==========
 
 /**
  * @route   POST /api/avions/:id/versions
  * @desc    Créer une nouvelle version de configuration
- * @access  Private (SUPERVISEUR, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { numeroVersion: string, modifications: string, configuration?: object }
  */
-router.post('/:id/versions', protect, authorize('SUPERVISEUR', 'MANAGER', 'ADMIN'), avionConfigurationController.creerNouvelleVersion);
+router.post('/:id/versions', protect, avionConfigurationController.creerNouvelleVersion);
 
 /**
  * @route   GET /api/avions/:id/versions
@@ -58,9 +59,9 @@ router.get('/:id/versions/:numeroVersion', protect, avionConfigurationController
 /**
  * @route   POST /api/avions/:id/versions/:numeroVersion/restaurer
  * @desc    Restaurer une version antérieure
- * @access  Private (SUPERVISEUR, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  */
-router.post('/:id/versions/:numeroVersion/restaurer', protect, authorize('SUPERVISEUR', 'MANAGER', 'ADMIN'), avionConfigurationController.restaurerVersion);
+router.post('/:id/versions/:numeroVersion/restaurer', protect, avionConfigurationController.restaurerVersion);
 
 /**
  * @route   GET /api/avions/:id/versions/comparer
@@ -75,10 +76,10 @@ router.get('/:id/versions/comparer', protect, avionConfigurationController.compa
 /**
  * @route   PUT /api/avions/:id/revision
  * @desc    Mettre à jour les informations de révision
- * @access  Private (SUPERVISEUR, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { date?: Date, type?: string, prochaineDatePrevue?: Date }
  */
-router.put('/:id/revision', protect, authorize('SUPERVISEUR', 'MANAGER', 'ADMIN'), avionConfigurationController.mettreAJourRevision);
+router.put('/:id/revision', protect, avionConfigurationController.mettreAJourRevision);
 
 /**
  * @route   GET /api/avions/revisions/prochaines

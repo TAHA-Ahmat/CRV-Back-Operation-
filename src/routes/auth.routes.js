@@ -12,13 +12,14 @@ router.post('/login', [
   validate
 ], login);
 
+// 🔒 PHASE 1 AJUSTÉE - Rôles actifs (opérationnels + QUALITE) | ADMIN gelé (technique uniquement)
 router.post('/register', [
   body('nom').notEmpty().withMessage('Nom requis'),
   body('prenom').notEmpty().withMessage('Prénom requis'),
   body('matricule').notEmpty().withMessage('Matricule requis'),
   body('email').isEmail().withMessage('Email invalide'),
   body('password').isLength({ min: 6 }).withMessage('Mot de passe minimum 6 caractères'),
-  body('fonction').isIn(['AGENT_ESCALE', 'SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER', 'ADMIN']).withMessage('Fonction invalide'),
+  body('fonction').isIn(['AGENT_ESCALE', 'CHEF_EQUIPE', 'SUPERVISEUR', 'MANAGER', 'QUALITE']).withMessage('Fonction invalide - rôles autorisés: AGENT_ESCALE, CHEF_EQUIPE, SUPERVISEUR, MANAGER, QUALITE'),
   validate
 ], register);
 

@@ -9,16 +9,18 @@ import { auditLog } from '../middlewares/auditLog.middleware.js';
 
 const router = express.Router();
 
+// 🔒 PHASE 1 AJUSTÉE - Décisions critiques (SUPERVISEUR, MANAGER uniquement)
 router.post('/:id/valider',
   protect,
-  authorize('SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER', 'ADMIN'),
+  authorize('SUPERVISEUR', 'MANAGER'),
   auditLog('VALIDATION'),
   validerCRVController
 );
 
+// 🔒 DÉCISION CRITIQUE: Déverrouillage réservé à MANAGER
 router.post('/:id/deverrouiller',
   protect,
-  authorize('MANAGER', 'ADMIN'),
+  authorize('MANAGER'),
   auditLog('MISE_A_JOUR'),
   deverrouillerCRVController
 );

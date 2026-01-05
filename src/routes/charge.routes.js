@@ -18,8 +18,9 @@ import { protect, authorize } from '../middlewares/auth.middleware.js';
 const router = express.Router();
 
 /**
- * IMPORTANT: Toutes les routes nécessitent l'authentification JWT
- * Le middleware protect ajoute req.user avec les informations de l'utilisateur connecté
+ * 🔒 PHASE 1 AJUSTÉE - Référentiel officiel
+ * Périmètre opérationnel unifié pour AGENT, CHEF, SUPERVISEUR, MANAGER
+ * QUALITE: Lecture seule (statistiques uniquement)
  */
 
 // ========== ROUTES POUR CATÉGORIES DÉTAILLÉES ==========
@@ -27,44 +28,44 @@ const router = express.Router();
 /**
  * @route   PUT /api/charges/:id/categories-detaillees
  * @desc    Mettre à jour les catégories détaillées de passagers
- * @access  Private (SUPERVISEUR, CHEF_EQUIPE, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { bebes, enfants, adolescents, adultes, seniors, pmr*, transit*, vip, equipage, deportes }
  */
-router.put('/:id/categories-detaillees', protect, authorize('SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER', 'ADMIN'), passagerController.mettreAJourCategoriesDetaillees);
+router.put('/:id/categories-detaillees', protect, passagerController.mettreAJourCategoriesDetaillees);
 
 /**
  * @route   PUT /api/charges/:id/classes
  * @desc    Mettre à jour les classes de passagers
- * @access  Private (SUPERVISEUR, CHEF_EQUIPE, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { premiere, affaires, economique }
  */
-router.put('/:id/classes', protect, authorize('SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER', 'ADMIN'), passagerController.mettreAJourClassePassagers);
+router.put('/:id/classes', protect, passagerController.mettreAJourClassePassagers);
 
 /**
  * @route   PUT /api/charges/:id/besoins-medicaux
  * @desc    Mettre à jour les besoins médicaux des passagers
- * @access  Private (SUPERVISEUR, CHEF_EQUIPE, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { oxygeneBord, brancardier, accompagnementMedical }
  */
-router.put('/:id/besoins-medicaux', protect, authorize('SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER', 'ADMIN'), passagerController.mettreAJourBesoinsMedicaux);
+router.put('/:id/besoins-medicaux', protect, passagerController.mettreAJourBesoinsMedicaux);
 
 /**
  * @route   PUT /api/charges/:id/mineurs
  * @desc    Mettre à jour les informations sur les mineurs
- * @access  Private (SUPERVISEUR, CHEF_EQUIPE, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { mineurNonAccompagne, bebeNonAccompagne }
  */
-router.put('/:id/mineurs', protect, authorize('SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER', 'ADMIN'), passagerController.mettreAJourMineurs);
+router.put('/:id/mineurs', protect, passagerController.mettreAJourMineurs);
 
 // ========== ROUTES POUR CONVERSION ==========
 
 /**
  * @route   POST /api/charges/:id/convertir-categories-detaillees
  * @desc    Convertir les catégories basiques en catégories détaillées
- * @access  Private (SUPERVISEUR, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { mapping?: object } (optionnel)
  */
-router.post('/:id/convertir-categories-detaillees', protect, authorize('SUPERVISEUR', 'MANAGER', 'ADMIN'), passagerController.convertirVersCategoriesDetaillees);
+router.post('/:id/convertir-categories-detaillees', protect, passagerController.convertirVersCategoriesDetaillees);
 
 // ========== ROUTES POUR STATISTIQUES ==========
 
@@ -88,25 +89,25 @@ router.get('/crv/:crvId/statistiques-passagers', protect, passagerController.obt
 /**
  * @route   PUT /api/charges/:id/fret-detaille
  * @desc    Mettre à jour le fret détaillé
- * @access  Private (SUPERVISEUR, CHEF_EQUIPE, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { categoriesFret, marchandisesDangereuses, logistique, douanes, conditionsTransport }
  */
-router.put('/:id/fret-detaille', protect, authorize('SUPERVISEUR', 'CHEF_EQUIPE', 'MANAGER', 'ADMIN'), fretController.mettreAJourFretDetaille);
+router.put('/:id/fret-detaille', protect, fretController.mettreAJourFretDetaille);
 
 /**
  * @route   POST /api/charges/:id/marchandises-dangereuses
  * @desc    Ajouter une marchandise dangereuse
- * @access  Private (SUPERVISEUR, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { codeONU, classeONU, designationOfficielle, quantite, unite, groupeEmballage }
  */
-router.post('/:id/marchandises-dangereuses', protect, authorize('SUPERVISEUR', 'MANAGER', 'ADMIN'), fretController.ajouterMarchandiseDangereuse);
+router.post('/:id/marchandises-dangereuses', protect, fretController.ajouterMarchandiseDangereuse);
 
 /**
  * @route   DELETE /api/charges/:id/marchandises-dangereuses/:marchandiseId
  * @desc    Retirer une marchandise dangereuse
- * @access  Private (SUPERVISEUR, MANAGER, ADMIN)
+ * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  */
-router.delete('/:id/marchandises-dangereuses/:marchandiseId', protect, authorize('SUPERVISEUR', 'MANAGER', 'ADMIN'), fretController.retirerMarchandiseDangereuse);
+router.delete('/:id/marchandises-dangereuses/:marchandiseId', protect, fretController.retirerMarchandiseDangereuse);
 
 /**
  * @route   POST /api/charges/valider-marchandise-dangereuse
