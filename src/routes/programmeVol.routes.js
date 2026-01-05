@@ -1,6 +1,6 @@
 import express from 'express';
 import * as programmeVolController from '../controllers/programmeVol.controller.js';
-import { protect, authorize } from '../middlewares/auth.middleware.js';
+import { protect, authorize, excludeQualite } from '../middlewares/auth.middleware.js';
 
 /**
  * EXTENSION 1 - Routes Programme vol saisonnier
@@ -47,7 +47,8 @@ const router = express.Router();
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { nomProgramme, compagnieAerienne, typeOperation, recurrence, detailsVol, remarques }
  */
-router.post('/', protect, programmeVolController.creerProgramme);
+// 🔒 P0-1: QUALITE exclu
+router.post('/', protect, excludeQualite, programmeVolController.creerProgramme);
 
 /**
  * @route   GET /api/programmes-vol
@@ -72,7 +73,8 @@ router.get('/:id', protect, programmeVolController.obtenirProgrammeParId);
  * @params  id - ID du programme
  * @body    Champs à mettre à jour
  */
-router.patch('/:id', protect, programmeVolController.mettreAJourProgramme);
+// 🔒 P0-1: QUALITE exclu
+router.patch('/:id', protect, excludeQualite, programmeVolController.mettreAJourProgramme);
 
 /**
  * @route   DELETE /api/programmes-vol/:id
@@ -107,7 +109,8 @@ router.post('/:id/activer', protect, authorize('SUPERVISEUR', 'MANAGER'), progra
  * @params  id - ID du programme
  * @body    { raison } (optionnel)
  */
-router.post('/:id/suspendre', protect, programmeVolController.suspendreProgramme);
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/suspendre', protect, excludeQualite, programmeVolController.suspendreProgramme);
 
 // ========== ROUTES DE RECHERCHE ET IMPORT ==========
 
@@ -126,6 +129,7 @@ router.get('/applicables/:date', protect, programmeVolController.trouverProgramm
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { programmes: [...] }
  */
-router.post('/import', protect, programmeVolController.importerProgrammes);
+// 🔒 P0-1: QUALITE exclu
+router.post('/import', protect, excludeQualite, programmeVolController.importerProgrammes);
 
 export default router;

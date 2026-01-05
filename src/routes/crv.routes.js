@@ -25,7 +25,7 @@ import {
   obtenirStatistiquesAnnulations,
   verifierPeutAnnuler
 } from '../controllers/annulation.controller.js';
-import { protect, authorize } from '../middlewares/auth.middleware.js';
+import { protect, authorize, excludeQualite } from '../middlewares/auth.middleware.js';
 import { validate } from '../middlewares/validation.middleware.js';
 import { auditLog } from '../middlewares/auditLog.middleware.js';
 import {
@@ -36,7 +36,8 @@ import {
 
 const router = express.Router();
 
-router.post('/', protect, [
+// 🔒 P0-1: QUALITE exclu (lecture seule)
+router.post('/', protect, excludeQualite, [
   body('volId').notEmpty().withMessage('Vol requis'),
   validate
 ], verifierPhasesAutoriseesCreationCRV, auditLog('CREATION'), creerCRV);
@@ -82,22 +83,26 @@ router.get('/statistiques/annulations', protect, authorize('MANAGER', 'ADMIN'), 
 
 router.get('/:id', protect, obtenirCRV);
 
-router.patch('/:id', protect, verifierCRVNonVerrouille, auditLog('MISE_A_JOUR'), mettreAJourCRV);
+// 🔒 P0-1: QUALITE exclu
+router.patch('/:id', protect, excludeQualite, verifierCRVNonVerrouille, auditLog('MISE_A_JOUR'), mettreAJourCRV);
 
-router.post('/:id/charges', protect, verifierCRVNonVerrouille, [
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/charges', protect, excludeQualite, verifierCRVNonVerrouille, [
   body('typeCharge').isIn(['PASSAGERS', 'BAGAGES', 'FRET']).withMessage('Type de charge invalide'),
   body('sensOperation').isIn(['EMBARQUEMENT', 'DEBARQUEMENT']).withMessage('Sens d\'opération invalide'),
   validate
 ], validerCoherenceCharges, auditLog('MISE_A_JOUR'), ajouterCharge);
 
-router.post('/:id/evenements', protect, verifierCRVNonVerrouille, [
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/evenements', protect, excludeQualite, verifierCRVNonVerrouille, [
   body('typeEvenement').notEmpty().withMessage('Type d\'événement requis'),
   body('gravite').isIn(['MINEURE', 'MODEREE', 'MAJEURE', 'CRITIQUE']).withMessage('Gravité invalide'),
   body('description').notEmpty().withMessage('Description requise'),
   validate
 ], auditLog('MISE_A_JOUR'), ajouterEvenement);
 
-router.post('/:id/observations', protect, verifierCRVNonVerrouille, [
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/observations', protect, excludeQualite, verifierCRVNonVerrouille, [
   body('categorie').isIn(['GENERALE', 'TECHNIQUE', 'OPERATIONNELLE', 'SECURITE', 'QUALITE', 'SLA']).withMessage('Catégorie invalide'),
   body('contenu').notEmpty().withMessage('Contenu requis'),
   validate
@@ -111,10 +116,12 @@ router.post('/:id/observations', protect, verifierCRVNonVerrouille, [
 router.get('/archive/status', getArchivageStatus);
 
 // Tester l'archivage avec un PDF de test
-router.post('/archive/test', protect, testerArchivage);
+// 🔒 P0-1: QUALITE exclu
+router.post('/archive/test', protect, excludeQualite, testerArchivage);
 
 // Archiver un CRV spécifique
-router.post('/:id/archive', protect, archiverCRV);
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/archive', protect, excludeQualite, archiverCRV);
 
 // ============================
 //   EXTENSION 6 - ROUTES ANNULATION (PARAMÉTRISÉES)

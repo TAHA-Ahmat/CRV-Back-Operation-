@@ -6,7 +6,7 @@ import {
   marquerPhaseNonRealisee,
   mettreAJourPhase
 } from '../controllers/phase.controller.js';
-import { protect } from '../middlewares/auth.middleware.js';
+import { protect, excludeQualite } from '../middlewares/auth.middleware.js';
 import { validate } from '../middlewares/validation.middleware.js';
 import { auditLog } from '../middlewares/auditLog.middleware.js';
 import {
@@ -16,16 +16,20 @@ import {
 
 const router = express.Router();
 
-router.post('/:id/demarrer', protect, verifierCoherencePhaseTypeOperation, auditLog('MISE_A_JOUR'), demarrerPhaseController);
+// 🔒 P0-1: QUALITE exclu (lecture seule)
+router.post('/:id/demarrer', protect, excludeQualite, verifierCoherencePhaseTypeOperation, auditLog('MISE_A_JOUR'), demarrerPhaseController);
 
-router.post('/:id/terminer', protect, verifierCoherencePhaseTypeOperation, auditLog('MISE_A_JOUR'), terminerPhaseController);
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/terminer', protect, excludeQualite, verifierCoherencePhaseTypeOperation, auditLog('MISE_A_JOUR'), terminerPhaseController);
 
-router.post('/:id/non-realise', protect, verifierCoherencePhaseTypeOperation, [
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/non-realise', protect, excludeQualite, verifierCoherencePhaseTypeOperation, [
   body('motifNonRealisation').isIn(['NON_NECESSAIRE', 'EQUIPEMENT_INDISPONIBLE', 'PERSONNEL_ABSENT', 'CONDITIONS_METEO', 'AUTRE']).withMessage('Motif invalide'),
   body('detailMotif').notEmpty().withMessage('Détail de justification requis'),
   validate
 ], verifierJustificationNonRealisation, auditLog('MISE_A_JOUR'), marquerPhaseNonRealisee);
 
-router.patch('/:id', protect, verifierCoherencePhaseTypeOperation, auditLog('MISE_A_JOUR'), mettreAJourPhase);
+// 🔒 P0-1: QUALITE exclu
+router.patch('/:id', protect, excludeQualite, verifierCoherencePhaseTypeOperation, auditLog('MISE_A_JOUR'), mettreAJourPhase);
 
 export default router;

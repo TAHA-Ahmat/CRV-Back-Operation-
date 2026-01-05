@@ -1,7 +1,7 @@
 import express from 'express';
 import * as passagerController from '../controllers/passager.controller.js';
 import * as fretController from '../controllers/fret.controller.js';
-import { protect, authorize } from '../middlewares/auth.middleware.js';
+import { protect, authorize, excludeQualite } from '../middlewares/auth.middleware.js';
 
 /**
  * EXTENSIONS 4 & 5 - Routes Charges (Passagers & Fret détaillés)
@@ -31,7 +31,8 @@ const router = express.Router();
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { bebes, enfants, adolescents, adultes, seniors, pmr*, transit*, vip, equipage, deportes }
  */
-router.put('/:id/categories-detaillees', protect, passagerController.mettreAJourCategoriesDetaillees);
+// 🔒 P0-1: QUALITE exclu
+router.put('/:id/categories-detaillees', protect, excludeQualite, passagerController.mettreAJourCategoriesDetaillees);
 
 /**
  * @route   PUT /api/charges/:id/classes
@@ -39,7 +40,8 @@ router.put('/:id/categories-detaillees', protect, passagerController.mettreAJour
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { premiere, affaires, economique }
  */
-router.put('/:id/classes', protect, passagerController.mettreAJourClassePassagers);
+// 🔒 P0-1: QUALITE exclu
+router.put('/:id/classes', protect, excludeQualite, passagerController.mettreAJourClassePassagers);
 
 /**
  * @route   PUT /api/charges/:id/besoins-medicaux
@@ -47,7 +49,8 @@ router.put('/:id/classes', protect, passagerController.mettreAJourClassePassager
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { oxygeneBord, brancardier, accompagnementMedical }
  */
-router.put('/:id/besoins-medicaux', protect, passagerController.mettreAJourBesoinsMedicaux);
+// 🔒 P0-1: QUALITE exclu
+router.put('/:id/besoins-medicaux', protect, excludeQualite, passagerController.mettreAJourBesoinsMedicaux);
 
 /**
  * @route   PUT /api/charges/:id/mineurs
@@ -55,7 +58,8 @@ router.put('/:id/besoins-medicaux', protect, passagerController.mettreAJourBesoi
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { mineurNonAccompagne, bebeNonAccompagne }
  */
-router.put('/:id/mineurs', protect, passagerController.mettreAJourMineurs);
+// 🔒 P0-1: QUALITE exclu
+router.put('/:id/mineurs', protect, excludeQualite, passagerController.mettreAJourMineurs);
 
 // ========== ROUTES POUR CONVERSION ==========
 
@@ -65,7 +69,8 @@ router.put('/:id/mineurs', protect, passagerController.mettreAJourMineurs);
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { mapping?: object } (optionnel)
  */
-router.post('/:id/convertir-categories-detaillees', protect, passagerController.convertirVersCategoriesDetaillees);
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/convertir-categories-detaillees', protect, excludeQualite, passagerController.convertirVersCategoriesDetaillees);
 
 // ========== ROUTES POUR STATISTIQUES ==========
 
@@ -92,7 +97,8 @@ router.get('/crv/:crvId/statistiques-passagers', protect, passagerController.obt
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { categoriesFret, marchandisesDangereuses, logistique, douanes, conditionsTransport }
  */
-router.put('/:id/fret-detaille', protect, fretController.mettreAJourFretDetaille);
+// 🔒 P0-1: QUALITE exclu
+router.put('/:id/fret-detaille', protect, excludeQualite, fretController.mettreAJourFretDetaille);
 
 /**
  * @route   POST /api/charges/:id/marchandises-dangereuses
@@ -100,14 +106,16 @@ router.put('/:id/fret-detaille', protect, fretController.mettreAJourFretDetaille
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { codeONU, classeONU, designationOfficielle, quantite, unite, groupeEmballage }
  */
-router.post('/:id/marchandises-dangereuses', protect, fretController.ajouterMarchandiseDangereuse);
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/marchandises-dangereuses', protect, excludeQualite, fretController.ajouterMarchandiseDangereuse);
 
 /**
  * @route   DELETE /api/charges/:id/marchandises-dangereuses/:marchandiseId
  * @desc    Retirer une marchandise dangereuse
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  */
-router.delete('/:id/marchandises-dangereuses/:marchandiseId', protect, fretController.retirerMarchandiseDangereuse);
+// 🔒 P0-1: QUALITE exclu
+router.delete('/:id/marchandises-dangereuses/:marchandiseId', protect, excludeQualite, fretController.retirerMarchandiseDangereuse);
 
 /**
  * @route   POST /api/charges/valider-marchandise-dangereuse

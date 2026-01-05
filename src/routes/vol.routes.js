@@ -8,13 +8,14 @@ import {
 } from '../controllers/vol.controller.js';
 // EXTENSION 2 - Import du nouveau contrôleur pour vols programmés/hors programme
 import * as volProgrammeController from '../controllers/volProgramme.controller.js';
-import { protect, authorize } from '../middlewares/auth.middleware.js';
+import { protect, authorize, excludeQualite } from '../middlewares/auth.middleware.js';
 import { validate } from '../middlewares/validation.middleware.js';
 
 const router = express.Router();
 
 // 🔒 PHASE 1 AJUSTÉE - Périmètre opérationnel unifié (AGENT, CHEF, SUPERVISEUR, MANAGER)
-router.post('/', protect, [
+// 🔒 P0-1: QUALITE exclu
+router.post('/', protect, excludeQualite, [
   body('numeroVol').notEmpty().withMessage('Numéro de vol requis'),
   body('typeOperation').isIn(['ARRIVEE', 'DEPART', 'TURN_AROUND']).withMessage('Type d\'opération invalide'),
   body('compagnieAerienne').notEmpty().withMessage('Compagnie aérienne requise'),
@@ -27,7 +28,8 @@ router.get('/', protect, listerVols);
 
 router.get('/:id', protect, obtenirVol);
 
-router.patch('/:id', protect, mettreAJourVol);
+// 🔒 P0-1: QUALITE exclu
+router.patch('/:id', protect, excludeQualite, mettreAJourVol);
 
 // ========== EXTENSION 2 - Routes pour distinction vol programmé / hors programme ==========
 // NON-RÉGRESSION: Ces routes sont NOUVELLES et n'affectent AUCUNE route existante ci-dessus
@@ -38,7 +40,8 @@ router.patch('/:id', protect, mettreAJourVol);
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { programmeVolId: string }
  */
-router.post('/:id/lier-programme', protect, volProgrammeController.lierVolAuProgramme);
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/lier-programme', protect, excludeQualite, volProgrammeController.lierVolAuProgramme);
 
 /**
  * @route   POST /api/vols/:id/marquer-hors-programme
@@ -46,14 +49,16 @@ router.post('/:id/lier-programme', protect, volProgrammeController.lierVolAuProg
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { typeVolHorsProgramme: string, raison?: string }
  */
-router.post('/:id/marquer-hors-programme', protect, volProgrammeController.marquerVolHorsProgramme);
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/marquer-hors-programme', protect, excludeQualite, volProgrammeController.marquerVolHorsProgramme);
 
 /**
  * @route   POST /api/vols/:id/detacher-programme
  * @desc    Détacher un vol d'un programme saisonnier
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  */
-router.post('/:id/detacher-programme', protect, volProgrammeController.detacherVolDuProgramme);
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/detacher-programme', protect, excludeQualite, volProgrammeController.detacherVolDuProgramme);
 
 /**
  * @route   GET /api/vols/:id/suggerer-programmes

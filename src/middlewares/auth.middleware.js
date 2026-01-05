@@ -77,3 +77,26 @@ export const authorize = (...roles) => {
     next();
   };
 };
+
+/**
+ * 🔒 P0-1 CORRECTIF SÉCURITÉ - Exclure QUALITE des opérations d'écriture
+ *
+ * QUALITE est un profil LECTURE SEULE (observation, analyse, rapports).
+ * Ce middleware bloque toutes tentatives de modification par QUALITE.
+ *
+ * Utilisation: Placer APRÈS protect, AVANT les handlers
+ *
+ * @example
+ * router.post('/', protect, excludeQualite, creerCRV);
+ * router.put('/:id', protect, excludeQualite, mettreAJourCRV);
+ */
+export const excludeQualite = (req, res, next) => {
+  if (req.user.fonction === 'QUALITE') {
+    return res.status(403).json({
+      success: false,
+      message: 'Accès refusé: QUALITE est un profil lecture seule uniquement',
+      code: 'QUALITE_READ_ONLY'
+    });
+  }
+  next();
+};

@@ -1,6 +1,6 @@
 import express from 'express';
 import * as avionConfigurationController from '../controllers/avionConfiguration.controller.js';
-import { protect, authorize } from '../middlewares/auth.middleware.js';
+import { protect, authorize, excludeQualite } from '../middlewares/auth.middleware.js';
 
 /**
  * EXTENSION 3 - Routes Avion (Version et configuration)
@@ -30,7 +30,8 @@ const router = express.Router();
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { sieges, equipements, moteurs, caracteristiquesTechniques, remarques }
  */
-router.put('/:id/configuration', protect, avionConfigurationController.mettreAJourConfiguration);
+// 🔒 P0-1: QUALITE exclu
+router.put('/:id/configuration', protect, excludeQualite, avionConfigurationController.mettreAJourConfiguration);
 
 // ========== ROUTES POUR GESTION DES VERSIONS ==========
 
@@ -40,7 +41,8 @@ router.put('/:id/configuration', protect, avionConfigurationController.mettreAJo
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { numeroVersion: string, modifications: string, configuration?: object }
  */
-router.post('/:id/versions', protect, avionConfigurationController.creerNouvelleVersion);
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/versions', protect, excludeQualite, avionConfigurationController.creerNouvelleVersion);
 
 /**
  * @route   GET /api/avions/:id/versions
@@ -61,7 +63,8 @@ router.get('/:id/versions/:numeroVersion', protect, avionConfigurationController
  * @desc    Restaurer une version antérieure
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  */
-router.post('/:id/versions/:numeroVersion/restaurer', protect, avionConfigurationController.restaurerVersion);
+// 🔒 P0-1: QUALITE exclu
+router.post('/:id/versions/:numeroVersion/restaurer', protect, excludeQualite, avionConfigurationController.restaurerVersion);
 
 /**
  * @route   GET /api/avions/:id/versions/comparer
@@ -79,7 +82,8 @@ router.get('/:id/versions/comparer', protect, avionConfigurationController.compa
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { date?: Date, type?: string, prochaineDatePrevue?: Date }
  */
-router.put('/:id/revision', protect, avionConfigurationController.mettreAJourRevision);
+// 🔒 P0-1: QUALITE exclu
+router.put('/:id/revision', protect, excludeQualite, avionConfigurationController.mettreAJourRevision);
 
 /**
  * @route   GET /api/avions/revisions/prochaines
