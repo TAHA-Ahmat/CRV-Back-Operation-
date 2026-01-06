@@ -10,7 +10,8 @@ import {
   ajouterObservation,
   rechercherCRV,
   obtenirStatsCRV,
-  exporterCRVExcel
+  exporterCRVExcel,
+  mettreAJourHoraire
 } from '../controllers/crv.controller.js';
 import {
   getArchivageStatus,
@@ -38,7 +39,8 @@ const router = express.Router();
 
 // 🔒 P0-1: QUALITE exclu (lecture seule)
 router.post('/', protect, excludeQualite, [
-  body('volId').notEmpty().withMessage('Vol requis'),
+  body('volId').optional(),
+  body('type').optional().isIn(['arrivee', 'depart', 'turnaround']).withMessage('Type invalide'),
   validate
 ], verifierPhasesAutoriseesCreationCRV, auditLog('CREATION'), creerCRV);
 
@@ -107,6 +109,18 @@ router.post('/:id/observations', protect, excludeQualite, verifierCRVNonVerrouil
   body('contenu').notEmpty().withMessage('Contenu requis'),
   validate
 ], auditLog('MISE_A_JOUR'), ajouterObservation);
+
+// ============================
+//   MISE À JOUR HORAIRES
+// ============================
+
+/**
+ * @route   PUT /api/crv/:id/horaire
+ * @desc    Mettre à jour les horaires d'un CRV
+ * @access  Private (QUALITE exclu)
+ * @body    Champs horaires (voir documentation)
+ */
+router.put('/:id/horaire', protect, excludeQualite, verifierCRVNonVerrouille, auditLog('MISE_A_JOUR'), mettreAJourHoraire);
 
 // ============================
 //   ROUTES ARCHIVAGE GOOGLE DRIVE

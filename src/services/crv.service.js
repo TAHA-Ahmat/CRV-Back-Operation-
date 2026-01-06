@@ -10,43 +10,72 @@ export const calculerCompletude = async (crvId) => {
     if (!crv) return 0;
 
     let score = 0;
-    let maxScore = 0;
+    const maxScore = 100;
 
-    if (crv.vol) {
-      score += 10;
-    }
-    maxScore += 10;
-
-    if (crv.horaire) {
-      score += 10;
-    }
-    maxScore += 10;
-
+    // ========================================
+    // PHASES : 40% (pro-rata des phases terminées)
+    // ========================================
     const phases = await ChronologiePhase.find({ crv: crvId });
     const phasesTerminees = phases.filter(p => p.statut === 'TERMINE' || p.statut === 'NON_REALISE');
     if (phases.length > 0) {
       score += (phasesTerminees.length / phases.length) * 40;
     }
-    maxScore += 40;
 
+    // ========================================
+    // CHARGES : 30% (présence de charges opérationnelles)
+    // ========================================
     const charges = await ChargeOperationnelle.find({ crv: crvId });
     if (charges.length > 0) {
-      score += 20;
+      // Bonus si plusieurs types de charges (PASSAGERS, BAGAGES, FRET)
+      const typesCharges = [...new Set(charges.map(c => c.typeCharge))];
+      if (typesCharges.length >= 3) {
+        score += 30; // Tous les types
+      } else if (typesCharges.length === 2) {
+        score += 25; // 2 types
+      } else {
+        score += 20; // 1 type minimum
+      }
     }
-    maxScore += 20;
 
-    if (crv.responsableVol) {
+    // ========================================
+    // HORAIRES : 10% (données de timing renseignées)
+    // ========================================
+    if (crv.horaire) {
+      const h = crv.horaire;
+      // Vérifier si au moins 2 horaires réels sont renseignés
+      const horairesReels = [
+        h.heureAtterrissageReelle,
+        h.heureArriveeAuParcReelle,
+        h.heureDepartDuParcReelle,
+        h.heureDecollageReelle,
+        h.heureOuvertureParkingReelle,
+        h.heureFermetureParkingReelle
+      ].filter(Boolean);
+
+      if (horairesReels.length >= 2) {
+        score += 10; // Horaires complets
+      } else if (horairesReels.length >= 1) {
+        score += 5; // Horaires partiels
+      }
+    }
+
+    // ========================================
+    // ÉVÉNEMENTS : 10% (présence d'événements opérationnels)
+    // ========================================
+    const evenements = await EvenementOperationnel.find({ crv: crvId });
+    if (evenements.length > 0) {
       score += 10;
     }
-    maxScore += 10;
 
+    // ========================================
+    // OBSERVATIONS : 10% (présence d'observations)
+    // ========================================
     const observations = await Observation.find({ crv: crvId });
     if (observations.length > 0) {
       score += 10;
     }
-    maxScore += 10;
 
-    const completude = Math.round((score / maxScore) * 100);
+    const completude = Math.round(score);
 
     await CRV.findByIdAndUpdate(crvId, { completude });
 

@@ -10,14 +10,36 @@ import { initialiserPhasesVol } from '../services/phase.service.js';
 
 export const creerCRV = async (req, res, next) => {
   try {
-    const { volId, responsableVolId } = req.body;
+    let { volId, responsableVolId, type, date } = req.body;
 
-    const vol = await Vol.findById(volId);
-    if (!vol) {
-      return res.status(404).json({
-        success: false,
-        message: 'Vol non trouvé'
+    // Si aucun volId n'est fourni, créer un vol automatiquement
+    let vol;
+    if (!volId) {
+      // Déterminer le type d'opération à partir du type de CRV
+      let typeOperation = 'DEPART'; // Par défaut
+      if (type === 'arrivee') typeOperation = 'ARRIVEE';
+      else if (type === 'depart') typeOperation = 'DEPART';
+      else if (type === 'turnaround') typeOperation = 'TURN_AROUND';
+
+      // Créer un vol temporaire
+      const count = await Vol.countDocuments();
+      vol = await Vol.create({
+        numeroVol: `VOL${String(count + 1).padStart(4, '0')}`,
+        typeOperation,
+        compagnieAerienne: 'Air France', // À remplacer par une vraie sélection
+        codeIATA: 'AF',
+        dateVol: date || new Date(),
+        statut: 'PROGRAMME'
       });
+      volId = vol._id;
+    } else {
+      vol = await Vol.findById(volId);
+      if (!vol) {
+        return res.status(404).json({
+          success: false,
+          message: 'Vol non trouvé'
+        });
+      }
     }
 
     const numeroCRV = await genererNumeroCRV(vol);
@@ -611,6 +633,122 @@ export const exporterCRVExcel = async (req, res, next) => {
       await workbook.xlsx.write(res);
       res.end();
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ============================
+//   MISE À JOUR HORAIRES
+// ============================
+
+export const mettreAJourHoraire = async (req, res, next) => {
+  try {
+    const crv = await CRV.findById(req.params.id).populate('horaire');
+
+    if (!crv) {
+      return res.status(404).json({
+        success: false,
+        message: 'CRV non trouvé'
+      });
+    }
+
+    if (crv.statut === 'VERROUILLE') {
+      return res.status(403).json({
+        success: false,
+        message: 'CRV verrouillé, modification impossible'
+      });
+    }
+
+    if (!crv.horaire) {
+      return res.status(404).json({
+        success: false,
+        message: 'Horaire non trouvé pour ce CRV'
+      });
+    }
+
+    const {
+      // Horaires prévus
+      heureAtterrisagePrevue,
+      heureArriveeAuParcPrevue,
+      heureDepartDuParcPrevue,
+      heureDecollagePrevue,
+      heureOuvertureParkingPrevue,
+      heureFermetureParkingPrevue,
+      // Horaires réels
+      heureAtterrissageReelle,
+      heureArriveeAuParcReelle,
+      heureDepartDuParcReelle,
+      heureDecollageReelle,
+      heureOuvertureParkingReelle,
+      heureFermetureParkingReelle,
+      // Alias frontend (mapping)
+      touchdownTime,
+      onBlockTime,
+      offBlockTime,
+      takeoffTime,
+      firstDoorOpenTime,
+      lastDoorCloseTime,
+      // Remarques
+      remarques
+    } = req.body;
+
+    // Mise à jour avec support des alias frontend
+    const updateData = {};
+
+    // Horaires prévus
+    if (heureAtterrisagePrevue) updateData.heureAtterrisagePrevue = new Date(heureAtterrisagePrevue);
+    if (heureArriveeAuParcPrevue) updateData.heureArriveeAuParcPrevue = new Date(heureArriveeAuParcPrevue);
+    if (heureDepartDuParcPrevue) updateData.heureDepartDuParcPrevue = new Date(heureDepartDuParcPrevue);
+    if (heureDecollagePrevue) updateData.heureDecollagePrevue = new Date(heureDecollagePrevue);
+    if (heureOuvertureParkingPrevue) updateData.heureOuvertureParkingPrevue = new Date(heureOuvertureParkingPrevue);
+    if (heureFermetureParkingPrevue) updateData.heureFermetureParkingPrevue = new Date(heureFermetureParkingPrevue);
+
+    // Horaires réels (avec alias frontend)
+    if (heureAtterrissageReelle || touchdownTime) {
+      updateData.heureAtterrissageReelle = new Date(heureAtterrissageReelle || touchdownTime);
+    }
+    if (heureArriveeAuParcReelle || onBlockTime) {
+      updateData.heureArriveeAuParcReelle = new Date(heureArriveeAuParcReelle || onBlockTime);
+    }
+    if (heureDepartDuParcReelle || offBlockTime) {
+      updateData.heureDepartDuParcReelle = new Date(heureDepartDuParcReelle || offBlockTime);
+    }
+    if (heureDecollageReelle || takeoffTime) {
+      updateData.heureDecollageReelle = new Date(heureDecollageReelle || takeoffTime);
+    }
+    if (heureOuvertureParkingReelle || firstDoorOpenTime) {
+      updateData.heureOuvertureParkingReelle = new Date(heureOuvertureParkingReelle || firstDoorOpenTime);
+    }
+    if (heureFermetureParkingReelle || lastDoorCloseTime) {
+      updateData.heureFermetureParkingReelle = new Date(heureFermetureParkingReelle || lastDoorCloseTime);
+    }
+
+    if (remarques !== undefined) updateData.remarques = remarques;
+
+    // Mise à jour via save() pour déclencher les hooks de calcul d'écarts
+    const horaire = await Horaire.findById(crv.horaire._id);
+    Object.assign(horaire, updateData);
+    await horaire.save();
+
+    // Recalculer la complétude
+    await calculerCompletude(crv._id);
+
+    // Récupérer le CRV mis à jour
+    const crvUpdated = await CRV.findById(crv._id)
+      .populate('vol')
+      .populate('horaire')
+      .populate('responsableVol');
+
+    req.crvId = crv._id;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        crv: crvUpdated,
+        horaire: horaire
+      }
+    });
   } catch (error) {
     next(error);
   }

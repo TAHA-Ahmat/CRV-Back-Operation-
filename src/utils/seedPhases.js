@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Phase from '../models/Phase.js';
 import { connectDB } from '../config/db.js';
 
@@ -157,6 +158,129 @@ const phasesDepart = [
   }
 ];
 
+const phasesTurnAround = [
+  {
+    code: 'TA_ATTERRISSAGE',
+    libelle: 'Atterrissage',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'PISTE',
+    ordre: 1,
+    dureeStandardMinutes: 5,
+    obligatoire: true,
+    description: 'Atterrissage de l\'avion sur la piste'
+  },
+  {
+    code: 'TA_ROULAGE_ARR',
+    libelle: 'Roulage vers parking',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'PISTE',
+    ordre: 2,
+    dureeStandardMinutes: 10,
+    obligatoire: true,
+    description: 'Roulage de l\'avion vers le parking assigné'
+  },
+  {
+    code: 'TA_CALAGE',
+    libelle: 'Calage et sécurisation',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'PISTE',
+    ordre: 3,
+    dureeStandardMinutes: 5,
+    obligatoire: true,
+    description: 'Mise en place des cales et sécurisation de l\'avion'
+  },
+  {
+    code: 'TA_PASSERELLE',
+    libelle: 'Installation passerelle',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'PASSAGERS',
+    ordre: 4,
+    dureeStandardMinutes: 3,
+    obligatoire: true,
+    description: 'Installation de la passerelle passagers'
+  },
+  {
+    code: 'TA_DEBARQ_PAX',
+    libelle: 'Débarquement passagers',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'PASSAGERS',
+    ordre: 5,
+    dureeStandardMinutes: 20,
+    obligatoire: true,
+    description: 'Débarquement de tous les passagers'
+  },
+  {
+    code: 'TA_DECHARG_SOUTE',
+    libelle: 'Déchargement soute',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'BAGAGE',
+    ordre: 6,
+    dureeStandardMinutes: 25,
+    obligatoire: true,
+    description: 'Déchargement des bagages et fret'
+  },
+  {
+    code: 'TA_NETTOYAGE',
+    libelle: 'Nettoyage cabine',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'NETTOYAGE',
+    ordre: 7,
+    dureeStandardMinutes: 30,
+    obligatoire: true,
+    description: 'Nettoyage et préparation cabine'
+  },
+  {
+    code: 'TA_AVITAILLEMENT',
+    libelle: 'Avitaillement carburant',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'AVITAILLEMENT',
+    ordre: 8,
+    dureeStandardMinutes: 20,
+    obligatoire: false,
+    description: 'Ravitaillement en carburant'
+  },
+  {
+    code: 'TA_CHARG_SOUTE',
+    libelle: 'Chargement soute',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'BAGAGE',
+    ordre: 9,
+    dureeStandardMinutes: 25,
+    obligatoire: true,
+    description: 'Chargement bagages et fret'
+  },
+  {
+    code: 'TA_EMBARQ_PAX',
+    libelle: 'Embarquement passagers',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'PASSAGERS',
+    ordre: 10,
+    dureeStandardMinutes: 25,
+    obligatoire: true,
+    description: 'Embarquement de tous les passagers'
+  },
+  {
+    code: 'TA_FERMETURE',
+    libelle: 'Fermeture des portes',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'PASSAGERS',
+    ordre: 11,
+    dureeStandardMinutes: 3,
+    obligatoire: true,
+    description: 'Fermeture et sécurisation des portes'
+  },
+  {
+    code: 'TA_REPOUSSAGE',
+    libelle: 'Repoussage',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'PISTE',
+    ordre: 12,
+    dureeStandardMinutes: 5,
+    obligatoire: true,
+    description: 'Repoussage de l\'avion'
+  }
+];
+
 const phasesCommunes = [
   {
     code: 'COM_CONTROLE_SECU',
@@ -177,18 +301,21 @@ export const seedPhases = async () => {
     await Phase.deleteMany({});
     console.log('🗑️  Phases existantes supprimées');
 
-    const toutesPhases = [...phasesArrivee, ...phasesDepart, ...phasesCommunes];
+    const toutesPhases = [...phasesArrivee, ...phasesDepart, ...phasesTurnAround, ...phasesCommunes];
 
     await Phase.insertMany(toutesPhases);
 
     console.log(`✅ ${toutesPhases.length} phases créées avec succès`);
     console.log(`   - Arrivée: ${phasesArrivee.length}`);
     console.log(`   - Départ: ${phasesDepart.length}`);
+    console.log(`   - Turn-Around: ${phasesTurnAround.length}`);
     console.log(`   - Communes: ${phasesCommunes.length}`);
 
+    await mongoose.connection.close();
     process.exit(0);
   } catch (error) {
     console.error('❌ Erreur lors de l\'initialisation des phases:', error);
+    await mongoose.connection.close();
     process.exit(1);
   }
 };
