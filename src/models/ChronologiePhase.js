@@ -46,6 +46,27 @@ chronologiePhaseSchema.index({ statut: 1 });
  * - Validation de la logique métier
  */
 chronologiePhaseSchema.pre('save', async function(next) {
+  const timestamp = new Date().toISOString();
+  const isNew = this.isNew;
+  const modifiedPaths = this.modifiedPaths();
+  const statutAvant = this.isModified('statut') ? this._previousStatut : this.statut;
+
+  console.log('[CRV][HOOK][CHRONO_PHASE_PRE_SAVE]', {
+    crvId: this.crv,
+    userId: this.responsable || null,
+    role: null,
+    input: {
+      chronoPhaseId: this._id,
+      isNew,
+      modifiedPaths,
+      statut: this.statut
+    },
+    decision: 'SAVE',
+    reason: isNew ? 'Création chronologie phase' : 'Modification chronologie phase',
+    output: null,
+    timestamp
+  });
+
   // Import dynamique pour éviter les dépendances circulaires
   const { calculerDureeMinutes, calculerEcartHoraire } = await import('../services/calcul.service.js');
 
@@ -71,6 +92,16 @@ chronologiePhaseSchema.pre('save', async function(next) {
 
   // RÈGLE MÉTIER : Phase non réalisée ne doit pas avoir de durée
   if (this.statut === 'NON_REALISE') {
+    console.log('[CRV][HOOK][CHRONO_PHASE_REGLE_METIER]', {
+      crvId: this.crv,
+      userId: null,
+      role: null,
+      input: { chronoPhaseId: this._id, statut: 'NON_REALISE' },
+      decision: 'RESET_DUREES',
+      reason: 'Phase non réalisée - réinitialisation des durées',
+      output: { heureDebutReelle: null, heureFinReelle: null, dureeReelleMinutes: null },
+      timestamp: new Date().toISOString()
+    });
     this.heureDebutReelle = null;
     this.heureFinReelle = null;
     this.dureeReelleMinutes = null;

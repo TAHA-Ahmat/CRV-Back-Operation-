@@ -18,6 +18,19 @@ const horaireSchema = new mongoose.Schema({
   heureOuvertureParkingReelle: Date,
   heureFermetureParkingPrevue: Date,
   heureFermetureParkingReelle: Date,
+
+  // REMISE DOCUMENTS — TRANSFERT DE RESPONSABILITÉ (Cahier des charges §6)
+  // Moment où le dossier de vol est remis au commandant de bord
+  // Avant remise : responsabilité escale | Après remise : responsabilité équipage
+  // Jalon critique pour les enquêtes et la traçabilité
+  heureRemiseDocumentsPrevue: Date,
+  heureRemiseDocumentsReelle: Date,
+
+  // LIVRAISON BAGAGES — TRAÇABILITÉ SLA (Cahier des charges §4)
+  // Distinct du déchargement : livraison = mise à disposition au carrousel
+  heureLivraisonBagagesDebut: Date,
+  heureLivraisonBagagesFin: Date,
+
   ecartAtterissage: Number,
   ecartDecollage: Number,
   ecartParc: Number,
@@ -34,6 +47,26 @@ horaireSchema.index({ vol: 1 });
  * - Garantit la cohérence des écarts
  */
 horaireSchema.pre('save', async function(next) {
+  const timestamp = new Date().toISOString();
+  const isNew = this.isNew;
+  const modifiedPaths = this.modifiedPaths();
+
+  console.log('[CRV][HOOK][HORAIRE_PRE_SAVE]', {
+    crvId: null,
+    userId: null,
+    role: null,
+    input: {
+      horaireId: this._id,
+      volId: this.vol,
+      isNew,
+      modifiedPaths
+    },
+    decision: 'SAVE',
+    reason: isNew ? 'Création horaire' : 'Modification horaire',
+    output: null,
+    timestamp
+  });
+
   const { calculerEcartHoraire } = await import('../services/calcul.service.js');
 
   // Calcul écart atterrissage
@@ -58,6 +91,24 @@ horaireSchema.pre('save', async function(next) {
       this.heureArriveeAuParcPrevue,
       this.heureArriveeAuParcReelle
     );
+  }
+
+  // Log des écarts calculés
+  if (this.ecartAtterissage !== undefined || this.ecartDecollage !== undefined || this.ecartParc !== undefined) {
+    console.log('[CRV][HOOK][HORAIRE_ECARTS_CALCULES]', {
+      crvId: null,
+      userId: null,
+      role: null,
+      input: { horaireId: this._id },
+      decision: 'CALCUL',
+      reason: 'Écarts horaires calculés',
+      output: {
+        ecartAtterissage: this.ecartAtterissage,
+        ecartDecollage: this.ecartDecollage,
+        ecartParc: this.ecartParc
+      },
+      timestamp: new Date().toISOString()
+    });
   }
 
   next();
