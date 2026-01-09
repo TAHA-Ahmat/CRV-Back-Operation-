@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Phase from '../models/Phase.js';
+import Phase from '../models/phases/Phase.js';
 import { connectDB } from '../config/db.js';
 
 const phasesArrivee = [
@@ -62,6 +62,18 @@ const phasesArrivee = [
     dureeStandardMinutes: 25,
     obligatoire: true,
     description: 'Déchargement des bagages et fret'
+  },
+  // PHASE AJOUTÉE — LIVRAISON BAGAGES (Cahier des charges §4)
+  // Distinct du déchargement : livraison = acheminement au carrousel zone publique
+  {
+    code: 'ARR_LIVRAISON_BAGAGES',
+    libelle: 'Livraison bagages au carrousel',
+    typeOperation: 'ARRIVEE',
+    categorie: 'BAGAGE',
+    ordre: 7,
+    dureeStandardMinutes: 15,
+    obligatoire: true,
+    description: 'Acheminement des bagages de la soute vers le carrousel en zone publique'
   }
 ];
 
@@ -219,12 +231,23 @@ const phasesTurnAround = [
     obligatoire: true,
     description: 'Déchargement des bagages et fret'
   },
+  // PHASE AJOUTÉE — LIVRAISON BAGAGES TURN_AROUND (Cahier des charges §4)
+  {
+    code: 'TA_LIVRAISON_BAGAGES',
+    libelle: 'Livraison bagages au carrousel',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'BAGAGE',
+    ordre: 7,
+    dureeStandardMinutes: 15,
+    obligatoire: true,
+    description: 'Acheminement des bagages de la soute vers le carrousel en zone publique'
+  },
   {
     code: 'TA_NETTOYAGE',
     libelle: 'Nettoyage cabine',
     typeOperation: 'TURN_AROUND',
     categorie: 'NETTOYAGE',
-    ordre: 7,
+    ordre: 8,
     dureeStandardMinutes: 30,
     obligatoire: true,
     description: 'Nettoyage et préparation cabine'
@@ -234,7 +257,7 @@ const phasesTurnAround = [
     libelle: 'Avitaillement carburant',
     typeOperation: 'TURN_AROUND',
     categorie: 'AVITAILLEMENT',
-    ordre: 8,
+    ordre: 9,
     dureeStandardMinutes: 20,
     obligatoire: false,
     description: 'Ravitaillement en carburant'
@@ -244,7 +267,7 @@ const phasesTurnAround = [
     libelle: 'Chargement soute',
     typeOperation: 'TURN_AROUND',
     categorie: 'BAGAGE',
-    ordre: 9,
+    ordre: 10,
     dureeStandardMinutes: 25,
     obligatoire: true,
     description: 'Chargement bagages et fret'
@@ -254,7 +277,7 @@ const phasesTurnAround = [
     libelle: 'Embarquement passagers',
     typeOperation: 'TURN_AROUND',
     categorie: 'PASSAGERS',
-    ordre: 10,
+    ordre: 11,
     dureeStandardMinutes: 25,
     obligatoire: true,
     description: 'Embarquement de tous les passagers'
@@ -264,7 +287,7 @@ const phasesTurnAround = [
     libelle: 'Fermeture des portes',
     typeOperation: 'TURN_AROUND',
     categorie: 'PASSAGERS',
-    ordre: 11,
+    ordre: 12,
     dureeStandardMinutes: 3,
     obligatoire: true,
     description: 'Fermeture et sécurisation des portes'
@@ -274,7 +297,7 @@ const phasesTurnAround = [
     libelle: 'Repoussage',
     typeOperation: 'TURN_AROUND',
     categorie: 'PISTE',
-    ordre: 12,
+    ordre: 13,
     dureeStandardMinutes: 5,
     obligatoire: true,
     description: 'Repoussage de l\'avion'
@@ -291,6 +314,42 @@ const phasesCommunes = [
     dureeStandardMinutes: 10,
     obligatoire: true,
     description: 'Contrôles de sécurité réglementaires'
+  },
+  // PHASE AJOUTÉE — CATERING (Cahier des charges §5)
+  // Approvisionnement repas et boissons - opération sol facultative
+  {
+    code: 'COM_CATERING',
+    libelle: 'Catering (approvisionnement repas)',
+    typeOperation: 'COMMUN',
+    categorie: 'TECHNIQUE',
+    ordre: 101,
+    dureeStandardMinutes: 20,
+    obligatoire: false,
+    description: 'Approvisionnement en repas et boissons pour le vol'
+  },
+  // PHASE AJOUTÉE — MAINTENANCE LÉGÈRE (Cahier des charges §5)
+  // Interventions techniques légères - opération sol facultative
+  {
+    code: 'COM_MAINTENANCE_LEGERE',
+    libelle: 'Maintenance légère',
+    typeOperation: 'COMMUN',
+    categorie: 'TECHNIQUE',
+    ordre: 102,
+    dureeStandardMinutes: 30,
+    obligatoire: false,
+    description: 'Interventions techniques légères (vérifications, petites réparations)'
+  },
+  // PHASE AJOUTÉE — REMISE DOCUMENTS (Cahier des charges §6)
+  // Transfert de responsabilité escale → équipage
+  {
+    code: 'COM_REMISE_DOCUMENTS',
+    libelle: 'Remise documents de vol',
+    typeOperation: 'COMMUN',
+    categorie: 'TECHNIQUE',
+    ordre: 103,
+    dureeStandardMinutes: 5,
+    obligatoire: true,
+    description: 'Remise du dossier de vol au commandant de bord (loadsheet, manifest, documents)'
   }
 ];
 

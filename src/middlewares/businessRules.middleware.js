@@ -1,7 +1,7 @@
-import CRV from '../models/CRV.js';
-import Vol from '../models/Vol.js';
-import ChronologiePhase from '../models/ChronologiePhase.js';
-import Phase from '../models/Phase.js';
+import CRV from '../models/crv/CRV.js';
+import Vol from '../models/flights/Vol.js';
+import ChronologiePhase from '../models/phases/ChronologiePhase.js';
+import Phase from '../models/phases/Phase.js';
 
 /**
  * RÈGLE MÉTIER CRITIQUE : Vérifier que le CRV n'est pas verrouillé
@@ -217,11 +217,9 @@ export const verifierPhasesAutoriseesCreationCRV = async (req, res, next) => {
   try {
     const { volId } = req.body;
 
+    // Si volId n'est pas fourni, le controller créera un vol automatiquement
     if (!volId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Vol requis'
-      });
+      return next();
     }
 
     const vol = await Vol.findById(volId);

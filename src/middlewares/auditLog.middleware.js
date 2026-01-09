@@ -1,4 +1,4 @@
-import HistoriqueModification from '../models/HistoriqueModification.js';
+import HistoriqueModification from '../models/crv/HistoriqueModification.js';
 
 /**
  * RÈGLE MÉTIER CRITIQUE : Audit trail automatique

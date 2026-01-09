@@ -1,6 +1,6 @@
 // ✅ COPIÉ DEPUIS MAGASIN : Middleware de finalisation d'audit
-import UserActivityLog from '../models/UserActivityLog.js';
-import Personne from '../models/Personne.js';
+import UserActivityLog from '../models/security/UserActivityLog.js';
+import Personne from '../models/security/Personne.js';
 
 const auditFinalizeMiddleware = (req, res, next) => {
   // S'assurer que res.locals existe

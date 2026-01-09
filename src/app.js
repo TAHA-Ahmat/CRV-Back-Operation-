@@ -9,21 +9,27 @@ import { errorHandler, notFound } from './middlewares/error.middleware.js';
 import auditRequestMiddleware from './middlewares/auditRequest.middleware.js';
 import auditFinalizeMiddleware from './middlewares/auditFinalize.middleware.js';
 
-import authRoutes from './routes/auth.routes.js';
-import crvRoutes from './routes/crv.routes.js';
-import volRoutes from './routes/vol.routes.js';
-import phaseRoutes from './routes/phase.routes.js';
-import validationRoutes from './routes/validation.routes.js';
-// EXTENSION 1 - Programme vol saisonnier (NON-RÉGRESSION: route nouvelle, aucun impact sur l'existant)
-import programmeVolRoutes from './routes/programmeVol.routes.js';
-// EXTENSION 3 - Version et configuration avion (NON-RÉGRESSION: route nouvelle, aucun impact sur l'existant)
-import avionRoutes from './routes/avion.routes.js';
-// EXTENSION 4 - Catégories passagers détaillées (NON-RÉGRESSION: route nouvelle, aucun impact sur l'existant)
-import chargeRoutes from './routes/charge.routes.js';
-// EXTENSION 7 - Service notification in-app (NON-RÉGRESSION: route nouvelle, aucun impact sur l'existant)
-import notificationRoutes from './routes/notification.routes.js';
-// EXTENSION 8 - Service alertes SLA proactives (NON-RÉGRESSION: route nouvelle, aucun impact sur l'existant)
-import alerteSLARoutes from './routes/alerteSLA.routes.js';
+// Routes - MVS 1: Security
+import authRoutes from './routes/security/auth.routes.js';
+import personneRoutes from './routes/security/personne.routes.js';
+// Routes - MVS 2: CRV
+import crvRoutes from './routes/crv/crv.routes.js';
+// Routes - MVS 3: Phases
+import phaseRoutes from './routes/phases/phase.routes.js';
+// Routes - MVS 4: Charges
+import chargeRoutes from './routes/charges/charge.routes.js';
+// Routes - MVS 5: Resources
+import enginRoutes from './routes/resources/engin.routes.js';
+// Routes - MVS 6: Flights
+import volRoutes from './routes/flights/vol.routes.js';
+import programmeVolRoutes from './routes/flights/programmeVol.routes.js';
+// Routes - MVS 7: Validation
+import validationRoutes from './routes/validation/validation.routes.js';
+// Routes - MVS 8: Notifications
+import notificationRoutes from './routes/notifications/notification.routes.js';
+import alerteSLARoutes from './routes/notifications/alerteSLA.routes.js';
+// Routes - MVS 9: Referentials
+import avionRoutes from './routes/referentials/avion.routes.js';
 
 const app = express();
 
@@ -62,6 +68,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/personnes', personneRoutes);
 app.use('/api/crv', crvRoutes);
 app.use('/api/vols', volRoutes);
 app.use('/api/phases', phaseRoutes);
@@ -72,6 +79,8 @@ app.use('/api/programmes-vol', programmeVolRoutes);
 app.use('/api/avions', avionRoutes);
 // EXTENSION 4 - Catégories passagers détaillées (NON-RÉGRESSION: endpoint nouveau /api/charges/*)
 app.use('/api/charges', chargeRoutes);
+// Gestion des engins (parc matériel)
+app.use('/api/engins', enginRoutes);
 // EXTENSION 7 - Service notification in-app (NON-RÉGRESSION: endpoint nouveau /api/notifications/*)
 app.use('/api/notifications', notificationRoutes);
 // EXTENSION 8 - Service alertes SLA proactives (NON-RÉGRESSION: endpoint nouveau /api/sla/*)
