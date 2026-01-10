@@ -9,8 +9,8 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
   jwtExpiration: process.env.JWT_EXPIRATION || '24h',
   corsOrigin: process.env.CORS_ORIGIN || '*',
-  rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  rateLimitMaxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
+  rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 1 * 60 * 1000,  // 1 minute
+  rateLimitMaxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 200,     // 200 req/min
 
   // Google Drive Configuration
   googleDriveCredentialsPath: process.env.GOOGLE_DRIVE_CREDENTIALS_PATH || './config/archivagebonsdecommande.json',
