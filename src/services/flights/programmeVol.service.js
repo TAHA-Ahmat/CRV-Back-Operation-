@@ -13,6 +13,11 @@ import UserActivityLog from '../../models/security/UserActivityLog.js';
  * - Aucun appel aux services existants
  *
  * Ce service est 100% AUTONOME et OPTIONNEL.
+ *
+ * EXTENSION 1.1 (2026-01-12) - Enrichissement standard programme de vol
+ * NON-RÉGRESSION: Nouveaux filtres optionnels, signatures existantes préservées
+ * - Ajout filtres: categorieVol, provenance, destination, nightStop
+ * - Nouvelles fonctions: obtenirStatistiques, trouverParRoute
  */
 
 /**
@@ -79,7 +84,8 @@ export const creerProgrammeVol = async (programmeData, userId) => {
 
 /**
  * Récupère tous les programmes vol avec filtres optionnels
- * @param {Object} filtres - Filtres optionnels (compagnie, statut, actif)
+ * EXTENSION 1.1: Ajout filtres categorieVol, provenance, destination, nightStop (rétrocompatible)
+ * @param {Object} filtres - Filtres optionnels (compagnie, statut, actif, categorieVol, provenance, destination, nightStop)
  * @returns {Array} Liste des programmes
  */
 export const obtenirProgrammesVol = async (filtres = {}) => {
@@ -96,6 +102,27 @@ export const obtenirProgrammesVol = async (filtres = {}) => {
 
     if (filtres.actif !== undefined) {
       query.actif = filtres.actif === 'true' || filtres.actif === true;
+    }
+
+    // EXTENSION 1.1: Nouveaux filtres optionnels
+    if (filtres.categorieVol) {
+      query.categorieVol = filtres.categorieVol.toUpperCase();
+    }
+
+    if (filtres.provenance) {
+      query['route.provenance'] = filtres.provenance.toUpperCase();
+    }
+
+    if (filtres.destination) {
+      query['route.destination'] = filtres.destination.toUpperCase();
+    }
+
+    if (filtres.nightStop !== undefined) {
+      query.nightStop = filtres.nightStop === 'true' || filtres.nightStop === true;
+    }
+
+    if (filtres.codeCompagnie) {
+      query.codeCompagnie = filtres.codeCompagnie.toUpperCase();
     }
 
     // Filtre par période si spécifié
@@ -398,11 +425,13 @@ export const suspendreProgrammeVol = async (programmeId, userId, raison = null) 
 
 /**
  * Trouve les programmes actifs pour une date et compagnie données
+ * EXTENSION 1.1: Ajout filtre optionnel categorieVol (rétrocompatible)
  * @param {Date} date - Date à vérifier
- * @param {String} compagnieAerienne - Code compagnie
+ * @param {String} compagnieAerienne - Code compagnie (optionnel)
+ * @param {String} categorieVol - PASSAGER, CARGO, DOMESTIQUE (optionnel)
  * @returns {Array} Programmes applicables
  */
-export const trouverProgrammesApplicables = async (date, compagnieAerienne = null) => {
+export const trouverProgrammesApplicables = async (date, compagnieAerienne = null, categorieVol = null) => {
   try {
     const query = {
       actif: true,
@@ -413,6 +442,11 @@ export const trouverProgrammesApplicables = async (date, compagnieAerienne = nul
 
     if (compagnieAerienne) {
       query.compagnieAerienne = compagnieAerienne.toUpperCase();
+    }
+
+    // EXTENSION 1.1: Filtre optionnel par catégorie
+    if (categorieVol) {
+      query.categorieVol = categorieVol.toUpperCase();
     }
 
     const programmes = await ProgrammeVolSaisonnier.find(query);
@@ -529,6 +563,85 @@ export const supprimerProgrammeVol = async (programmeId, userId) => {
 
   } catch (error) {
     console.error('Erreur lors de la suppression du programme vol:', error);
+    throw error;
+  }
+};
+
+// ========== EXTENSION 1.1 - NOUVELLES FONCTIONS ==========
+
+/**
+ * Obtient les statistiques par catégorie de vol
+ * @returns {Object} Statistiques par catégorie
+ */
+export const obtenirStatistiquesParCategorie = async () => {
+  try {
+    return await ProgrammeVolSaisonnier.obtenirStatistiquesParCategorie();
+  } catch (error) {
+    console.error('Erreur lors du calcul des statistiques par catégorie:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtient les statistiques par jour de la semaine (Lundi → Dimanche)
+ * @returns {Object} Statistiques par jour
+ */
+export const obtenirStatistiquesParJour = async () => {
+  try {
+    return await ProgrammeVolSaisonnier.obtenirStatistiquesParJour();
+  } catch (error) {
+    console.error('Erreur lors du calcul des statistiques par jour:', error);
+    throw error;
+  }
+};
+
+/**
+ * Trouve les programmes par route (provenance et/ou destination)
+ * @param {Object} options - { provenance, destination, categorieVol }
+ * @returns {Array} Programmes correspondants
+ */
+export const trouverParRoute = async (options = {}) => {
+  try {
+    return await ProgrammeVolSaisonnier.trouverParRoute(options);
+  } catch (error) {
+    console.error('Erreur lors de la recherche par route:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtient un résumé complet du programme de vol
+ * @returns {Object} Résumé avec statistiques
+ */
+export const obtenirResumeProgramme = async () => {
+  try {
+    const [parCategorie, parJour, totalActifs] = await Promise.all([
+      ProgrammeVolSaisonnier.obtenirStatistiquesParCategorie(),
+      ProgrammeVolSaisonnier.obtenirStatistiquesParJour(),
+      ProgrammeVolSaisonnier.countDocuments({ actif: true, statut: 'ACTIF' })
+    ]);
+
+    // Calculer total hebdomadaire
+    let totalHebdo = 0;
+    Object.values(parJour).forEach(jour => {
+      totalHebdo += jour.total;
+    });
+
+    return {
+      totalProgrammesActifs: totalActifs,
+      totalVolsHebdomadaires: totalHebdo,
+      parCategorie: parCategorie.reduce((acc, cat) => {
+        acc[cat._id || 'PASSAGER'] = {
+          count: cat.count,
+          compagnies: cat.compagnies
+        };
+        return acc;
+      }, {}),
+      parJour
+    };
+
+  } catch (error) {
+    console.error('Erreur lors de l\'obtention du résumé:', error);
     throw error;
   }
 };

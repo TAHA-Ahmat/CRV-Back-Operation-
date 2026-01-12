@@ -14,6 +14,14 @@ const { Schema } = mongoose;
  * - Aucune modification de la logique existante
  *
  * Ce modèle est 100% OPTIONNEL et sert uniquement à la planification des vols futurs.
+ *
+ * EXTENSION 1.1 (2026-01-12) - Enrichissement standard programme de vol
+ * NON-RÉGRESSION: Tous les nouveaux champs sont OPTIONNELS avec valeurs par défaut.
+ * - Ajout categorieVol (PASSAGER, CARGO, DOMESTIQUE)
+ * - Ajout codeCompagnie (code IATA 2 lettres)
+ * - Ajout route (provenance, destination, escales)
+ * - Ajout numeroVolRetour, configurationSieges, nightStop
+ * - Documents existants continuent de fonctionner sans modification
  */
 
 const programmeVolSaisonnierSchema = new Schema({
@@ -38,6 +46,54 @@ const programmeVolSaisonnierSchema = new Schema({
     enum: ['ARRIVEE', 'DEPART', 'TURN_AROUND'],
     required: true,
     description: 'Type d\'opération du vol'
+  },
+
+  // ========== EXTENSION 1.1 - CATÉGORISATION ==========
+  // NON-RÉGRESSION: Tous ces champs sont OPTIONNELS avec valeurs par défaut
+
+  categorieVol: {
+    type: String,
+    enum: ['PASSAGER', 'CARGO', 'DOMESTIQUE'],
+    default: 'PASSAGER',
+    description: 'Catégorie du vol (passager commercial, cargo/fret, domestique/intérieur)'
+  },
+
+  codeCompagnie: {
+    type: String,
+    default: null,
+    uppercase: true,
+    trim: true,
+    maxlength: 3,
+    description: 'Code IATA de la compagnie (2-3 lettres, ex: ET, AF, TK)'
+  },
+
+  // ========== EXTENSION 1.1 - ROUTE ==========
+  route: {
+    provenance: {
+      type: String,
+      default: null,
+      uppercase: true,
+      trim: true,
+      description: 'Code IATA aéroport d\'origine (ex: ADD, CDG, IST)'
+    },
+    destination: {
+      type: String,
+      default: null,
+      uppercase: true,
+      trim: true,
+      description: 'Code IATA aéroport de destination (ex: ADD, CDG, IST)'
+    },
+    escales: {
+      type: [String],
+      default: [],
+      description: 'Codes IATA des escales intermédiaires (ex: ["NIM", "NSI"])'
+    }
+  },
+
+  nightStop: {
+    type: Boolean,
+    default: false,
+    description: 'Indique si l\'avion reste stationné la nuit sur l\'escale'
   },
 
   // ========== RÉCURRENCE ==========
@@ -84,11 +140,28 @@ const programmeVolSaisonnierSchema = new Schema({
       description: 'Numéro de vol de base (ex: "AF456")'
     },
 
+    // EXTENSION 1.1 - Numéro vol retour pour turnaround
+    numeroVolRetour: {
+      type: String,
+      default: null,
+      uppercase: true,
+      trim: true,
+      description: 'Numéro du vol retour pour turnaround (ex: "ET938" pour "ET939")'
+    },
+
     avionType: {
       type: String,
       default: null,
       trim: true,
-      description: 'Type d\'avion prévu (ex: "Boeing 737-800")'
+      description: 'Type d\'avion prévu (ex: "Boeing 737-800", "B737-800")'
+    },
+
+    // EXTENSION 1.1 - Configuration sièges
+    configurationSieges: {
+      type: String,
+      default: null,
+      trim: true,
+      description: 'Code configuration sièges (ex: "16C138Y", "CARGO", "TBN")'
     },
 
     horairePrevu: {
@@ -191,6 +264,20 @@ programmeVolSaisonnierSchema.index({ 'recurrence.dateDebut': 1, 'recurrence.date
 // Index pour rechercher par statut
 programmeVolSaisonnierSchema.index({ statut: 1 });
 
+// ========== EXTENSION 1.1 - NOUVEAUX INDEX ==========
+// Index pour filtrer par catégorie de vol
+programmeVolSaisonnierSchema.index({ categorieVol: 1 });
+
+// Index pour rechercher par route (provenance/destination)
+programmeVolSaisonnierSchema.index({ 'route.provenance': 1 });
+programmeVolSaisonnierSchema.index({ 'route.destination': 1 });
+
+// Index pour rechercher par numéro de vol
+programmeVolSaisonnierSchema.index({ 'detailsVol.numeroVolBase': 1 });
+
+// Index composé pour recherche avancée
+programmeVolSaisonnierSchema.index({ categorieVol: 1, actif: 1, statut: 1 });
+
 // ========== MÉTHODES D'INSTANCE ==========
 
 /**
@@ -220,20 +307,34 @@ programmeVolSaisonnierSchema.methods.appliqueAuJour = function(date) {
 
 /**
  * Retourne un objet simple avec les informations essentielles
+ * EXTENSION 1.1: Enrichi avec les nouveaux champs (rétrocompatible)
  */
 programmeVolSaisonnierSchema.methods.toSimpleObject = function() {
   return {
     id: this._id,
     nomProgramme: this.nomProgramme,
     compagnieAerienne: this.compagnieAerienne,
+    codeCompagnie: this.codeCompagnie || null,
     numeroVolBase: this.detailsVol.numeroVolBase,
+    numeroVolRetour: this.detailsVol.numeroVolRetour || null,
     typeOperation: this.typeOperation,
+    categorieVol: this.categorieVol || 'PASSAGER',
     statut: this.statut,
     actif: this.actif,
     periode: {
       debut: this.recurrence.dateDebut,
       fin: this.recurrence.dateFin
-    }
+    },
+    route: {
+      provenance: this.route?.provenance || null,
+      destination: this.route?.destination || null,
+      escales: this.route?.escales || []
+    },
+    horaires: {
+      arrivee: this.detailsVol.horairePrevu?.heureArrivee || null,
+      depart: this.detailsVol.horairePrevu?.heureDepart || null
+    },
+    nightStop: this.nightStop || false
   };
 };
 
@@ -241,25 +342,121 @@ programmeVolSaisonnierSchema.methods.toSimpleObject = function() {
 
 /**
  * Trouve tous les programmes actifs pour une compagnie
+ * EXTENSION 1.1: Ajout filtre optionnel categorieVol (rétrocompatible)
+ * @param {String} compagnieAerienne - Nom ou code de la compagnie
+ * @param {String} categorieVol - Optionnel: PASSAGER, CARGO, DOMESTIQUE
  */
-programmeVolSaisonnierSchema.statics.trouverProgrammesActifs = function(compagnieAerienne) {
-  return this.find({
+programmeVolSaisonnierSchema.statics.trouverProgrammesActifs = function(compagnieAerienne, categorieVol = null) {
+  const query = {
     compagnieAerienne: compagnieAerienne.toUpperCase(),
     actif: true,
     statut: 'ACTIF'
-  });
+  };
+
+  // EXTENSION 1.1: Filtre optionnel par catégorie
+  if (categorieVol) {
+    query.categorieVol = categorieVol.toUpperCase();
+  }
+
+  return this.find(query);
 };
 
 /**
  * Trouve les programmes valides pour une date donnée
+ * EXTENSION 1.1: Ajout filtre optionnel categorieVol (rétrocompatible)
+ * @param {Date} date - Date à vérifier
+ * @param {String} categorieVol - Optionnel: PASSAGER, CARGO, DOMESTIQUE
  */
-programmeVolSaisonnierSchema.statics.trouverProgrammesPourDate = function(date) {
-  return this.find({
+programmeVolSaisonnierSchema.statics.trouverProgrammesPourDate = function(date, categorieVol = null) {
+  const query = {
     actif: true,
     statut: 'ACTIF',
     'recurrence.dateDebut': { $lte: date },
     'recurrence.dateFin': { $gte: date }
+  };
+
+  // EXTENSION 1.1: Filtre optionnel par catégorie
+  if (categorieVol) {
+    query.categorieVol = categorieVol.toUpperCase();
+  }
+
+  return this.find(query);
+};
+
+// ========== EXTENSION 1.1 - NOUVELLES MÉTHODES STATIQUES ==========
+
+/**
+ * Trouve les programmes par route (provenance et/ou destination)
+ * @param {Object} options - { provenance, destination, categorieVol }
+ */
+programmeVolSaisonnierSchema.statics.trouverParRoute = function(options = {}) {
+  const query = {
+    actif: true,
+    statut: 'ACTIF'
+  };
+
+  if (options.provenance) {
+    query['route.provenance'] = options.provenance.toUpperCase();
+  }
+
+  if (options.destination) {
+    query['route.destination'] = options.destination.toUpperCase();
+  }
+
+  if (options.categorieVol) {
+    query.categorieVol = options.categorieVol.toUpperCase();
+  }
+
+  return this.find(query);
+};
+
+/**
+ * Calcule les statistiques par catégorie de vol
+ */
+programmeVolSaisonnierSchema.statics.obtenirStatistiquesParCategorie = async function() {
+  return this.aggregate([
+    { $match: { actif: true, statut: 'ACTIF' } },
+    {
+      $group: {
+        _id: '$categorieVol',
+        count: { $sum: 1 },
+        compagnies: { $addToSet: '$compagnieAerienne' }
+      }
+    },
+    { $sort: { count: -1 } }
+  ]);
+};
+
+/**
+ * Calcule les statistiques par jour de la semaine
+ */
+programmeVolSaisonnierSchema.statics.obtenirStatistiquesParJour = async function() {
+  const joursNom = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+
+  const programmes = await this.find({ actif: true, statut: 'ACTIF' });
+
+  const stats = {};
+  joursNom.forEach((jour, index) => {
+    stats[jour] = { total: 0, passagers: 0, cargo: 0, domestiques: 0 };
   });
+
+  programmes.forEach(prog => {
+    const jours = prog.recurrence.frequence === 'QUOTIDIEN'
+      ? [0, 1, 2, 3, 4, 5, 6]
+      : prog.recurrence.joursSemaine;
+
+    jours.forEach(jour => {
+      const nomJour = joursNom[jour];
+      stats[nomJour].total++;
+
+      const cat = (prog.categorieVol || 'PASSAGER').toUpperCase();
+      if (cat === 'PASSAGER') stats[nomJour].passagers++;
+      else if (cat === 'CARGO') stats[nomJour].cargo++;
+      else if (cat === 'DOMESTIQUE') stats[nomJour].domestiques++;
+    });
+  });
+
+  return stats;
 };
 
 const ProgrammeVolSaisonnier = mongoose.model('ProgrammeVolSaisonnier', programmeVolSaisonnierSchema);
