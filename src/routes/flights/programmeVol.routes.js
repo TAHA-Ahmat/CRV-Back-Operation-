@@ -215,15 +215,32 @@ router.patch('/:programmeId/vols/:id', protect, excludeQualite, volProgrammeCont
 router.delete('/:programmeId/vols/:id', protect, authorize(...ROLES_OPERATIONNELS), volProgrammeController.supprimerVol);
 
 // ══════════════════════════════════════════════════════════════════════════
-// ROUTE EXPORT PDF
+// ROUTES EXPORT PDF
 // ══════════════════════════════════════════════════════════════════════════
 
 /**
  * @route   GET /api/programmes-vol/:programmeId/export-pdf
- * @desc    Obtenir les données formatées pour export PDF
+ * @desc    Obtenir les donnees formatees pour export PDF (apercu JSON)
  * @access  Private (Tous)
- * @query   format (hebdomadaire, journalier)
  */
 router.get('/:programmeId/export-pdf', protect, volProgrammeController.obtenirDonneesPDF);
+
+/**
+ * @route   GET /api/programmes-vol/:programmeId/telecharger-pdf
+ * @desc    Telecharger le PDF du programme de vols
+ * @access  Private (Tous)
+ * @query   responsable (optionnel - nom du responsable)
+ * @returns PDF file download
+ */
+router.get('/:programmeId/telecharger-pdf', protect, volProgrammeController.telechargerPDF);
+
+/**
+ * @route   GET /api/programmes-vol/:programmeId/pdf-base64
+ * @desc    Obtenir le PDF en base64 (pour preview dans le frontend)
+ * @access  Private (Tous)
+ * @query   responsable (optionnel - nom du responsable)
+ * @returns { base64: string, mimeType: string }
+ */
+router.get('/:programmeId/pdf-base64', protect, volProgrammeController.obtenirPDFBase64);
 
 export default router;

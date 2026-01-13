@@ -1,4 +1,5 @@
 import * as volProgrammeService from '../../services/flights/volProgramme.service.js';
+import * as programmeVolPdfService from '../../services/flights/programmeVolPdf.service.js';
 
 /**
  * CONTRÔLEUR VOLS PROGRAMME
@@ -462,17 +463,14 @@ export const reorganiserVols = async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════
 
 /**
- * Obtenir les données formatées pour export PDF
+ * Obtenir les données formatées pour export PDF (apercu)
  * GET /api/programmes-vol/:programmeId/export-pdf
  */
 export const obtenirDonneesPDF = async (req, res) => {
   try {
     const { programmeId } = req.params;
-    const options = {
-      format: req.query.format || 'hebdomadaire'
-    };
 
-    const donnees = await volProgrammeService.obtenirDonneesPDF(programmeId, options);
+    const donnees = await programmeVolPdfService.obtenirApercu(programmeId);
 
     res.status(200).json({
       success: true,
@@ -482,7 +480,7 @@ export const obtenirDonneesPDF = async (req, res) => {
   } catch (error) {
     console.error('Erreur dans obtenirDonneesPDF:', error);
 
-    if (error.message.includes('non trouvé')) {
+    if (error.message.includes('non trouv')) {
       return res.status(404).json({
         success: false,
         message: error.message
@@ -491,7 +489,79 @@ export const obtenirDonneesPDF = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: error.message || 'Erreur lors de la génération des données PDF'
+      message: error.message || 'Erreur lors de la generation des donnees PDF'
+    });
+  }
+};
+
+/**
+ * Telecharger le PDF du programme de vols
+ * GET /api/programmes-vol/:programmeId/telecharger-pdf
+ */
+export const telechargerPDF = async (req, res) => {
+  try {
+    const { programmeId } = req.params;
+
+    // Configuration optionnelle depuis query params
+    const config = {};
+    if (req.query.responsable) config.responsable = req.query.responsable;
+
+    await programmeVolPdfService.genererPDFStream(programmeId, res, config);
+
+  } catch (error) {
+    console.error('Erreur dans telechargerPDF:', error);
+
+    // Si headers pas encore envoyes
+    if (!res.headersSent) {
+      if (error.message.includes('non trouv')) {
+        return res.status(404).json({
+          success: false,
+          message: error.message
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Erreur lors de la generation du PDF'
+      });
+    }
+  }
+};
+
+/**
+ * Generer et obtenir le PDF en base64 (pour preview)
+ * GET /api/programmes-vol/:programmeId/pdf-base64
+ */
+export const obtenirPDFBase64 = async (req, res) => {
+  try {
+    const { programmeId } = req.params;
+
+    const config = {};
+    if (req.query.responsable) config.responsable = req.query.responsable;
+
+    const buffer = await programmeVolPdfService.genererPDFBuffer(programmeId, config);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        base64: buffer.toString('base64'),
+        mimeType: 'application/pdf'
+      }
+    });
+
+  } catch (error) {
+    console.error('Erreur dans obtenirPDFBase64:', error);
+
+    if (error.message.includes('non trouv')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la generation du PDF'
     });
   }
 };
