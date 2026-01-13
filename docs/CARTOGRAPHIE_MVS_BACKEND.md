@@ -213,7 +213,8 @@ Ce MVS gere l'execution chronologique des operations d'assistance au sol. Chaque
 | Regle | Description |
 |---|---|
 | **Types operation** | ARRIVEE, DEPART, TURN_AROUND, COMMUN |
-| **Categories** | PISTE, PASSAGERS, FRET, BAGAGE, TECHNIQUE, AVITAILLEMENT, NETTOYAGE, SECURITE |
+| **Categories** | PISTE, PASSAGERS, FRET, BAGAGE, TECHNIQUE, AVITAILLEMENT, NETTOYAGE, SECURITE, BRIEFING |
+| **Macro-phases** | DEBUT, REALISATION, FIN (ajout 2026-01-11) |
 | **Statuts phase** | NON_COMMENCE -> EN_COURS -> TERMINE / NON_REALISE / ANNULE |
 | **Motifs non-realisation** | NON_NECESSAIRE, EQUIPEMENT_INDISPONIBLE, PERSONNEL_ABSENT, CONDITIONS_METEO, AUTRE |
 | **Calcul ecarts** | ecartMinutes = heureFinReelle - heureFinPrevue |
@@ -236,6 +237,19 @@ Ce MVS gere l'execution chronologique des operations d'assistance au sol. Chaque
 - **Calcul ecarts** : Logique pre-save dans ChronologiePhase.js
 - **verifierCoherencePhaseTypeOperation** : Regle metier critique
 - **Index crv+phase** : Unicite obligatoire
+
+### H. Phases ARRIVEE (Referentiel 2026-01-11)
+
+| Ordre | Code | Libelle | MacroPhase | Obligatoire |
+|-------|------|---------|------------|-------------|
+| 1 | ARR_BRIEFING | Briefing equipes | DEBUT | Oui |
+| 2 | ARR_ARRIVEE_AVION | Arrivee avion | DEBUT | Oui |
+| 3 | ARR_OUVERTURE_SOUTES | Ouverture des soutes | REALISATION | Oui |
+| 4 | ARR_DECHARGEMENT | Dechargement | REALISATION | Oui |
+| 5 | ARR_LIVRAISON_BAGAGES | Livraison bagages | REALISATION | Oui |
+| 6 | ARR_DEBARQUEMENT_PAX | Debarquement passagers | REALISATION | Oui |
+| 7 | ARR_MISE_CONDITION_CABINE | Mise en condition cabine | FIN | Non |
+| 8 | ARR_DEBRIEFING | Debriefing cloture | FIN | Non |
 
 ---
 

@@ -1,183 +1,229 @@
 import express from 'express';
 import * as programmeVolController from '../../controllers/flights/programmeVol.controller.js';
+import * as volProgrammeController from '../../controllers/flights/volProgramme.controller.js';
 import { protect, authorize, excludeQualite } from '../../middlewares/auth.middleware.js';
 
 /**
- * Rôles opérationnels autorisés pour toutes les actions sur les programmes de vol.
- * QUALITE = lecture seule, ADMIN = pas d'accès métier
- */
-const ROLES_OPERATIONNELS = ['AGENT_ESCALE', 'CHEF_EQUIPE', 'SUPERVISEUR', 'MANAGER'];
-
-/**
- * EXTENSION 1 - Routes Programme vol saisonnier
+ * ROUTES PROGRAMME VOL - NOUVEAU SYSTÈME
  *
- * Routes NOUVELLES et INDÉPENDANTES pour gérer les programmes de vols récurrents.
+ * Architecture à deux modèles:
+ * - ProgrammeVol: Le conteneur (ex: HIVER_2025_2026)
+ * - VolProgramme: Les vols individuels dans le programme
  *
- * NON-RÉGRESSION: Ces routes sont NOUVELLES et n'affectent AUCUNE route existante.
- * - /api/crv/* reste inchangé
- * - /api/vol/* (si existe) reste inchangé
- * - /api/phase/* reste inchangé
- * - Toutes les routes existantes continuent de fonctionner exactement comme avant
- *
- * Ces routes gèrent UNIQUEMENT le nouveau endpoint /api/programmes-vol/*
- *
- * EXTENSION 1.1 (2026-01-12) - Enrichissement standard programme de vol
- * NON-RÉGRESSION: Nouvelles routes ADDITIVES, routes existantes inchangées
- * - Nouveaux filtres: categorieVol, provenance, destination, nightStop, codeCompagnie
- * - Nouvelles routes: /statistiques/*, /par-route, /resume
+ * WORKFLOW:
+ * 1. Créer un programme (nom, dateDebut, dateFin)
+ * 2. Ajouter des vols un par un
+ * 3. Valider le programme
+ * 4. Activer le programme
  */
 
 const router = express.Router();
 
 /**
- * 🔒 PHASE 1 AJUSTÉE - Référentiel officiel
- *
- * PRINCIPE FONDAMENTAL:
- * AGENT_ESCALE, CHEF_EQUIPE, SUPERVISEUR, MANAGER ont le MÊME périmètre opérationnel.
- * La différence est dans la RESPONSABILITÉ et la LÉGITIMITÉ, pas dans l'action.
- *
- * Rôles actifs:
- * - AGENT_ESCALE, CHEF_EQUIPE, SUPERVISEUR, MANAGER: Périmètre opérationnel unifié
- * - QUALITE: Lecture seule complète (observation, analyse, rapports)
- *
- * Rôle gelé:
- * - ADMIN: Technique uniquement (configuration système, pas métier)
- *
- * Permissions programmes vol (alignées Frontend c1a724a):
- * - Toutes les actions: Tous les opérationnels (AGENT, CHEF, SUPERVISEUR, MANAGER)
- * - Lecture: Tous (y compris QUALITE)
- * - QUALITE: Lecture seule uniquement
- * - ADMIN: Pas d'accès métier
+ * Rôles opérationnels autorisés
  */
+const ROLES_OPERATIONNELS = ['AGENT_ESCALE', 'CHEF_EQUIPE', 'SUPERVISEUR', 'MANAGER'];
 
-// ========== ROUTES CRUD DE BASE ==========
+// ══════════════════════════════════════════════════════════════════════════
+// ROUTES PROGRAMME (CONTENEUR)
+// ══════════════════════════════════════════════════════════════════════════
 
 /**
  * @route   POST /api/programmes-vol
- * @desc    Créer un nouveau programme vol saisonnier
- * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
- * @body    { nomProgramme, compagnieAerienne, typeOperation, recurrence, detailsVol, remarques }
+ * @desc    Créer un nouveau programme
+ * @access  Private (Opérationnels)
+ * @body    { nom, dateDebut, dateFin, edition?, description? }
  */
-// 🔒 P0-1: QUALITE exclu
 router.post('/', protect, excludeQualite, programmeVolController.creerProgramme);
 
 /**
  * @route   GET /api/programmes-vol
- * @desc    Récupérer tous les programmes vol avec filtres optionnels
- * @access  Private (Tous: opérationnels + QUALITE)
- * @query   compagnieAerienne, statut, actif, dateDebut, dateFin
- * @query   EXTENSION 1.1: categorieVol, provenance, destination, nightStop, codeCompagnie
+ * @desc    Lister tous les programmes
+ * @access  Private (Tous)
+ * @query   statut, actif, nom
  */
 router.get('/', protect, programmeVolController.obtenirProgrammes);
 
-// ========== EXTENSION 1.1 - ROUTES STATISTIQUES ET RECHERCHE ==========
-// IMPORTANT: Ces routes DOIVENT être AVANT /:id pour éviter les conflits
-
 /**
- * @route   GET /api/programmes-vol/resume
- * @desc    Obtenir un résumé complet du programme de vol
- * @access  Private (Tous: opérationnels + QUALITE)
+ * @route   GET /api/programmes-vol/actif
+ * @desc    Obtenir le programme actif actuel
+ * @access  Private (Tous)
  */
-router.get('/resume', protect, programmeVolController.obtenirResumeProgramme);
-
-/**
- * @route   GET /api/programmes-vol/par-route
- * @desc    Trouver les programmes par route (provenance/destination)
- * @access  Private (Tous: opérationnels + QUALITE)
- * @query   provenance - Code IATA origine (optionnel)
- * @query   destination - Code IATA destination (optionnel)
- * @query   categorieVol - PASSAGER, CARGO, DOMESTIQUE (optionnel)
- */
-router.get('/par-route', protect, programmeVolController.trouverParRoute);
-
-/**
- * @route   GET /api/programmes-vol/statistiques/categories
- * @desc    Obtenir les statistiques par catégorie de vol
- * @access  Private (Tous: opérationnels + QUALITE)
- */
-router.get('/statistiques/categories', protect, programmeVolController.obtenirStatistiquesParCategorie);
-
-/**
- * @route   GET /api/programmes-vol/statistiques/jours
- * @desc    Obtenir les statistiques par jour de la semaine
- * @access  Private (Tous: opérationnels + QUALITE)
- */
-router.get('/statistiques/jours', protect, programmeVolController.obtenirStatistiquesParJour);
-
-// ========== FIN EXTENSION 1.1 ==========
+router.get('/actif', protect, programmeVolController.obtenirProgrammeActif);
 
 /**
  * @route   GET /api/programmes-vol/:id
- * @desc    Récupérer un programme vol par son ID
- * @access  Private (Tous: opérationnels + QUALITE)
- * @params  id - ID du programme
+ * @desc    Obtenir un programme par ID
+ * @access  Private (Tous)
  */
 router.get('/:id', protect, programmeVolController.obtenirProgrammeParId);
 
 /**
  * @route   PATCH /api/programmes-vol/:id
- * @desc    Mettre à jour un programme vol saisonnier
- * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
- * @params  id - ID du programme
- * @body    Champs à mettre à jour
+ * @desc    Modifier un programme
+ * @access  Private (Opérationnels)
  */
-// 🔒 P0-1: QUALITE exclu
 router.patch('/:id', protect, excludeQualite, programmeVolController.mettreAJourProgramme);
 
 /**
  * @route   DELETE /api/programmes-vol/:id
- * @desc    Supprimer un programme vol saisonnier
- * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
- * @params  id - ID du programme
+ * @desc    Supprimer un programme et tous ses vols
+ * @access  Private (Opérationnels)
  */
 router.delete('/:id', protect, authorize(...ROLES_OPERATIONNELS), programmeVolController.supprimerProgramme);
 
-// ========== ROUTES D'ACTIONS SPÉCIFIQUES ==========
+// ══════════════════════════════════════════════════════════════════════════
+// ROUTES WORKFLOW PROGRAMME
+// ══════════════════════════════════════════════════════════════════════════
 
 /**
  * @route   POST /api/programmes-vol/:id/valider
- * @desc    Valider un programme vol saisonnier
- * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
- * @params  id - ID du programme
+ * @desc    Valider un programme (BROUILLON → VALIDE)
+ * @access  Private (Opérationnels)
  */
 router.post('/:id/valider', protect, authorize(...ROLES_OPERATIONNELS), programmeVolController.validerProgramme);
 
 /**
  * @route   POST /api/programmes-vol/:id/activer
- * @desc    Activer un programme vol saisonnier validé
- * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
- * @params  id - ID du programme
+ * @desc    Activer un programme validé (VALIDE → ACTIF)
+ * @access  Private (Opérationnels)
  */
 router.post('/:id/activer', protect, authorize(...ROLES_OPERATIONNELS), programmeVolController.activerProgramme);
 
 /**
  * @route   POST /api/programmes-vol/:id/suspendre
- * @desc    Suspendre un programme vol saisonnier actif
- * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
- * @params  id - ID du programme
- * @body    { raison } (optionnel)
+ * @desc    Suspendre un programme actif (ACTIF → SUSPENDU)
+ * @access  Private (Opérationnels)
+ * @body    { raison? }
  */
 router.post('/:id/suspendre', protect, authorize(...ROLES_OPERATIONNELS), programmeVolController.suspendreProgramme);
 
-// ========== ROUTES DE RECHERCHE ET IMPORT ==========
+/**
+ * @route   POST /api/programmes-vol/:id/dupliquer
+ * @desc    Dupliquer un programme avec tous ses vols
+ * @access  Private (Opérationnels)
+ * @body    { nom, dateDebut, dateFin, edition? }
+ */
+router.post('/:id/dupliquer', protect, excludeQualite, programmeVolController.dupliquerProgramme);
+
+// ══════════════════════════════════════════════════════════════════════════
+// ROUTES STATISTIQUES ET RÉSUMÉ PROGRAMME
+// ══════════════════════════════════════════════════════════════════════════
 
 /**
- * @route   GET /api/programmes-vol/applicables/:date
- * @desc    Trouver les programmes applicables pour une date donnée
- * @access  Private (Tous: opérationnels + QUALITE)
- * @params  date - Date au format ISO (YYYY-MM-DD)
- * @query   compagnieAerienne (optionnel)
- * @query   EXTENSION 1.1: categorieVol - PASSAGER, CARGO, DOMESTIQUE (optionnel)
+ * @route   GET /api/programmes-vol/:id/statistiques
+ * @desc    Obtenir les statistiques d'un programme
+ * @access  Private (Tous)
  */
-router.get('/applicables/:date', protect, programmeVolController.trouverProgrammesApplicables);
+router.get('/:id/statistiques', protect, programmeVolController.obtenirStatistiques);
 
 /**
- * @route   POST /api/programmes-vol/import
- * @desc    Importer plusieurs programmes depuis un fichier JSON
- * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
- * @body    { programmes: [...] }
+ * @route   GET /api/programmes-vol/:id/resume
+ * @desc    Obtenir le résumé complet d'un programme (avec vols)
+ * @access  Private (Tous)
  */
-// 🔒 P0-1: QUALITE exclu
-router.post('/import', protect, excludeQualite, programmeVolController.importerProgrammes);
+router.get('/:id/resume', protect, programmeVolController.obtenirResume);
+
+// ══════════════════════════════════════════════════════════════════════════
+// ROUTES VOLS DANS LE PROGRAMME
+// ══════════════════════════════════════════════════════════════════════════
+
+/**
+ * @route   POST /api/programmes-vol/:programmeId/vols
+ * @desc    Ajouter un vol au programme
+ * @access  Private (Opérationnels)
+ * @body    {
+ *   numeroVol: "ET939",
+ *   joursSemaine: [1, 3, 5],
+ *   typeAvion: "B737-800",
+ *   version: "16C138Y",
+ *   provenance: "ADD",
+ *   heureArrivee: "12:10",
+ *   destination: "ADD",
+ *   heureDepart: "14:05",
+ *   departLendemain: false,
+ *   observations: "..."
+ * }
+ */
+router.post('/:programmeId/vols', protect, excludeQualite, volProgrammeController.ajouterVol);
+
+/**
+ * @route   GET /api/programmes-vol/:programmeId/vols
+ * @desc    Lister les vols d'un programme
+ * @access  Private (Tous)
+ * @query   tri (ordre, heureArrivee, heureDepart, numeroVol), ordre (asc, desc)
+ */
+router.get('/:programmeId/vols', protect, volProgrammeController.obtenirVols);
+
+/**
+ * @route   GET /api/programmes-vol/:programmeId/vols/jour/:jour
+ * @desc    Obtenir les vols d'un jour spécifique (0=Dim, 6=Sam)
+ * @access  Private (Tous)
+ */
+router.get('/:programmeId/vols/jour/:jour', protect, volProgrammeController.obtenirVolsParJour);
+
+/**
+ * @route   GET /api/programmes-vol/:programmeId/vols/recherche
+ * @desc    Rechercher des vols par numéro
+ * @access  Private (Tous)
+ * @query   q (terme de recherche, min 2 caractères)
+ */
+router.get('/:programmeId/vols/recherche', protect, volProgrammeController.rechercherVols);
+
+/**
+ * @route   GET /api/programmes-vol/:programmeId/vols/compagnie/:code
+ * @desc    Obtenir les vols d'une compagnie
+ * @access  Private (Tous)
+ */
+router.get('/:programmeId/vols/compagnie/:code', protect, volProgrammeController.obtenirVolsParCompagnie);
+
+/**
+ * @route   POST /api/programmes-vol/:programmeId/vols/import
+ * @desc    Importer plusieurs vols en une fois
+ * @access  Private (Opérationnels)
+ * @body    { vols: [...] }
+ */
+router.post('/:programmeId/vols/import', protect, excludeQualite, volProgrammeController.importerVols);
+
+/**
+ * @route   PATCH /api/programmes-vol/:programmeId/vols/reorganiser
+ * @desc    Réorganiser l'ordre des vols
+ * @access  Private (Opérationnels)
+ * @body    { ordres: [{ volId, ordre }] }
+ */
+router.patch('/:programmeId/vols/reorganiser', protect, excludeQualite, volProgrammeController.reorganiserVols);
+
+/**
+ * @route   GET /api/programmes-vol/:programmeId/vols/:id
+ * @desc    Obtenir un vol par ID
+ * @access  Private (Tous)
+ */
+router.get('/:programmeId/vols/:id', protect, volProgrammeController.obtenirVolParId);
+
+/**
+ * @route   PATCH /api/programmes-vol/:programmeId/vols/:id
+ * @desc    Modifier un vol
+ * @access  Private (Opérationnels)
+ */
+router.patch('/:programmeId/vols/:id', protect, excludeQualite, volProgrammeController.modifierVol);
+
+/**
+ * @route   DELETE /api/programmes-vol/:programmeId/vols/:id
+ * @desc    Supprimer un vol
+ * @access  Private (Opérationnels)
+ */
+router.delete('/:programmeId/vols/:id', protect, authorize(...ROLES_OPERATIONNELS), volProgrammeController.supprimerVol);
+
+// ══════════════════════════════════════════════════════════════════════════
+// ROUTE EXPORT PDF
+// ══════════════════════════════════════════════════════════════════════════
+
+/**
+ * @route   GET /api/programmes-vol/:programmeId/export-pdf
+ * @desc    Obtenir les données formatées pour export PDF
+ * @access  Private (Tous)
+ * @query   format (hebdomadaire, journalier)
+ */
+router.get('/:programmeId/export-pdf', protect, volProgrammeController.obtenirDonneesPDF);
 
 export default router;

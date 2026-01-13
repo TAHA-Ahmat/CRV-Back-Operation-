@@ -41,20 +41,27 @@ Modele central representant un Compte Rendu de Vol. Documente toutes les operati
 
 ### Sous-document embedded : personnelAffecte[]
 
-| Champ | Type | Requis | Description |
-|-------|------|--------|-------------|
-| `nom` | String | OUI | Nom de famille |
-| `prenom` | String | OUI | Prenom |
-| `fonction` | String | OUI | Role sur le vol |
-| `matricule` | String | NON | Identifiant employe |
-| `telephone` | String | NON | Contact |
-| `remarques` | String | NON | Notes |
+| Champ | Type | Requis | Contraintes | Description |
+|-------|------|--------|-------------|-------------|
+| `nom` | String | OUI | trim | Nom de famille |
+| `prenom` | String | OUI | trim | Prenom |
+| `fonction` | String | OUI | enum (voir ci-dessous) | Role sur le vol |
+| `matricule` | String | NON | trim | Identifiant employe |
+| `telephone` | String | NON | trim | Contact |
+| `remarques` | String | NON | trim | Notes |
+
+#### Valeurs ENUM fonction (mise a jour 2026-01-11)
+```
+'CHEF_ESCALE', 'AGENT_TRAFIC', 'AGENT_PISTE', 'AGENT_PASSAGE',
+'MANUTENTIONNAIRE', 'CHAUFFEUR', 'AGENT_SECURITE', 'TECHNICIEN',
+'SUPERVISEUR', 'COORDINATEUR', 'AUTRE'
+```
 
 ### Sous-document embedded : materielUtilise[]
 
 | Champ | Type | Requis | Contraintes |
 |-------|------|--------|-------------|
-| `typeEngin` | String | OUI | enum: TRACTEUR_PUSHBACK, PASSERELLE, TAPIS_BAGAGES, GPU, ASU, ESCALIER, TRANSBORDEUR, CAMION_AVITAILLEMENT, CAMION_VIDANGE, CAMION_EAU, NACELLE_ELEVATRICE, CHARIOT_BAGAGES, CONTENEUR_ULD, DOLLY, AUTRE |
+| `typeEngin` | String | OUI | enum: TRACTEUR_PUSHBACK, PASSERELLE, TAPIS_BAGAGES, GPU, ASU, ESCALIER, TRANSBORDEUR, CAMION_AVITAILLEMENT, CAMION_VIDANGE, CAMION_EAU, ELEVATEUR, CHARIOT_BAGAGES, CONTENEUR_ULD, DOLLY, AUTRE |
 | `identifiant` | String | OUI | uppercase |
 | `heureDebutUtilisation` | Date | NON | - |
 | `heureFinUtilisation` | Date | NON | - |

@@ -38,7 +38,10 @@ export const creerCRV = async (req, res, next) => {
   });
 
   try {
-    let { volId, responsableVolId, type, date } = req.body;
+    let { volId, responsableVolId, type, date, escale } = req.body;
+
+    // Escale par défaut si non fournie (code IATA de l'aéroport local)
+    escale = escale || 'TLS';
 
     // Si aucun volId n'est fourni, créer un vol automatiquement
     let vol;
@@ -111,6 +114,7 @@ export const creerCRV = async (req, res, next) => {
     const crv = await CRV.create({
       numeroCRV,
       vol: volId,
+      escale,
       horaire: horaire._id,
       creePar: req.user._id,
       responsableVol: responsableVolId,
@@ -504,7 +508,7 @@ export const mettreAJourCRV = async (req, res, next) => {
 
         // Gestion de l'avion (immatriculation + type)
         if (volData.immatriculation || volData.typeAvion) {
-          const Avion = (await import('../models/Avion.js')).default;
+          const Avion = (await import('../../models/referentials/Avion.js')).default;
           let avion = null;
 
           if (volData.immatriculation) {

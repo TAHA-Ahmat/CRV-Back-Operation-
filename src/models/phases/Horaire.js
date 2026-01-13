@@ -67,7 +67,7 @@ horaireSchema.pre('save', async function(next) {
     timestamp
   });
 
-  const { calculerEcartHoraire } = await import('../services/calcul.service.js');
+  const { calculerEcartHoraire } = await import('../../services/charges/calcul.service.js');
 
   // Calcul écart atterrissage
   if (this.heureAtterrissageReelle && this.heureAtterrisagePrevue) {

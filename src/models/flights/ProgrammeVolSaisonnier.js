@@ -3,250 +3,531 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 /**
- * EXTENSION 1 - Programme vol saisonnier
+ * EXTENSION 1.2 - Programme Vol Saisonnier COMPLET
  *
- * Modèle NOUVEAU et INDÉPENDANT pour gérer les programmes de vols récurrents.
+ * Modèle adapté pour gérer 100% des cas du Programme Général des Vols THS.
+ * Basé sur l'analyse exhaustive du document HIVER_2025_2026 (50 conditions).
  *
- * NON-RÉGRESSION: Ce modèle n'impacte AUCUN modèle existant.
- * - Vol.js reste inchangé
- * - CRV.js reste inchangé
- * - Phase.js reste inchangé
- * - Aucune modification de la logique existante
+ * STRUCTURE DU DOCUMENT PDF:
+ * | JOURS | N° VOL | Type d'avion | VERSION | PROVENANCE | Arrivée | DESTINATION | Départ | OBSERVATIONS |
  *
- * Ce modèle est 100% OPTIONNEL et sert uniquement à la planification des vols futurs.
+ * CATÉGORIES DE VOLS:
+ * - INTERNATIONAL: Vols intercontinentaux (ET, AF, TK, MS, AT, AH)
+ * - REGIONAL: Vols régionaux Afrique (KP, QC)
+ * - DOMESTIQUE: Vols intérieurs Tchad (CH - Royal Airways)
+ * - CARGO: Vols fret (ET3xxx, MS0xxx)
  *
- * EXTENSION 1.1 (2026-01-12) - Enrichissement standard programme de vol
- * NON-RÉGRESSION: Tous les nouveaux champs sont OPTIONNELS avec valeurs par défaut.
- * - Ajout categorieVol (PASSAGER, CARGO, DOMESTIQUE)
- * - Ajout codeCompagnie (code IATA 2 lettres)
- * - Ajout route (provenance, destination, escales)
- * - Ajout numeroVolRetour, configurationSieges, nightStop
- * - Documents existants continuent de fonctionner sans modification
+ * CONDITIONS SPÉCIALES GÉRÉES:
+ * - Numéros de vol combinés (CH110/111)
+ * - Types d'avion multiples (B737F/B77F/B763F)
+ * - Routes multi-escales (IST-NIM, AMJ-AEH)
+ * - Destination avec vol retour (ADD(ET938))
+ * - Night stop
+ * - Périodes variables par jour
+ * - Notes de bas de page (① ②)
+ * - Horaires J+1
+ * - Vols exclus du programme (à la demande)
  */
 
-const programmeVolSaisonnierSchema = new Schema({
-  // ========== INFORMATIONS GÉNÉRALES ==========
-  nomProgramme: {
-    type: String,
-    required: true,
-    trim: true,
-    description: 'Nom descriptif du programme (ex: "Air France Paris-Dakar Hiver 2024")'
-  },
+// ========== SOUS-SCHÉMAS ==========
 
-  compagnieAerienne: {
+/**
+ * Schéma pour les périodes de validité par jour
+ * Permet de gérer: AT293 Mardi = 08 Déc, AT293 Jeudi = 26 Oct
+ */
+const periodeParJourSchema = new Schema({
+  jour: {
+    type: Number,
+    required: true,
+    min: 0,
+    max: 6,
+    description: '0=Dimanche, 1=Lundi, 2=Mardi, 3=Mercredi, 4=Jeudi, 5=Vendredi, 6=Samedi'
+  },
+  dateDebut: {
+    type: Date,
+    required: true
+  },
+  dateFin: {
+    type: Date,
+    required: true
+  }
+}, { _id: false });
+
+// ========== SCHÉMA PRINCIPAL ==========
+
+const programmeVolSaisonnierSchema = new Schema({
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 1. MÉTADONNÉES DU DOCUMENT
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Saison du programme (ex: "HIVER_2025_2026", "ETE_2026")
+   * Permet de regrouper tous les vols d'une même saison
+   */
+  saison: {
     type: String,
     required: true,
     uppercase: true,
     trim: true,
-    description: 'Code IATA ou nom de la compagnie aérienne'
+    description: 'Identifiant de la saison (ex: HIVER_2025_2026)'
   },
 
-  typeOperation: {
+  /**
+   * Numéro d'édition du document (ex: "N°01/17-déc.-25")
+   */
+  edition: {
     type: String,
-    enum: ['ARRIVEE', 'DEPART', 'TURN_AROUND'],
-    required: true,
-    description: 'Type d\'opération du vol'
+    default: null,
+    trim: true,
+    description: 'Numéro d\'édition du programme (ex: N°01/17-déc.-25)'
   },
 
-  // ========== EXTENSION 1.1 - CATÉGORISATION ==========
-  // NON-RÉGRESSION: Tous ces champs sont OPTIONNELS avec valeurs par défaut
+  // ══════════════════════════════════════════════════════════════════════════
+  // 2. IDENTIFICATION DE LA COMPAGNIE
+  // ══════════════════════════════════════════════════════════════════════════
 
-  categorieVol: {
-    type: String,
-    enum: ['PASSAGER', 'CARGO', 'DOMESTIQUE'],
-    default: 'PASSAGER',
-    description: 'Catégorie du vol (passager commercial, cargo/fret, domestique/intérieur)'
-  },
-
+  /**
+   * Code IATA de la compagnie (2 lettres, déduit du numéro de vol)
+   * Ex: ET, AF, TK, MS, AT, AH, KP, QC, CH
+   */
   codeCompagnie: {
+    type: String,
+    required: true,
+    uppercase: true,
+    trim: true,
+    minlength: 2,
+    maxlength: 3,
+    description: 'Code IATA de la compagnie (ex: ET, AF, TK)'
+  },
+
+  /**
+   * Nom complet de la compagnie (optionnel, peut être dans OBSERVATIONS)
+   * Ex: "Royal Airways", "AIR ALGERIE", "Ethiopian Airlines"
+   */
+  nomCompagnie: {
+    type: String,
+    default: null,
+    trim: true,
+    description: 'Nom complet de la compagnie (ex: Royal Airways)'
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 3. NUMÉRO DE VOL
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Format d'affichage du numéro de vol (tel qu'affiché dans le PDF)
+   * Ex: "CH110/111", "ET939", "MS0548"
+   */
+  numeroVolDisplay: {
+    type: String,
+    required: true,
+    uppercase: true,
+    trim: true,
+    description: 'Numéro de vol tel qu\'affiché (ex: CH110/111, ET939)'
+  },
+
+  /**
+   * Numéro de vol aller (premier numéro si combiné)
+   * Ex: "CH110" pour "CH110/111", "ET939" pour vol simple
+   */
+  numeroVolAller: {
+    type: String,
+    required: true,
+    uppercase: true,
+    trim: true,
+    description: 'Numéro de vol aller (ex: CH110, ET939)'
+  },
+
+  /**
+   * Numéro de vol retour (second numéro si combiné, ou depuis DESTINATION)
+   * Ex: "CH111" pour "CH110/111", "ET938" pour "ADD(ET938)"
+   */
+  numeroVolRetour: {
     type: String,
     default: null,
     uppercase: true,
     trim: true,
-    maxlength: 3,
-    description: 'Code IATA de la compagnie (2-3 lettres, ex: ET, AF, TK)'
+    description: 'Numéro de vol retour (ex: CH111, ET938)'
   },
 
-  // ========== EXTENSION 1.1 - ROUTE ==========
-  route: {
-    provenance: {
-      type: String,
-      default: null,
-      uppercase: true,
-      trim: true,
-      description: 'Code IATA aéroport d\'origine (ex: ADD, CDG, IST)'
-    },
-    destination: {
-      type: String,
-      default: null,
-      uppercase: true,
-      trim: true,
-      description: 'Code IATA aéroport de destination (ex: ADD, CDG, IST)'
-    },
-    escales: {
-      type: [String],
-      default: [],
-      description: 'Codes IATA des escales intermédiaires (ex: ["NIM", "NSI"])'
-    }
+  // ══════════════════════════════════════════════════════════════════════════
+  // 4. TYPE D'AVION
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Format d'affichage du type d'avion (tel qu'affiché dans le PDF)
+   * Ex: "B737-800", "B737F/B77F/B763F", "E145"
+   */
+  avionTypeDisplay: {
+    type: String,
+    default: null,
+    trim: true,
+    description: 'Type d\'avion tel qu\'affiché (ex: B737F/B77F/B763F)'
   },
 
+  /**
+   * Liste des types d'avion possibles
+   * Ex: ["B737F", "B77F", "B763F"] pour cargo Ethiopian
+   */
+  avionTypes: {
+    type: [String],
+    default: [],
+    description: 'Liste des types d\'avion possibles'
+  },
+
+  /**
+   * Indique si c'est un avion cargo (suffixe F = Freighter)
+   */
+  avionCargo: {
+    type: Boolean,
+    default: false,
+    description: 'True si avion cargo (suffixe F)'
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 5. CONFIGURATION SIÈGES (VERSION)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Configuration des sièges
+   * Ex: "16C138Y" (16 Business + 138 Economy), "JY159" (tout éco), "TBN", "CARGO"
+   */
+  configurationSieges: {
+    type: String,
+    default: 'TBN',
+    uppercase: true,
+    trim: true,
+    description: 'Configuration sièges (ex: 16C138Y, JY159, TBN, CARGO)'
+  },
+
+  /**
+   * Capacité Business Class (déduit de la configuration)
+   */
+  capaciteBusiness: {
+    type: Number,
+    default: null,
+    min: 0,
+    description: 'Nombre de sièges Business'
+  },
+
+  /**
+   * Capacité Economy Class (déduit de la configuration)
+   */
+  capaciteEconomy: {
+    type: Number,
+    default: null,
+    min: 0,
+    description: 'Nombre de sièges Economy'
+  },
+
+  /**
+   * Capacité totale (calculée)
+   */
+  capaciteTotale: {
+    type: Number,
+    default: null,
+    min: 0,
+    description: 'Capacité totale passagers'
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 6. PROVENANCE
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Format d'affichage de la provenance (tel qu'affiché dans le PDF)
+   * Ex: "ADD", "IST-NIM", "AMJ-AEH", "-", "IST (DIRECT)"
+   */
+  provenanceDisplay: {
+    type: String,
+    default: null,
+    uppercase: true,
+    trim: true,
+    description: 'Provenance tel qu\'affichée (ex: IST-NIM, ADD, -)'
+  },
+
+  /**
+   * Code IATA de l'aéroport d'origine
+   * Ex: "IST" pour "IST-NIM"
+   */
+  provenanceCode: {
+    type: String,
+    default: null,
+    uppercase: true,
+    trim: true,
+    description: 'Code IATA origine (ex: IST, ADD)'
+  },
+
+  /**
+   * Escales avant N'Djamena (extraites du format IST-NIM)
+   * Ex: ["NIM"] pour "IST-NIM"
+   */
+  provenanceEscales: {
+    type: [String],
+    default: [],
+    description: 'Escales avant N\'Djamena (ex: [NIM] pour IST-NIM)'
+  },
+
+  /**
+   * Vol en provenance directe (annotation DIRECT)
+   */
+  provenanceDirecte: {
+    type: Boolean,
+    default: false,
+    description: 'True si vol direct (sans escale)'
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 7. HORAIRE ARRIVÉE
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Heure d'arrivée prévue (format HH:MM, 24h)
+   * Ex: "12:10", "09:05", null si départ pur
+   */
+  heureArrivee: {
+    type: String,
+    default: null,
+    match: /^([01]\d|2[0-3]):([0-5]\d)$/,
+    description: 'Heure d\'arrivée (format HH:MM)'
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 8. DESTINATION
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Format d'affichage de la destination (tel qu'affiché dans le PDF)
+   * Ex: "ADD(ET938)", "IST", "ABV-LFW", "NSI - CDG", "-"
+   */
+  destinationDisplay: {
+    type: String,
+    default: null,
+    uppercase: true,
+    trim: true,
+    description: 'Destination tel qu\'affichée (ex: ADD(ET938), NSI-CDG)'
+  },
+
+  /**
+   * Code IATA de l'aéroport de destination finale
+   * Ex: "ADD" pour "ADD(ET938)", "CDG" pour "NSI - CDG"
+   */
+  destinationCode: {
+    type: String,
+    default: null,
+    uppercase: true,
+    trim: true,
+    description: 'Code IATA destination finale (ex: ADD, CDG)'
+  },
+
+  /**
+   * Escales après N'Djamena (extraites du format NSI-CDG)
+   * Ex: ["NSI"] pour "NSI - CDG"
+   */
+  destinationEscales: {
+    type: [String],
+    default: [],
+    description: 'Escales après N\'Djamena (ex: [NSI] pour NSI-CDG)'
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 9. HORAIRE DÉPART
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Heure de départ prévue (format HH:MM, 24h)
+   * Ex: "14:05", "07:45", null si arrivée pure
+   */
+  heureDepart: {
+    type: String,
+    default: null,
+    match: /^([01]\d|2[0-3]):([0-5]\d)$/,
+    description: 'Heure de départ (format HH:MM)'
+  },
+
+  /**
+   * Indique si le départ est le jour suivant (J+1)
+   * Ex: true pour "00H45 (J+1)"
+   */
+  departJourSuivant: {
+    type: Boolean,
+    default: false,
+    description: 'True si départ le lendemain (J+1)'
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 10. CATÉGORISATION
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Catégorie de vol
+   */
+  categorieVol: {
+    type: String,
+    enum: ['INTERNATIONAL', 'REGIONAL', 'DOMESTIQUE', 'CARGO'],
+    required: true,
+    description: 'Catégorie du vol'
+  },
+
+  /**
+   * Type d'opération (déduit des champs provenance/destination)
+   */
+  typeOperation: {
+    type: String,
+    enum: ['ARRIVEE', 'DEPART', 'TURN_AROUND', 'TRANSIT'],
+    required: true,
+    description: 'Type d\'opération'
+  },
+
+  /**
+   * Indique si l'avion reste la nuit (NIGHT STOP)
+   */
   nightStop: {
     type: Boolean,
     default: false,
-    description: 'Indique si l\'avion reste stationné la nuit sur l\'escale'
+    description: 'True si l\'avion reste la nuit'
   },
 
-  // ========== RÉCURRENCE ==========
-  recurrence: {
-    frequence: {
-      type: String,
-      enum: ['QUOTIDIEN', 'HEBDOMADAIRE', 'BIMENSUEL', 'MENSUEL'],
-      required: true,
-      description: 'Fréquence de répétition du vol'
-    },
+  // ══════════════════════════════════════════════════════════════════════════
+  // 11. RÉCURRENCE ET PÉRIODE
+  // ══════════════════════════════════════════════════════════════════════════
 
-    joursSemaine: {
-      type: [Number],
-      default: [],
-      validate: {
-        validator: function(arr) {
-          return arr.every(day => day >= 0 && day <= 6);
-        },
-        message: 'Les jours doivent être entre 0 (Dimanche) et 6 (Samedi)'
+  /**
+   * Jours de la semaine où le vol opère
+   * Ex: [1, 5] pour Lundi et Vendredi
+   * 0=Dimanche, 1=Lundi, 2=Mardi, 3=Mercredi, 4=Jeudi, 5=Vendredi, 6=Samedi
+   */
+  joursSemaine: {
+    type: [Number],
+    required: true,
+    validate: {
+      validator: function(arr) {
+        return arr.length > 0 && arr.every(day => day >= 0 && day <= 6);
       },
-      description: '0=Dimanche, 1=Lundi, 2=Mardi, 3=Mercredi, 4=Jeudi, 5=Vendredi, 6=Samedi'
+      message: 'Au moins un jour requis, valeurs entre 0 (Dim) et 6 (Sam)'
     },
+    description: 'Jours de la semaine (0=Dim, 1=Lun, ...)'
+  },
 
+  /**
+   * Période de validité par défaut (toute la saison si pas spécifié par jour)
+   */
+  periodeDefaut: {
     dateDebut: {
       type: Date,
       required: true,
-      description: 'Date de début du programme'
+      description: 'Date de début par défaut'
     },
-
     dateFin: {
       type: Date,
       required: true,
-      description: 'Date de fin du programme'
+      description: 'Date de fin par défaut'
     }
   },
 
-  // ========== DÉTAILS DU VOL ==========
-  detailsVol: {
-    numeroVolBase: {
-      type: String,
-      required: true,
-      uppercase: true,
-      trim: true,
-      description: 'Numéro de vol de base (ex: "AF456")'
-    },
-
-    // EXTENSION 1.1 - Numéro vol retour pour turnaround
-    numeroVolRetour: {
-      type: String,
-      default: null,
-      uppercase: true,
-      trim: true,
-      description: 'Numéro du vol retour pour turnaround (ex: "ET938" pour "ET939")'
-    },
-
-    avionType: {
-      type: String,
-      default: null,
-      trim: true,
-      description: 'Type d\'avion prévu (ex: "Boeing 737-800", "B737-800")'
-    },
-
-    // EXTENSION 1.1 - Configuration sièges
-    configurationSieges: {
-      type: String,
-      default: null,
-      trim: true,
-      description: 'Code configuration sièges (ex: "16C138Y", "CARGO", "TBN")'
-    },
-
-    horairePrevu: {
-      heureArrivee: {
-        type: String,
-        default: null,
-        match: /^([01]\d|2[0-3]):([0-5]\d)$/,
-        description: 'Heure d\'arrivée prévue au format HH:MM'
-      },
-      heureDepart: {
-        type: String,
-        default: null,
-        match: /^([01]\d|2[0-3]):([0-5]\d)$/,
-        description: 'Heure de départ prévue au format HH:MM'
-      }
-    },
-
-    capacitePassagers: {
-      type: Number,
-      default: null,
-      min: 0,
-      description: 'Capacité passagers prévue'
-    },
-
-    capaciteFret: {
-      type: Number,
-      default: null,
-      min: 0,
-      description: 'Capacité fret prévue (en kg)'
-    }
+  /**
+   * Périodes spécifiques par jour (si différentes de la période par défaut)
+   * Ex: AT293 a des dates différentes le Mardi vs Jeudi/Dimanche
+   */
+  periodesParJour: {
+    type: [periodeParJourSchema],
+    default: [],
+    description: 'Périodes spécifiques par jour si différentes'
   },
 
-  // ========== STATUT ET VALIDATION ==========
+  // ══════════════════════════════════════════════════════════════════════════
+  // 12. OBSERVATIONS ET NOTES
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Indicateur de note (① ② ③)
+   */
+  noteIndex: {
+    type: String,
+    enum: [null, '①', '②', '③'],
+    default: null,
+    description: 'Indicateur de note de bas de page'
+  },
+
+  /**
+   * Texte de la note associée
+   */
+  noteTexte: {
+    type: String,
+    default: null,
+    trim: true,
+    description: 'Texte de la note de bas de page'
+  },
+
+  /**
+   * Observations/remarques générales
+   * Ex: "Royal Airways", "Du 27 oct. au 28 Nov. 2025"
+   */
+  observations: {
+    type: String,
+    default: null,
+    trim: true,
+    description: 'Observations diverses'
+  },
+
+  /**
+   * Horaires variables (comme les cargos)
+   */
+  horairesVariables: {
+    type: Boolean,
+    default: false,
+    description: 'True si horaires susceptibles de changer'
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 13. STATUT ET WORKFLOW
+  // ══════════════════════════════════════════════════════════════════════════
+
   statut: {
     type: String,
     enum: ['BROUILLON', 'VALIDE', 'ACTIF', 'SUSPENDU', 'TERMINE'],
     default: 'BROUILLON',
-    description: 'Statut du programme saisonnier'
+    description: 'Statut du programme'
   },
 
   actif: {
     type: Boolean,
     default: false,
-    description: 'Indique si le programme est actuellement actif'
+    description: 'Programme actuellement actif'
   },
 
   validation: {
     valide: {
       type: Boolean,
-      default: false,
-      description: 'Indique si le programme a été validé'
+      default: false
     },
     validePar: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
-      default: null,
-      description: 'Utilisateur ayant validé le programme'
+      ref: 'Personne',
+      default: null
     },
     dateValidation: {
       type: Date,
-      default: null,
-      description: 'Date de validation du programme'
+      default: null
     }
   },
 
-  // ========== MÉTADONNÉES ==========
-  remarques: {
-    type: String,
-    default: null,
-    trim: true,
-    description: 'Remarques ou notes sur le programme'
-  },
+  // ══════════════════════════════════════════════════════════════════════════
+  // 14. MÉTADONNÉES
+  // ══════════════════════════════════════════════════════════════════════════
 
   createdBy: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    description: 'Utilisateur ayant créé le programme'
+    ref: 'Personne',
+    required: true
   },
 
   updatedBy: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
-    default: null,
-    description: 'Utilisateur ayant modifié le programme pour la dernière fois'
+    ref: 'Personne',
+    default: null
   }
 
 }, {
@@ -254,210 +535,346 @@ const programmeVolSaisonnierSchema = new Schema({
   collection: 'programmesvolsaisonniers'
 });
 
-// ========== INDEX ==========
-// Index pour rechercher les programmes actifs d'une compagnie
-programmeVolSaisonnierSchema.index({ compagnieAerienne: 1, actif: 1 });
+// ══════════════════════════════════════════════════════════════════════════
+// INDEX
+// ══════════════════════════════════════════════════════════════════════════
 
-// Index pour rechercher par période
-programmeVolSaisonnierSchema.index({ 'recurrence.dateDebut': 1, 'recurrence.dateFin': 1 });
+// Index par saison
+programmeVolSaisonnierSchema.index({ saison: 1 });
 
-// Index pour rechercher par statut
-programmeVolSaisonnierSchema.index({ statut: 1 });
+// Index par compagnie
+programmeVolSaisonnierSchema.index({ codeCompagnie: 1 });
 
-// ========== EXTENSION 1.1 - NOUVEAUX INDEX ==========
-// Index pour filtrer par catégorie de vol
-programmeVolSaisonnierSchema.index({ categorieVol: 1 });
+// Index par numéro de vol
+programmeVolSaisonnierSchema.index({ numeroVolAller: 1 });
+programmeVolSaisonnierSchema.index({ numeroVolDisplay: 1 });
 
-// Index pour rechercher par route (provenance/destination)
-programmeVolSaisonnierSchema.index({ 'route.provenance': 1 });
-programmeVolSaisonnierSchema.index({ 'route.destination': 1 });
+// Index par catégorie et statut
+programmeVolSaisonnierSchema.index({ categorieVol: 1, statut: 1, actif: 1 });
 
-// Index pour rechercher par numéro de vol
-programmeVolSaisonnierSchema.index({ 'detailsVol.numeroVolBase': 1 });
+// Index par jours de la semaine
+programmeVolSaisonnierSchema.index({ joursSemaine: 1 });
 
-// Index composé pour recherche avancée
-programmeVolSaisonnierSchema.index({ categorieVol: 1, actif: 1, statut: 1 });
+// Index par période
+programmeVolSaisonnierSchema.index({ 'periodeDefaut.dateDebut': 1, 'periodeDefaut.dateFin': 1 });
 
-// ========== MÉTHODES D'INSTANCE ==========
+// Index par type d'opération
+programmeVolSaisonnierSchema.index({ typeOperation: 1 });
+
+// Index composite pour génération PDF
+programmeVolSaisonnierSchema.index({ saison: 1, joursSemaine: 1, heureArrivee: 1 });
+
+// ══════════════════════════════════════════════════════════════════════════
+// VIRTUALS
+// ══════════════════════════════════════════════════════════════════════════
 
 /**
- * Vérifie si le programme est actif pour une date donnée
+ * Retourne le libellé des jours de la semaine
+ */
+programmeVolSaisonnierSchema.virtual('joursLibelle').get(function() {
+  const joursNom = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+  return this.joursSemaine.map(j => joursNom[j]).join(', ');
+});
+
+/**
+ * Indique si c'est un vol quotidien
+ */
+programmeVolSaisonnierSchema.virtual('estQuotidien').get(function() {
+  return this.joursSemaine.length === 7;
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// MÉTHODES D'INSTANCE
+// ══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Vérifie si le vol opère un jour donné
+ */
+programmeVolSaisonnierSchema.methods.opereLeJour = function(date) {
+  const jour = new Date(date).getDay();
+  return this.joursSemaine.includes(jour);
+};
+
+/**
+ * Retourne la période de validité pour un jour donné
+ */
+programmeVolSaisonnierSchema.methods.getPeriodePourJour = function(jour) {
+  const periodeSpecifique = this.periodesParJour.find(p => p.jour === jour);
+  if (periodeSpecifique) {
+    return { dateDebut: periodeSpecifique.dateDebut, dateFin: periodeSpecifique.dateFin };
+  }
+  return { dateDebut: this.periodeDefaut.dateDebut, dateFin: this.periodeDefaut.dateFin };
+};
+
+/**
+ * Vérifie si le vol est actif pour une date donnée
  */
 programmeVolSaisonnierSchema.methods.estActifPourDate = function(date) {
-  if (!this.actif) return false;
-  if (this.statut !== 'ACTIF') return false;
+  if (!this.actif || this.statut !== 'ACTIF') return false;
 
   const dateCheck = new Date(date);
-  return dateCheck >= this.recurrence.dateDebut && dateCheck <= this.recurrence.dateFin;
+  const jour = dateCheck.getDay();
+
+  // Vérifier si le vol opère ce jour
+  if (!this.joursSemaine.includes(jour)) return false;
+
+  // Obtenir la période pour ce jour
+  const periode = this.getPeriodePourJour(jour);
+
+  return dateCheck >= periode.dateDebut && dateCheck <= periode.dateFin;
 };
 
 /**
- * Vérifie si le programme s'applique à un jour de la semaine donné
+ * Génère la ligne pour le PDF
  */
-programmeVolSaisonnierSchema.methods.appliqueAuJour = function(date) {
-  const jour = new Date(date).getDay();
-
-  if (this.recurrence.frequence === 'QUOTIDIEN') return true;
-  if (this.recurrence.frequence === 'HEBDOMADAIRE') {
-    return this.recurrence.joursSemaine.includes(jour);
-  }
-
-  return false;
-};
-
-/**
- * Retourne un objet simple avec les informations essentielles
- * EXTENSION 1.1: Enrichi avec les nouveaux champs (rétrocompatible)
- */
-programmeVolSaisonnierSchema.methods.toSimpleObject = function() {
+programmeVolSaisonnierSchema.methods.toLignePDF = function() {
   return {
-    id: this._id,
-    nomProgramme: this.nomProgramme,
-    compagnieAerienne: this.compagnieAerienne,
-    codeCompagnie: this.codeCompagnie || null,
-    numeroVolBase: this.detailsVol.numeroVolBase,
-    numeroVolRetour: this.detailsVol.numeroVolRetour || null,
-    typeOperation: this.typeOperation,
-    categorieVol: this.categorieVol || 'PASSAGER',
-    statut: this.statut,
-    actif: this.actif,
-    periode: {
-      debut: this.recurrence.dateDebut,
-      fin: this.recurrence.dateFin
-    },
-    route: {
-      provenance: this.route?.provenance || null,
-      destination: this.route?.destination || null,
-      escales: this.route?.escales || []
-    },
-    horaires: {
-      arrivee: this.detailsVol.horairePrevu?.heureArrivee || null,
-      depart: this.detailsVol.horairePrevu?.heureDepart || null
-    },
-    nightStop: this.nightStop || false
+    numeroVol: this.numeroVolDisplay,
+    typeAvion: this.avionTypeDisplay || '-',
+    version: this.configurationSieges || 'TBN',
+    provenance: this.provenanceDisplay || '-',
+    arrivee: this.heureArrivee ? this.heureArrivee.replace(':', 'H') : '-',
+    destination: this.destinationDisplay || '-',
+    depart: this.heureDepart ? (this.heureDepart.replace(':', 'H') + (this.departJourSuivant ? ' (J+1)' : '')) : '-',
+    observations: this._buildObservations()
   };
 };
 
-// ========== MÉTHODES STATIQUES ==========
-
 /**
- * Trouve tous les programmes actifs pour une compagnie
- * EXTENSION 1.1: Ajout filtre optionnel categorieVol (rétrocompatible)
- * @param {String} compagnieAerienne - Nom ou code de la compagnie
- * @param {String} categorieVol - Optionnel: PASSAGER, CARGO, DOMESTIQUE
+ * Construit le champ observations pour le PDF
  */
-programmeVolSaisonnierSchema.statics.trouverProgrammesActifs = function(compagnieAerienne, categorieVol = null) {
-  const query = {
-    compagnieAerienne: compagnieAerienne.toUpperCase(),
-    actif: true,
-    statut: 'ACTIF'
-  };
+programmeVolSaisonnierSchema.methods._buildObservations = function() {
+  const parts = [];
 
-  // EXTENSION 1.1: Filtre optionnel par catégorie
-  if (categorieVol) {
-    query.categorieVol = categorieVol.toUpperCase();
+  // Note index
+  if (this.noteIndex) {
+    parts.push(this.noteIndex);
   }
 
-  return this.find(query);
+  // Nom compagnie si domestique
+  if (this.nomCompagnie && this.categorieVol === 'DOMESTIQUE') {
+    parts.push(this.nomCompagnie);
+  }
+
+  // Période si pas toute la saison
+  if (this.observations && this.observations.includes('Du ')) {
+    parts.push(this.observations);
+  }
+
+  // Night stop
+  if (this.nightStop) {
+    parts.push('NIGHT STOP');
+  }
+
+  return parts.join('; ') || this.observations || '';
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+// MÉTHODES STATIQUES
+// ══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Trouve tous les vols pour une saison, groupés par jour
+ */
+programmeVolSaisonnierSchema.statics.getVolsParJour = async function(saison) {
+  const joursNom = ['DIMANCHE', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI'];
+
+  const programmes = await this.find({ saison, actif: true, statut: 'ACTIF' })
+    .sort({ heureArrivee: 1, heureDepart: 1 });
+
+  const result = {};
+  joursNom.forEach((nom, index) => {
+    result[nom] = programmes.filter(p => p.joursSemaine.includes(index));
+  });
+
+  return result;
 };
 
 /**
- * Trouve les programmes valides pour une date donnée
- * EXTENSION 1.1: Ajout filtre optionnel categorieVol (rétrocompatible)
- * @param {Date} date - Date à vérifier
- * @param {String} categorieVol - Optionnel: PASSAGER, CARGO, DOMESTIQUE
+ * Trouve les vols applicables pour une date donnée
  */
-programmeVolSaisonnierSchema.statics.trouverProgrammesPourDate = function(date, categorieVol = null) {
+programmeVolSaisonnierSchema.statics.getVolsPourDate = async function(date, options = {}) {
+  const dateCheck = new Date(date);
+  const jour = dateCheck.getDay();
+
   const query = {
     actif: true,
     statut: 'ACTIF',
-    'recurrence.dateDebut': { $lte: date },
-    'recurrence.dateFin': { $gte: date }
+    joursSemaine: jour,
+    'periodeDefaut.dateDebut': { $lte: dateCheck },
+    'periodeDefaut.dateFin': { $gte: dateCheck }
   };
-
-  // EXTENSION 1.1: Filtre optionnel par catégorie
-  if (categorieVol) {
-    query.categorieVol = categorieVol.toUpperCase();
-  }
-
-  return this.find(query);
-};
-
-// ========== EXTENSION 1.1 - NOUVELLES MÉTHODES STATIQUES ==========
-
-/**
- * Trouve les programmes par route (provenance et/ou destination)
- * @param {Object} options - { provenance, destination, categorieVol }
- */
-programmeVolSaisonnierSchema.statics.trouverParRoute = function(options = {}) {
-  const query = {
-    actif: true,
-    statut: 'ACTIF'
-  };
-
-  if (options.provenance) {
-    query['route.provenance'] = options.provenance.toUpperCase();
-  }
-
-  if (options.destination) {
-    query['route.destination'] = options.destination.toUpperCase();
-  }
 
   if (options.categorieVol) {
     query.categorieVol = options.categorieVol.toUpperCase();
   }
 
-  return this.find(query);
+  if (options.codeCompagnie) {
+    query.codeCompagnie = options.codeCompagnie.toUpperCase();
+  }
+
+  return this.find(query).sort({ heureArrivee: 1, heureDepart: 1 });
 };
 
 /**
- * Calcule les statistiques par catégorie de vol
+ * Obtient les statistiques pour une saison
  */
-programmeVolSaisonnierSchema.statics.obtenirStatistiquesParCategorie = async function() {
-  return this.aggregate([
-    { $match: { actif: true, statut: 'ACTIF' } },
-    {
-      $group: {
-        _id: '$categorieVol',
-        count: { $sum: 1 },
-        compagnies: { $addToSet: '$compagnieAerienne' }
-      }
-    },
-    { $sort: { count: -1 } }
-  ]);
-};
-
-/**
- * Calcule les statistiques par jour de la semaine
- */
-programmeVolSaisonnierSchema.statics.obtenirStatistiquesParJour = async function() {
+programmeVolSaisonnierSchema.statics.getStatistiquesSaison = async function(saison) {
   const joursNom = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
-  const programmes = await this.find({ actif: true, statut: 'ACTIF' });
+  const programmes = await this.find({ saison, actif: true, statut: 'ACTIF' });
 
-  const stats = {};
-  joursNom.forEach((jour, index) => {
-    stats[jour] = { total: 0, passagers: 0, cargo: 0, domestiques: 0 };
+  const stats = {
+    totalVols: programmes.length,
+    parCategorie: {
+      INTERNATIONAL: 0,
+      REGIONAL: 0,
+      DOMESTIQUE: 0,
+      CARGO: 0
+    },
+    parJour: {},
+    compagnies: new Set()
+  };
+
+  joursNom.forEach((nom, index) => {
+    stats.parJour[nom] = {
+      total: 0,
+      international: 0,
+      regional: 0,
+      domestique: 0,
+      cargo: 0
+    };
   });
 
   programmes.forEach(prog => {
-    const jours = prog.recurrence.frequence === 'QUOTIDIEN'
-      ? [0, 1, 2, 3, 4, 5, 6]
-      : prog.recurrence.joursSemaine;
+    // Par catégorie
+    stats.parCategorie[prog.categorieVol]++;
 
-    jours.forEach(jour => {
+    // Compagnies
+    stats.compagnies.add(prog.codeCompagnie);
+
+    // Par jour
+    prog.joursSemaine.forEach(jour => {
       const nomJour = joursNom[jour];
-      stats[nomJour].total++;
-
-      const cat = (prog.categorieVol || 'PASSAGER').toUpperCase();
-      if (cat === 'PASSAGER') stats[nomJour].passagers++;
-      else if (cat === 'CARGO') stats[nomJour].cargo++;
-      else if (cat === 'DOMESTIQUE') stats[nomJour].domestiques++;
+      stats.parJour[nomJour].total++;
+      stats.parJour[nomJour][prog.categorieVol.toLowerCase()]++;
     });
   });
 
+  stats.compagnies = Array.from(stats.compagnies);
+
   return stats;
 };
+
+/**
+ * Parse un numéro de vol pour extraire le code compagnie
+ */
+programmeVolSaisonnierSchema.statics.parseCodeCompagnie = function(numeroVol) {
+  if (!numeroVol) return null;
+  const match = numeroVol.match(/^([A-Z]{2})/);
+  return match ? match[1] : null;
+};
+
+/**
+ * Parse une configuration sièges pour extraire les capacités
+ */
+programmeVolSaisonnierSchema.statics.parseConfigurationSieges = function(config) {
+  if (!config || config === 'TBN' || config === 'CARGO') {
+    return { business: null, economy: null, total: null };
+  }
+
+  // Format 16C138Y = 16 Business + 138 Economy
+  const matchBC = config.match(/^(\d+)C(\d+)Y$/);
+  if (matchBC) {
+    const business = parseInt(matchBC[1]);
+    const economy = parseInt(matchBC[2]);
+    return { business, economy, total: business + economy };
+  }
+
+  // Format JY159 = 159 Economy (tout éco)
+  const matchJY = config.match(/^JY(\d+)$/);
+  if (matchJY) {
+    const economy = parseInt(matchJY[1]);
+    return { business: 0, economy, total: economy };
+  }
+
+  return { business: null, economy: null, total: null };
+};
+
+/**
+ * Parse une route pour extraire le code et les escales
+ * Ex: "IST-NIM" -> { code: "IST", escales: ["NIM"] }
+ * Ex: "IST (DIRECT)" -> { code: "IST", escales: [], direct: true }
+ */
+programmeVolSaisonnierSchema.statics.parseRoute = function(route) {
+  if (!route || route === '-') {
+    return { code: null, escales: [], direct: false };
+  }
+
+  // Nettoyer
+  route = route.trim().toUpperCase();
+
+  // Vérifier (DIRECT)
+  const direct = route.includes('(DIRECT)');
+  route = route.replace('(DIRECT)', '').trim();
+
+  // Extraire vol retour entre parenthèses
+  let volRetour = null;
+  const matchRetour = route.match(/\(([A-Z]{2}\d+)\)/);
+  if (matchRetour) {
+    volRetour = matchRetour[1];
+    route = route.replace(matchRetour[0], '').trim();
+  }
+
+  // Séparer par tiret
+  const parts = route.split(/[-–]/).map(p => p.trim()).filter(p => p);
+
+  if (parts.length === 0) {
+    return { code: null, escales: [], direct, volRetour };
+  }
+
+  if (parts.length === 1) {
+    return { code: parts[0], escales: [], direct, volRetour };
+  }
+
+  // Premier = code, reste = escales
+  return {
+    code: parts[0],
+    escales: parts.slice(1),
+    direct,
+    volRetour
+  };
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+// PRE-SAVE HOOKS
+// ══════════════════════════════════════════════════════════════════════════
+
+programmeVolSaisonnierSchema.pre('save', function(next) {
+  // Auto-déduire le code compagnie si non fourni
+  if (!this.codeCompagnie && this.numeroVolAller) {
+    this.codeCompagnie = this.constructor.parseCodeCompagnie(this.numeroVolAller);
+  }
+
+  // Parser la configuration sièges
+  if (this.configurationSieges) {
+    const config = this.constructor.parseConfigurationSieges(this.configurationSieges);
+    this.capaciteBusiness = config.business;
+    this.capaciteEconomy = config.economy;
+    this.capaciteTotale = config.total;
+  }
+
+  // Détecter avion cargo
+  if (this.avionTypeDisplay) {
+    this.avionCargo = this.avionTypeDisplay.includes('F');
+  }
+
+  next();
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════════════════════════
 
 const ProgrammeVolSaisonnier = mongoose.model('ProgrammeVolSaisonnier', programmeVolSaisonnierSchema);
 

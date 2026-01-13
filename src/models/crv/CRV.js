@@ -101,7 +101,19 @@ const crvSchema = new mongoose.Schema({
     fonction: {
       type: String,
       required: true,
-      trim: true
+      enum: [
+        'CHEF_ESCALE',
+        'AGENT_TRAFIC',
+        'AGENT_PISTE',
+        'AGENT_PASSAGE',
+        'MANUTENTIONNAIRE',
+        'CHAUFFEUR',
+        'AGENT_SECURITE',
+        'TECHNICIEN',
+        'SUPERVISEUR',
+        'COORDINATEUR',
+        'AUTRE'
+      ]
     },
     matricule: {
       type: String,
@@ -137,7 +149,7 @@ const crvSchema = new mongoose.Schema({
         'CAMION_AVITAILLEMENT',
         'CAMION_VIDANGE',
         'CAMION_EAU',
-        'NACELLE_ELEVATRICE',
+        'ELEVATEUR',
         'CHARIOT_BAGAGES',
         'CONTENEUR_ULD',
         'DOLLY',

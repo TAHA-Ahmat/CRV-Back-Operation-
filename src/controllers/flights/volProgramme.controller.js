@@ -1,44 +1,64 @@
-import * as volService from '../../services/flights/vol.service.js';
+import * as volProgrammeService from '../../services/flights/volProgramme.service.js';
 
 /**
- * EXTENSION 2 - Contrôleur Vol Programme (Distinction programmé / hors programme)
+ * CONTRÔLEUR VOLS PROGRAMME
  *
- * Contrôleur NOUVEAU pour gérer les requêtes HTTP liées aux vols programmés et hors programme.
+ * Gère les requêtes HTTP pour les vols individuels dans un programme.
+ * Chaque vol appartient à un ProgrammeVol (conteneur).
  *
- * NON-RÉGRESSION: Ce contrôleur est NOUVEAU et n'affecte AUCUN contrôleur existant.
- * - vol.controller.js reste inchangé (creerVol, obtenirVol, listerVols, mettreAJourVol)
- * - Ce contrôleur ajoute UNIQUEMENT des handlers pour les nouvelles fonctionnalités
- *
- * Ce contrôleur gère les routes ADDITIONNELLES liées à l'extension 2.
+ * ENDPOINTS:
+ * - POST   /api/programmes-vol/:programmeId/vols        → Ajouter un vol
+ * - GET    /api/programmes-vol/:programmeId/vols        → Lister les vols
+ * - GET    /api/programmes-vol/:programmeId/vols/:id    → Obtenir un vol
+ * - PATCH  /api/programmes-vol/:programmeId/vols/:id    → Modifier un vol
+ * - DELETE /api/programmes-vol/:programmeId/vols/:id    → Supprimer un vol
+ * - GET    /api/programmes-vol/:programmeId/vols/jour/:jour → Vols par jour
+ * - GET    /api/programmes-vol/:programmeId/vols/recherche  → Rechercher
+ * - GET    /api/programmes-vol/:programmeId/vols/compagnie/:code → Par compagnie
+ * - POST   /api/programmes-vol/:programmeId/vols/import → Import bulk
+ * - PATCH  /api/programmes-vol/:programmeId/vols/reorganiser → Réorganiser
+ * - GET    /api/programmes-vol/:programmeId/export-pdf  → Export PDF data
  */
 
+// ══════════════════════════════════════════════════════════════════════════
+// CRUD DE BASE
+// ══════════════════════════════════════════════════════════════════════════
+
 /**
- * Lier un vol à un programme saisonnier
- * POST /api/vols/:id/lier-programme
+ * Ajouter un vol au programme
+ * POST /api/programmes-vol/:programmeId/vols
  */
-export const lierVolAuProgramme = async (req, res) => {
+export const ajouterVol = async (req, res) => {
   try {
-    const volId = req.params.id;
-    const { programmeVolId } = req.body;
     const userId = req.user._id;
+    const { programmeId } = req.params;
+    const donneesVol = req.body;
 
-    if (!programmeVolId) {
+    // Validation basique
+    if (!donneesVol.numeroVol) {
       return res.status(400).json({
         success: false,
-        message: 'L\'ID du programme vol saisonnier est requis'
+        message: 'Le numéro de vol est requis'
       });
     }
 
-    const vol = await volService.lierVolAuProgramme(volId, programmeVolId, userId);
+    if (!donneesVol.joursSemaine || donneesVol.joursSemaine.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Au moins un jour de la semaine est requis'
+      });
+    }
 
-    res.status(200).json({
+    const vol = await volProgrammeService.ajouterVol(programmeId, donneesVol, userId);
+
+    res.status(201).json({
       success: true,
-      message: 'Vol lié au programme saisonnier avec succès',
+      message: `Vol ${vol.numeroVol} ajouté au programme`,
       data: vol
     });
 
   } catch (error) {
-    console.error('Erreur dans lierVolAuProgramme:', error);
+    console.error('Erreur dans ajouterVol:', error);
 
     if (error.message.includes('non trouvé')) {
       return res.status(404).json({
@@ -47,7 +67,7 @@ export const lierVolAuProgramme = async (req, res) => {
       });
     }
 
-    if (error.message.includes('actif') || error.message.includes('correspond pas')) {
+    if (error.message.includes('Impossible') || error.message.includes('existe déjà')) {
       return res.status(400).json({
         success: false,
         message: error.message
@@ -56,110 +76,24 @@ export const lierVolAuProgramme = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: error.message || 'Erreur lors de la liaison du vol au programme'
+      message: error.message || 'Erreur lors de l\'ajout du vol'
     });
   }
 };
 
 /**
- * Marquer un vol comme hors programme
- * POST /api/vols/:id/marquer-hors-programme
+ * Obtenir les vols d'un programme
+ * GET /api/programmes-vol/:programmeId/vols
  */
-export const marquerVolHorsProgramme = async (req, res) => {
+export const obtenirVols = async (req, res) => {
   try {
-    const volId = req.params.id;
-    const { typeVolHorsProgramme, raison } = req.body;
-    const userId = req.user._id;
+    const { programmeId } = req.params;
+    const options = {
+      tri: req.query.tri || 'ordre',
+      ordre: req.query.ordre || 'asc'
+    };
 
-    if (!typeVolHorsProgramme) {
-      return res.status(400).json({
-        success: false,
-        message: 'Le type de vol hors programme est requis'
-      });
-    }
-
-    const vol = await volService.marquerVolHorsProgramme(volId, typeVolHorsProgramme, raison, userId);
-
-    res.status(200).json({
-      success: true,
-      message: 'Vol marqué comme hors programme avec succès',
-      data: vol
-    });
-
-  } catch (error) {
-    console.error('Erreur dans marquerVolHorsProgramme:', error);
-
-    if (error.message.includes('non trouvé')) {
-      return res.status(404).json({
-        success: false,
-        message: error.message
-      });
-    }
-
-    if (error.message.includes('invalide')) {
-      return res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Erreur lors du marquage du vol hors programme'
-    });
-  }
-};
-
-/**
- * Détacher un vol d'un programme saisonnier
- * POST /api/vols/:id/detacher-programme
- */
-export const detacherVolDuProgramme = async (req, res) => {
-  try {
-    const volId = req.params.id;
-    const userId = req.user._id;
-
-    const vol = await volService.detacherVolDuProgramme(volId, userId);
-
-    res.status(200).json({
-      success: true,
-      message: 'Vol détaché du programme saisonnier avec succès',
-      data: vol
-    });
-
-  } catch (error) {
-    console.error('Erreur dans detacherVolDuProgramme:', error);
-
-    if (error.message.includes('non trouvé')) {
-      return res.status(404).json({
-        success: false,
-        message: error.message
-      });
-    }
-
-    if (error.message.includes('pas lié')) {
-      return res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Erreur lors du détachement du vol du programme'
-    });
-  }
-};
-
-/**
- * Obtenir tous les vols d'un programme saisonnier
- * GET /api/vols/programme/:programmeVolId
- */
-export const obtenirVolsDuProgramme = async (req, res) => {
-  try {
-    const programmeVolId = req.params.programmeVolId;
-
-    const vols = await volService.obtenirVolsDuProgramme(programmeVolId);
+    const vols = await volProgrammeService.obtenirVolsDuProgramme(programmeId, options);
 
     res.status(200).json({
       success: true,
@@ -168,7 +102,7 @@ export const obtenirVolsDuProgramme = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Erreur dans obtenirVolsDuProgramme:', error);
+    console.error('Erreur dans obtenirVols:', error);
 
     if (error.message.includes('non trouvé')) {
       return res.status(404).json({
@@ -179,101 +113,157 @@ export const obtenirVolsDuProgramme = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: error.message || 'Erreur lors de la récupération des vols du programme'
+      message: error.message || 'Erreur lors de la récupération des vols'
     });
   }
 };
 
 /**
- * Obtenir tous les vols hors programme avec filtres
- * GET /api/vols/hors-programme
+ * Obtenir un vol par ID
+ * GET /api/programmes-vol/:programmeId/vols/:id
  */
-export const obtenirVolsHorsProgramme = async (req, res) => {
+export const obtenirVolParId = async (req, res) => {
   try {
-    const filtres = {
-      typeVolHorsProgramme: req.query.typeVolHorsProgramme,
-      compagnieAerienne: req.query.compagnieAerienne,
-      dateDebut: req.query.dateDebut,
-      dateFin: req.query.dateFin
-    };
-
-    // Nettoyer les filtres undefined
-    Object.keys(filtres).forEach(key => {
-      if (filtres[key] === undefined) {
-        delete filtres[key];
-      }
-    });
-
-    const vols = await volService.obtenirVolsHorsProgramme(filtres);
+    const { programmeId, id } = req.params;
+    const vol = await volProgrammeService.obtenirVolParId(programmeId, id);
 
     res.status(200).json({
       success: true,
+      data: vol
+    });
+
+  } catch (error) {
+    console.error('Erreur dans obtenirVolParId:', error);
+
+    if (error.message.includes('non trouvé')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la récupération du vol'
+    });
+  }
+};
+
+/**
+ * Modifier un vol
+ * PATCH /api/programmes-vol/:programmeId/vols/:id
+ */
+export const modifierVol = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { programmeId, id } = req.params;
+    const modifications = req.body;
+
+    const vol = await volProgrammeService.modifierVol(programmeId, id, modifications, userId);
+
+    res.status(200).json({
+      success: true,
+      message: `Vol ${vol.numeroVol} mis à jour`,
+      data: vol
+    });
+
+  } catch (error) {
+    console.error('Erreur dans modifierVol:', error);
+
+    if (error.message.includes('non trouvé')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    if (error.message.includes('Impossible')) {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la modification du vol'
+    });
+  }
+};
+
+/**
+ * Supprimer un vol
+ * DELETE /api/programmes-vol/:programmeId/vols/:id
+ */
+export const supprimerVol = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { programmeId, id } = req.params;
+
+    const resultat = await volProgrammeService.supprimerVol(programmeId, id, userId);
+
+    res.status(200).json({
+      success: true,
+      message: resultat.message
+    });
+
+  } catch (error) {
+    console.error('Erreur dans supprimerVol:', error);
+
+    if (error.message.includes('non trouvé')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    if (error.message.includes('Impossible')) {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la suppression du vol'
+    });
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+// FILTRES ET RECHERCHE
+// ══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Obtenir les vols d'un jour spécifique
+ * GET /api/programmes-vol/:programmeId/vols/jour/:jour
+ */
+export const obtenirVolsParJour = async (req, res) => {
+  try {
+    const { programmeId, jour } = req.params;
+    const jourNum = parseInt(jour);
+
+    if (isNaN(jourNum) || jourNum < 0 || jourNum > 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Le jour doit être un nombre entre 0 (dimanche) et 6 (samedi)'
+      });
+    }
+
+    const vols = await volProgrammeService.obtenirVolsParJour(programmeId, jourNum);
+
+    const joursNoms = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+
+    res.status(200).json({
+      success: true,
+      jour: joursNoms[jourNum],
       count: vols.length,
       data: vols
     });
 
   } catch (error) {
-    console.error('Erreur dans obtenirVolsHorsProgramme:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Erreur lors de la récupération des vols hors programme'
-    });
-  }
-};
-
-/**
- * Obtenir les statistiques vols programmés vs hors programme
- * GET /api/vols/statistiques/programmes
- */
-export const obtenirStatistiquesVolsProgrammes = async (req, res) => {
-  try {
-    const filtres = {
-      compagnieAerienne: req.query.compagnieAerienne,
-      dateDebut: req.query.dateDebut,
-      dateFin: req.query.dateFin
-    };
-
-    // Nettoyer les filtres undefined
-    Object.keys(filtres).forEach(key => {
-      if (filtres[key] === undefined) {
-        delete filtres[key];
-      }
-    });
-
-    const statistiques = await volService.obtenirStatistiquesVolsProgrammes(filtres);
-
-    res.status(200).json({
-      success: true,
-      data: statistiques
-    });
-
-  } catch (error) {
-    console.error('Erreur dans obtenirStatistiquesVolsProgrammes:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Erreur lors du calcul des statistiques'
-    });
-  }
-};
-
-/**
- * Suggérer des programmes compatibles pour un vol
- * GET /api/vols/:id/suggerer-programmes
- */
-export const suggererProgrammesPourVol = async (req, res) => {
-  try {
-    const volId = req.params.id;
-
-    const suggestions = await volService.suggererProgrammesPourVol(volId);
-
-    res.status(200).json({
-      success: true,
-      count: suggestions.length,
-      data: suggestions
-    });
-
-  } catch (error) {
-    console.error('Erreur dans suggererProgrammesPourVol:', error);
+    console.error('Erreur dans obtenirVolsParJour:', error);
 
     if (error.message.includes('non trouvé')) {
       return res.status(404).json({
@@ -284,7 +274,224 @@ export const suggererProgrammesPourVol = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: error.message || 'Erreur lors de la suggestion de programmes'
+      message: error.message || 'Erreur lors de la récupération des vols par jour'
+    });
+  }
+};
+
+/**
+ * Rechercher des vols par numéro
+ * GET /api/programmes-vol/:programmeId/vols/recherche
+ */
+export const rechercherVols = async (req, res) => {
+  try {
+    const { programmeId } = req.params;
+    const { q } = req.query;
+
+    if (!q || q.length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: 'La recherche doit contenir au moins 2 caractères'
+      });
+    }
+
+    const vols = await volProgrammeService.rechercherParNumero(programmeId, q);
+
+    res.status(200).json({
+      success: true,
+      recherche: q,
+      count: vols.length,
+      data: vols
+    });
+
+  } catch (error) {
+    console.error('Erreur dans rechercherVols:', error);
+
+    if (error.message.includes('non trouvé')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la recherche'
+    });
+  }
+};
+
+/**
+ * Obtenir les vols d'une compagnie
+ * GET /api/programmes-vol/:programmeId/vols/compagnie/:code
+ */
+export const obtenirVolsParCompagnie = async (req, res) => {
+  try {
+    const { programmeId, code } = req.params;
+
+    const vols = await volProgrammeService.obtenirVolsParCompagnie(programmeId, code.toUpperCase());
+
+    res.status(200).json({
+      success: true,
+      compagnie: code.toUpperCase(),
+      count: vols.length,
+      data: vols
+    });
+
+  } catch (error) {
+    console.error('Erreur dans obtenirVolsParCompagnie:', error);
+
+    if (error.message.includes('non trouvé')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la récupération des vols par compagnie'
+    });
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+// OPÉRATIONS BULK
+// ══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Importer plusieurs vols
+ * POST /api/programmes-vol/:programmeId/vols/import
+ */
+export const importerVols = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { programmeId } = req.params;
+    const { vols } = req.body;
+
+    if (!vols || !Array.isArray(vols) || vols.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Un tableau de vols est requis'
+      });
+    }
+
+    const resultat = await volProgrammeService.importerVols(programmeId, vols, userId);
+
+    res.status(201).json({
+      success: true,
+      message: `${resultat.volsCrees} vol(s) importé(s) avec succès`,
+      data: resultat
+    });
+
+  } catch (error) {
+    console.error('Erreur dans importerVols:', error);
+
+    if (error.message.includes('non trouvé')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    if (error.message.includes('Impossible')) {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de l\'import des vols'
+    });
+  }
+};
+
+/**
+ * Réorganiser l'ordre des vols
+ * PATCH /api/programmes-vol/:programmeId/vols/reorganiser
+ */
+export const reorganiserVols = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { programmeId } = req.params;
+    const { ordres } = req.body;
+
+    if (!ordres || !Array.isArray(ordres)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Un tableau d\'ordres est requis: [{volId, ordre}]'
+      });
+    }
+
+    const resultat = await volProgrammeService.reorganiserVols(programmeId, ordres, userId);
+
+    res.status(200).json({
+      success: true,
+      message: `${resultat.modifies} vol(s) réorganisé(s)`,
+      data: resultat
+    });
+
+  } catch (error) {
+    console.error('Erreur dans reorganiserVols:', error);
+
+    if (error.message.includes('non trouvé')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    if (error.message.includes('Impossible')) {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la réorganisation'
+    });
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Obtenir les données formatées pour export PDF
+ * GET /api/programmes-vol/:programmeId/export-pdf
+ */
+export const obtenirDonneesPDF = async (req, res) => {
+  try {
+    const { programmeId } = req.params;
+    const options = {
+      format: req.query.format || 'hebdomadaire'
+    };
+
+    const donnees = await volProgrammeService.obtenirDonneesPDF(programmeId, options);
+
+    res.status(200).json({
+      success: true,
+      data: donnees
+    });
+
+  } catch (error) {
+    console.error('Erreur dans obtenirDonneesPDF:', error);
+
+    if (error.message.includes('non trouvé')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la génération des données PDF'
     });
   }
 };

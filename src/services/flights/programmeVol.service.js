@@ -1,144 +1,110 @@
-import ProgrammeVolSaisonnier from '../../models/flights/ProgrammeVolSaisonnier.js';
+import ProgrammeVol from '../../models/flights/ProgrammeVol.js';
+import VolProgramme from '../../models/flights/VolProgramme.js';
 import UserActivityLog from '../../models/security/UserActivityLog.js';
+import '../../models/security/Personne.js';
 
 /**
- * EXTENSION 1 - Service Programme vol saisonnier
+ * SERVICE PROGRAMME VOL (Conteneur)
  *
- * Service NOUVEAU et INDÉPENDANT pour gérer les programmes de vols récurrents.
+ * Gère les opérations CRUD sur les programmes de vol.
+ * Un programme est un conteneur qui regroupe plusieurs vols (voir volProgramme.service.js).
  *
- * NON-RÉGRESSION: Ce service n'utilise AUCUN service existant et ne modifie AUCUNE logique.
- * - crv.service.js reste inchangé
- * - calcul.service.js reste inchangé
- * - vol.service.js (si existe) reste inchangé
- * - Aucun appel aux services existants
- *
- * Ce service est 100% AUTONOME et OPTIONNEL.
- *
- * EXTENSION 1.1 (2026-01-12) - Enrichissement standard programme de vol
- * NON-RÉGRESSION: Nouveaux filtres optionnels, signatures existantes préservées
- * - Ajout filtres: categorieVol, provenance, destination, nightStop
- * - Nouvelles fonctions: obtenirStatistiques, trouverParRoute
+ * WORKFLOW:
+ * 1. creerProgramme() → Créer un programme vide (BROUILLON)
+ * 2. [Ajouter des vols via volProgramme.service.js]
+ * 3. validerProgramme() → Passer en VALIDE
+ * 4. activerProgramme() → Passer en ACTIF
+ * 5. suspendreProgramme() → Passer en SUSPENDU (si besoin)
  */
 
+// ══════════════════════════════════════════════════════════════════════════
+// CRUD DE BASE
+// ══════════════════════════════════════════════════════════════════════════
+
 /**
- * Crée un nouveau programme vol saisonnier
- * @param {Object} programmeData - Données du programme
+ * Crée un nouveau programme de vol (conteneur vide)
+ * @param {Object} data - { nom, dateDebut, dateFin, edition?, description? }
  * @param {String} userId - ID de l'utilisateur créateur
  * @returns {Object} Programme créé
  */
-export const creerProgrammeVol = async (programmeData, userId) => {
+export const creerProgramme = async (data, userId) => {
   try {
     // Validation des dates
-    const dateDebut = new Date(programmeData.recurrence.dateDebut);
-    const dateFin = new Date(programmeData.recurrence.dateFin);
+    const dateDebut = new Date(data.dateDebut);
+    const dateFin = new Date(data.dateFin);
 
     if (dateFin <= dateDebut) {
       throw new Error('La date de fin doit être postérieure à la date de début');
     }
 
-    // Validation de la fréquence hebdomadaire
-    if (programmeData.recurrence.frequence === 'HEBDOMADAIRE') {
-      if (!programmeData.recurrence.joursSemaine || programmeData.recurrence.joursSemaine.length === 0) {
-        throw new Error('Pour une fréquence hebdomadaire, au moins un jour de la semaine doit être spécifié');
-      }
+    // Vérifier que le nom n'existe pas déjà
+    const existant = await ProgrammeVol.findOne({ nom: data.nom.toUpperCase() });
+    if (existant) {
+      throw new Error(`Un programme avec le nom "${data.nom}" existe déjà`);
     }
 
     // Créer le programme
-    const programme = new ProgrammeVolSaisonnier({
-      ...programmeData,
-      createdBy: userId,
+    const programme = new ProgrammeVol({
+      nom: data.nom,
+      edition: data.edition || null,
+      description: data.description || null,
+      dateDebut: dateDebut,
+      dateFin: dateFin,
       statut: 'BROUILLON',
       actif: false,
-      validation: {
-        valide: false,
-        validePar: null,
-        dateValidation: null
-      }
+      nombreVols: 0,
+      compagnies: [],
+      createdBy: userId
     });
 
     await programme.save();
 
-    // Log de l'activité (traçabilité)
+    // Log de l'activité
     await UserActivityLog.create({
       user: userId,
       action: 'CREATE',
-      targetModel: 'ProgrammeVolSaisonnier',
+      targetModel: 'ProgrammeVol',
       targetId: programme._id,
       changes: {
-        nomProgramme: programme.nomProgramme,
-        compagnieAerienne: programme.compagnieAerienne,
-        numeroVolBase: programme.detailsVol.numeroVolBase
+        nom: programme.nom,
+        dateDebut: programme.dateDebut,
+        dateFin: programme.dateFin
       },
       metadata: {
-        description: `Création du programme vol saisonnier "${programme.nomProgramme}"`
+        description: `Création du programme "${programme.nom}"`
       }
     });
 
     return programme;
 
   } catch (error) {
-    console.error('Erreur lors de la création du programme vol:', error);
+    console.error('Erreur lors de la création du programme:', error);
     throw error;
   }
 };
 
 /**
- * Récupère tous les programmes vol avec filtres optionnels
- * EXTENSION 1.1: Ajout filtres categorieVol, provenance, destination, nightStop (rétrocompatible)
- * @param {Object} filtres - Filtres optionnels (compagnie, statut, actif, categorieVol, provenance, destination, nightStop)
+ * Récupère tous les programmes avec filtres optionnels
+ * @param {Object} filtres - { statut?, actif?, nom? }
  * @returns {Array} Liste des programmes
  */
-export const obtenirProgrammesVol = async (filtres = {}) => {
+export const obtenirProgrammes = async (filtres = {}) => {
   try {
     const query = {};
 
-    if (filtres.compagnieAerienne) {
-      query.compagnieAerienne = filtres.compagnieAerienne.toUpperCase();
-    }
-
     if (filtres.statut) {
-      query.statut = filtres.statut;
+      query.statut = filtres.statut.toUpperCase();
     }
 
     if (filtres.actif !== undefined) {
       query.actif = filtres.actif === 'true' || filtres.actif === true;
     }
 
-    // EXTENSION 1.1: Nouveaux filtres optionnels
-    if (filtres.categorieVol) {
-      query.categorieVol = filtres.categorieVol.toUpperCase();
+    if (filtres.nom) {
+      query.nom = { $regex: filtres.nom, $options: 'i' };
     }
 
-    if (filtres.provenance) {
-      query['route.provenance'] = filtres.provenance.toUpperCase();
-    }
-
-    if (filtres.destination) {
-      query['route.destination'] = filtres.destination.toUpperCase();
-    }
-
-    if (filtres.nightStop !== undefined) {
-      query.nightStop = filtres.nightStop === 'true' || filtres.nightStop === true;
-    }
-
-    if (filtres.codeCompagnie) {
-      query.codeCompagnie = filtres.codeCompagnie.toUpperCase();
-    }
-
-    // Filtre par période si spécifié
-    if (filtres.dateDebut || filtres.dateFin) {
-      query['recurrence.dateDebut'] = {};
-      query['recurrence.dateFin'] = {};
-
-      if (filtres.dateDebut) {
-        query['recurrence.dateDebut'].$gte = new Date(filtres.dateDebut);
-      }
-      if (filtres.dateFin) {
-        query['recurrence.dateFin'].$lte = new Date(filtres.dateFin);
-      }
-    }
-
-    const programmes = await ProgrammeVolSaisonnier.find(query)
+    const programmes = await ProgrammeVol.find(query)
       .populate('createdBy', 'nom prenom email')
       .populate('updatedBy', 'nom prenom email')
       .populate('validation.validePar', 'nom prenom email')
@@ -147,183 +113,223 @@ export const obtenirProgrammesVol = async (filtres = {}) => {
     return programmes;
 
   } catch (error) {
-    console.error('Erreur lors de la récupération des programmes vol:', error);
+    console.error('Erreur lors de la récupération des programmes:', error);
     throw error;
   }
 };
 
 /**
- * Récupère un programme vol par son ID
+ * Récupère un programme par son ID
  * @param {String} programmeId - ID du programme
  * @returns {Object} Programme trouvé
  */
-export const obtenirProgrammeVolParId = async (programmeId) => {
+export const obtenirProgrammeParId = async (programmeId) => {
   try {
-    const programme = await ProgrammeVolSaisonnier.findById(programmeId)
+    const programme = await ProgrammeVol.findById(programmeId)
       .populate('createdBy', 'nom prenom email')
       .populate('updatedBy', 'nom prenom email')
       .populate('validation.validePar', 'nom prenom email');
 
     if (!programme) {
-      throw new Error('Programme vol saisonnier non trouvé');
+      throw new Error('Programme non trouvé');
     }
 
     return programme;
 
   } catch (error) {
-    console.error('Erreur lors de la récupération du programme vol:', error);
+    console.error('Erreur lors de la récupération du programme:', error);
     throw error;
   }
 };
 
 /**
- * Met à jour un programme vol saisonnier
+ * Met à jour un programme
  * @param {String} programmeId - ID du programme
- * @param {Object} updateData - Données à mettre à jour
- * @param {String} userId - ID de l'utilisateur modificateur
+ * @param {Object} data - Données à mettre à jour
+ * @param {String} userId - ID de l'utilisateur
  * @returns {Object} Programme mis à jour
  */
-export const mettreAJourProgrammeVol = async (programmeId, updateData, userId) => {
+export const mettreAJourProgramme = async (programmeId, data, userId) => {
   try {
-    const programme = await ProgrammeVolSaisonnier.findById(programmeId);
+    const programme = await ProgrammeVol.findById(programmeId);
 
     if (!programme) {
-      throw new Error('Programme vol saisonnier non trouvé');
+      throw new Error('Programme non trouvé');
     }
 
-    // Empêcher la modification si le programme est validé et actif
-    if (programme.validation.valide && programme.actif) {
-      throw new Error('Impossible de modifier un programme validé et actif. Suspendez-le d\'abord.');
-    }
+    // Programme toujours modifiable (même actif)
 
-    // Sauvegarder l'ancien état pour le log
+    // Sauvegarder l'ancien état
     const ancienEtat = {
-      nomProgramme: programme.nomProgramme,
-      statut: programme.statut,
-      actif: programme.actif
+      nom: programme.nom,
+      dateDebut: programme.dateDebut,
+      dateFin: programme.dateFin,
+      edition: programme.edition
     };
 
-    // Appliquer les modifications
-    Object.keys(updateData).forEach(key => {
-      if (key !== 'createdBy' && key !== 'validation') {
-        if (key.includes('.')) {
-          // Gestion des nested fields (ex: "recurrence.dateDebut")
-          const keys = key.split('.');
-          let obj = programme;
-          for (let i = 0; i < keys.length - 1; i++) {
-            obj = obj[keys[i]];
-          }
-          obj[keys[keys.length - 1]] = updateData[key];
+    // Champs modifiables
+    const champsModifiables = ['nom', 'edition', 'description', 'dateDebut', 'dateFin', 'remarques'];
+
+    champsModifiables.forEach(champ => {
+      if (data[champ] !== undefined) {
+        if (champ === 'dateDebut' || champ === 'dateFin') {
+          programme[champ] = new Date(data[champ]);
         } else {
-          programme[key] = updateData[key];
+          programme[champ] = data[champ];
         }
       }
     });
+
+    // Validation des dates si modifiées
+    if (programme.dateFin <= programme.dateDebut) {
+      throw new Error('La date de fin doit être postérieure à la date de début');
+    }
 
     programme.updatedBy = userId;
     await programme.save();
 
-    // Log de l'activité
+    // Log
     await UserActivityLog.create({
       user: userId,
       action: 'UPDATE',
-      targetModel: 'ProgrammeVolSaisonnier',
+      targetModel: 'ProgrammeVol',
       targetId: programme._id,
-      changes: {
-        avant: ancienEtat,
-        apres: {
-          nomProgramme: programme.nomProgramme,
-          statut: programme.statut,
-          actif: programme.actif
-        }
-      },
+      changes: { avant: ancienEtat, apres: data },
       metadata: {
-        description: `Modification du programme vol saisonnier "${programme.nomProgramme}"`
+        description: `Modification du programme "${programme.nom}"`
       }
     });
 
     return programme;
 
   } catch (error) {
-    console.error('Erreur lors de la mise à jour du programme vol:', error);
+    console.error('Erreur lors de la mise à jour du programme:', error);
     throw error;
   }
 };
 
 /**
- * Valide un programme vol saisonnier
+ * Supprime un programme et tous ses vols
+ * @param {String} programmeId - ID du programme
+ * @param {String} userId - ID de l'utilisateur
+ * @returns {Object} Résultat
+ */
+export const supprimerProgramme = async (programmeId, userId) => {
+  try {
+    const programme = await ProgrammeVol.findById(programmeId);
+
+    if (!programme) {
+      throw new Error('Programme non trouvé');
+    }
+
+    // Programme supprimable même si actif
+
+    const nomProgramme = programme.nom;
+    const nombreVols = programme.nombreVols;
+
+    // Supprimer tous les vols du programme
+    await VolProgramme.deleteMany({ programme: programmeId });
+
+    // Supprimer le programme
+    await ProgrammeVol.findByIdAndDelete(programmeId);
+
+    // Log
+    await UserActivityLog.create({
+      user: userId,
+      action: 'DELETE',
+      targetModel: 'ProgrammeVol',
+      targetId: programmeId,
+      changes: {
+        nom: nomProgramme,
+        volsSupprimes: nombreVols
+      },
+      metadata: {
+        description: `Suppression du programme "${nomProgramme}" et ses ${nombreVols} vols`
+      }
+    });
+
+    return {
+      message: `Programme "${nomProgramme}" supprimé avec succès`,
+      volsSupprimes: nombreVols
+    };
+
+  } catch (error) {
+    console.error('Erreur lors de la suppression du programme:', error);
+    throw error;
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+// WORKFLOW: VALIDATION / ACTIVATION / SUSPENSION
+// ══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Valide un programme
  * @param {String} programmeId - ID du programme
  * @param {String} userId - ID de l'utilisateur validateur
  * @returns {Object} Programme validé
  */
-export const validerProgrammeVol = async (programmeId, userId) => {
+export const validerProgramme = async (programmeId, userId) => {
   try {
-    const programme = await ProgrammeVolSaisonnier.findById(programmeId);
+    const programme = await ProgrammeVol.findById(programmeId);
 
     if (!programme) {
-      throw new Error('Programme vol saisonnier non trouvé');
+      throw new Error('Programme non trouvé');
     }
 
     if (programme.validation.valide) {
       throw new Error('Le programme est déjà validé');
     }
 
-    // Validation métier
-    if (!programme.nomProgramme || !programme.compagnieAerienne) {
-      throw new Error('Les informations du programme sont incomplètes');
+    if (programme.statut !== 'BROUILLON') {
+      throw new Error('Seul un programme en BROUILLON peut être validé');
     }
 
-    if (!programme.recurrence.dateDebut || !programme.recurrence.dateFin) {
-      throw new Error('La période de validité doit être définie');
+    if (programme.nombreVols === 0) {
+      throw new Error('Le programme doit contenir au moins un vol pour être validé');
     }
 
-    if (!programme.detailsVol.numeroVolBase) {
-      throw new Error('Le numéro de vol de base doit être défini');
-    }
-
-    // Valider le programme
+    // Valider
     programme.validation.valide = true;
     programme.validation.validePar = userId;
     programme.validation.dateValidation = new Date();
     programme.statut = 'VALIDE';
+    programme.updatedBy = userId;
 
     await programme.save();
 
-    // Log de l'activité
+    // Log
     await UserActivityLog.create({
       user: userId,
       action: 'VALIDATE',
-      targetModel: 'ProgrammeVolSaisonnier',
+      targetModel: 'ProgrammeVol',
       targetId: programme._id,
-      changes: {
-        valide: true,
-        statut: 'VALIDE'
-      },
+      changes: { statut: 'VALIDE', nombreVols: programme.nombreVols },
       metadata: {
-        description: `Validation du programme vol saisonnier "${programme.nomProgramme}"`
+        description: `Validation du programme "${programme.nom}" (${programme.nombreVols} vols)`
       }
     });
 
     return programme;
 
   } catch (error) {
-    console.error('Erreur lors de la validation du programme vol:', error);
+    console.error('Erreur lors de la validation du programme:', error);
     throw error;
   }
 };
 
 /**
- * Active un programme vol saisonnier validé
+ * Active un programme validé
  * @param {String} programmeId - ID du programme
  * @param {String} userId - ID de l'utilisateur
  * @returns {Object} Programme activé
  */
-export const activerProgrammeVol = async (programmeId, userId) => {
+export const activerProgramme = async (programmeId, userId) => {
   try {
-    const programme = await ProgrammeVolSaisonnier.findById(programmeId);
+    const programme = await ProgrammeVol.findById(programmeId);
 
     if (!programme) {
-      throw new Error('Programme vol saisonnier non trouvé');
+      throw new Error('Programme non trouvé');
     }
 
     if (!programme.validation.valide) {
@@ -334,54 +340,56 @@ export const activerProgrammeVol = async (programmeId, userId) => {
       throw new Error('Le programme est déjà actif');
     }
 
-    // Vérifier que la période est valide
-    const maintenant = new Date();
-    if (programme.recurrence.dateFin < maintenant) {
-      throw new Error('Impossible d\'activer un programme dont la période est déjà terminée');
+    if (programme.dateFin < new Date()) {
+      throw new Error('Impossible d\'activer un programme dont la période est terminée');
     }
 
+    // Désactiver les autres programmes actifs (un seul actif à la fois)
+    await ProgrammeVol.updateMany(
+      { actif: true, _id: { $ne: programmeId } },
+      { actif: false, statut: 'SUSPENDU' }
+    );
+
+    // Activer
     programme.actif = true;
     programme.statut = 'ACTIF';
     programme.updatedBy = userId;
 
     await programme.save();
 
-    // Log de l'activité
+    // Log
     await UserActivityLog.create({
       user: userId,
       action: 'ACTIVATE',
-      targetModel: 'ProgrammeVolSaisonnier',
+      targetModel: 'ProgrammeVol',
       targetId: programme._id,
-      changes: {
-        actif: true,
-        statut: 'ACTIF'
-      },
+      changes: { actif: true, statut: 'ACTIF' },
       metadata: {
-        description: `Activation du programme vol saisonnier "${programme.nomProgramme}"`
+        description: `Activation du programme "${programme.nom}"`
       }
     });
 
     return programme;
 
   } catch (error) {
-    console.error('Erreur lors de l\'activation du programme vol:', error);
+    console.error('Erreur lors de l\'activation du programme:', error);
     throw error;
   }
 };
 
 /**
- * Suspend un programme vol saisonnier actif
+ * Suspend un programme actif
  * @param {String} programmeId - ID du programme
  * @param {String} userId - ID de l'utilisateur
  * @param {String} raison - Raison de la suspension (optionnel)
  * @returns {Object} Programme suspendu
  */
-export const suspendreProgrammeVol = async (programmeId, userId, raison = null) => {
+export const suspendreProgramme = async (programmeId, userId, raison = null) => {
   try {
-    const programme = await ProgrammeVolSaisonnier.findById(programmeId);
+    const programme = await ProgrammeVol.findById(programmeId);
 
     if (!programme) {
-      throw new Error('Programme vol saisonnier non trouvé');
+      throw new Error('Programme non trouvé');
     }
 
     if (!programme.actif) {
@@ -394,254 +402,215 @@ export const suspendreProgrammeVol = async (programmeId, userId, raison = null) 
 
     if (raison) {
       programme.remarques = (programme.remarques ? programme.remarques + '\n' : '') +
-                            `[SUSPENSION ${new Date().toISOString()}] ${raison}`;
+        `[SUSPENSION ${new Date().toISOString()}] ${raison}`;
     }
 
     await programme.save();
 
-    // Log de l'activité
+    // Log
     await UserActivityLog.create({
       user: userId,
       action: 'SUSPEND',
-      targetModel: 'ProgrammeVolSaisonnier',
+      targetModel: 'ProgrammeVol',
       targetId: programme._id,
-      changes: {
-        actif: false,
-        statut: 'SUSPENDU',
-        raison: raison
-      },
+      changes: { actif: false, statut: 'SUSPENDU', raison },
       metadata: {
-        description: `Suspension du programme vol saisonnier "${programme.nomProgramme}"`
+        description: `Suspension du programme "${programme.nom}"${raison ? ': ' + raison : ''}`
       }
     });
 
     return programme;
 
   } catch (error) {
-    console.error('Erreur lors de la suspension du programme vol:', error);
+    console.error('Erreur lors de la suspension du programme:', error);
     throw error;
   }
 };
 
+// ══════════════════════════════════════════════════════════════════════════
+// STATISTIQUES ET UTILITAIRES
+// ══════════════════════════════════════════════════════════════════════════
+
 /**
- * Trouve les programmes actifs pour une date et compagnie données
- * EXTENSION 1.1: Ajout filtre optionnel categorieVol (rétrocompatible)
- * @param {Date} date - Date à vérifier
- * @param {String} compagnieAerienne - Code compagnie (optionnel)
- * @param {String} categorieVol - PASSAGER, CARGO, DOMESTIQUE (optionnel)
- * @returns {Array} Programmes applicables
+ * Obtient le programme actif actuel
+ * @returns {Object|null} Programme actif ou null
  */
-export const trouverProgrammesApplicables = async (date, compagnieAerienne = null, categorieVol = null) => {
+export const obtenirProgrammeActif = async () => {
   try {
-    const query = {
-      actif: true,
-      statut: 'ACTIF',
-      'recurrence.dateDebut': { $lte: date },
-      'recurrence.dateFin': { $gte: date }
-    };
-
-    if (compagnieAerienne) {
-      query.compagnieAerienne = compagnieAerienne.toUpperCase();
-    }
-
-    // EXTENSION 1.1: Filtre optionnel par catégorie
-    if (categorieVol) {
-      query.categorieVol = categorieVol.toUpperCase();
-    }
-
-    const programmes = await ProgrammeVolSaisonnier.find(query);
-
-    // Filtrer par jour de la semaine
-    const jour = new Date(date).getDay();
-    const programmesApplicables = programmes.filter(prog => {
-      if (prog.recurrence.frequence === 'QUOTIDIEN') return true;
-      if (prog.recurrence.frequence === 'HEBDOMADAIRE') {
-        return prog.recurrence.joursSemaine.includes(jour);
-      }
-      return false;
-    });
-
-    return programmesApplicables;
-
+    return await ProgrammeVol.getProgrammeActif();
   } catch (error) {
-    console.error('Erreur lors de la recherche des programmes applicables:', error);
+    console.error('Erreur lors de la récupération du programme actif:', error);
     throw error;
   }
 };
 
 /**
- * Importe plusieurs programmes depuis un tableau de données
- * @param {Array} programmesData - Tableau de données de programmes
- * @param {String} userId - ID de l'utilisateur importateur
- * @returns {Object} Résultat de l'import
- */
-export const importerProgrammesVol = async (programmesData, userId) => {
-  try {
-    const resultats = {
-      succes: [],
-      erreurs: []
-    };
-
-    for (const programmeData of programmesData) {
-      try {
-        const programme = await creerProgrammeVol(programmeData, userId);
-        resultats.succes.push({
-          nomProgramme: programme.nomProgramme,
-          id: programme._id
-        });
-      } catch (error) {
-        resultats.erreurs.push({
-          nomProgramme: programmeData.nomProgramme || 'Inconnu',
-          erreur: error.message
-        });
-      }
-    }
-
-    // Log de l'activité d'import
-    await UserActivityLog.create({
-      user: userId,
-      action: 'IMPORT',
-      targetModel: 'ProgrammeVolSaisonnier',
-      targetId: null,
-      changes: {
-        total: programmesData.length,
-        succes: resultats.succes.length,
-        erreurs: resultats.erreurs.length
-      },
-      metadata: {
-        description: `Import de ${programmesData.length} programmes vol saisonniers`
-      }
-    });
-
-    return resultats;
-
-  } catch (error) {
-    console.error('Erreur lors de l\'import des programmes vol:', error);
-    throw error;
-  }
-};
-
-/**
- * Supprime un programme vol saisonnier (soft delete possible)
+ * Obtient les statistiques d'un programme
  * @param {String} programmeId - ID du programme
- * @param {String} userId - ID de l'utilisateur
- * @returns {Object} Résultat de la suppression
+ * @returns {Object} Statistiques
  */
-export const supprimerProgrammeVol = async (programmeId, userId) => {
+export const obtenirStatistiques = async (programmeId) => {
   try {
-    const programme = await ProgrammeVolSaisonnier.findById(programmeId);
+    const programme = await ProgrammeVol.findById(programmeId);
 
     if (!programme) {
-      throw new Error('Programme vol saisonnier non trouvé');
+      throw new Error('Programme non trouvé');
     }
 
-    // Empêcher la suppression si le programme est actif
-    if (programme.actif) {
-      throw new Error('Impossible de supprimer un programme actif. Suspendez-le d\'abord.');
+    // Statistiques par catégorie
+    const parCategorie = await VolProgramme.getStatistiquesParCategorie(programmeId);
+
+    // Statistiques par jour
+    const joursNom = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const parJour = {};
+
+    for (let i = 0; i < 7; i++) {
+      const vols = await VolProgramme.getVolsParJour(programmeId, i);
+      parJour[joursNom[i]] = {
+        total: vols.length,
+        vols: vols.map(v => v.numeroVol)
+      };
     }
-
-    const nomProgramme = programme.nomProgramme;
-
-    // Suppression définitive
-    await ProgrammeVolSaisonnier.findByIdAndDelete(programmeId);
-
-    // Log de l'activité
-    await UserActivityLog.create({
-      user: userId,
-      action: 'DELETE',
-      targetModel: 'ProgrammeVolSaisonnier',
-      targetId: programmeId,
-      changes: {
-        nomProgramme: nomProgramme
-      },
-      metadata: {
-        description: `Suppression du programme vol saisonnier "${nomProgramme}"`
-      }
-    });
-
-    return { message: 'Programme vol saisonnier supprimé avec succès' };
-
-  } catch (error) {
-    console.error('Erreur lors de la suppression du programme vol:', error);
-    throw error;
-  }
-};
-
-// ========== EXTENSION 1.1 - NOUVELLES FONCTIONS ==========
-
-/**
- * Obtient les statistiques par catégorie de vol
- * @returns {Object} Statistiques par catégorie
- */
-export const obtenirStatistiquesParCategorie = async () => {
-  try {
-    return await ProgrammeVolSaisonnier.obtenirStatistiquesParCategorie();
-  } catch (error) {
-    console.error('Erreur lors du calcul des statistiques par catégorie:', error);
-    throw error;
-  }
-};
-
-/**
- * Obtient les statistiques par jour de la semaine (Lundi → Dimanche)
- * @returns {Object} Statistiques par jour
- */
-export const obtenirStatistiquesParJour = async () => {
-  try {
-    return await ProgrammeVolSaisonnier.obtenirStatistiquesParJour();
-  } catch (error) {
-    console.error('Erreur lors du calcul des statistiques par jour:', error);
-    throw error;
-  }
-};
-
-/**
- * Trouve les programmes par route (provenance et/ou destination)
- * @param {Object} options - { provenance, destination, categorieVol }
- * @returns {Array} Programmes correspondants
- */
-export const trouverParRoute = async (options = {}) => {
-  try {
-    return await ProgrammeVolSaisonnier.trouverParRoute(options);
-  } catch (error) {
-    console.error('Erreur lors de la recherche par route:', error);
-    throw error;
-  }
-};
-
-/**
- * Obtient un résumé complet du programme de vol
- * @returns {Object} Résumé avec statistiques
- */
-export const obtenirResumeProgramme = async () => {
-  try {
-    const [parCategorie, parJour, totalActifs] = await Promise.all([
-      ProgrammeVolSaisonnier.obtenirStatistiquesParCategorie(),
-      ProgrammeVolSaisonnier.obtenirStatistiquesParJour(),
-      ProgrammeVolSaisonnier.countDocuments({ actif: true, statut: 'ACTIF' })
-    ]);
-
-    // Calculer total hebdomadaire
-    let totalHebdo = 0;
-    Object.values(parJour).forEach(jour => {
-      totalHebdo += jour.total;
-    });
 
     return {
-      totalProgrammesActifs: totalActifs,
-      totalVolsHebdomadaires: totalHebdo,
+      programme: {
+        nom: programme.nom,
+        statut: programme.statut,
+        periode: {
+          debut: programme.dateDebut,
+          fin: programme.dateFin,
+          dureeJours: programme.dureeJours
+        }
+      },
+      totalVols: programme.nombreVols,
+      compagnies: programme.compagnies,
       parCategorie: parCategorie.reduce((acc, cat) => {
-        acc[cat._id || 'PASSAGER'] = {
-          count: cat.count,
-          compagnies: cat.compagnies
-        };
+        acc[cat._id] = cat.count;
         return acc;
       }, {}),
       parJour
     };
 
   } catch (error) {
+    console.error('Erreur lors du calcul des statistiques:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtient un résumé pour affichage
+ * @param {String} programmeId - ID du programme
+ * @returns {Object} Résumé
+ */
+export const obtenirResume = async (programmeId) => {
+  try {
+    const programme = await obtenirProgrammeParId(programmeId);
+    const vols = await VolProgramme.getVolsParProgramme(programmeId);
+
+    return {
+      programme: {
+        id: programme._id,
+        nom: programme.nom,
+        edition: programme.edition,
+        dateDebut: programme.dateDebut,
+        dateFin: programme.dateFin,
+        statut: programme.statut,
+        actif: programme.actif,
+        nombreVols: programme.nombreVols,
+        compagnies: programme.compagnies
+      },
+      vols: vols.map(v => ({
+        id: v._id,
+        jours: v.joursTexte,
+        numeroVol: v.numeroVol,
+        typeAvion: v.typeAvion,
+        version: v.version,
+        provenance: v.provenance,
+        heureArrivee: v.heureArrivee,
+        destination: v.destination,
+        heureDepart: v.heureDepart,
+        observations: v.observations
+      }))
+    };
+
+  } catch (error) {
     console.error('Erreur lors de l\'obtention du résumé:', error);
+    throw error;
+  }
+};
+
+/**
+ * Duplique un programme (pour créer une nouvelle saison basée sur l'ancienne)
+ * @param {String} programmeId - ID du programme source
+ * @param {Object} data - { nom, dateDebut, dateFin }
+ * @param {String} userId - ID de l'utilisateur
+ * @returns {Object} Nouveau programme
+ */
+export const dupliquerProgramme = async (programmeId, data, userId) => {
+  try {
+    const source = await ProgrammeVol.findById(programmeId);
+
+    if (!source) {
+      throw new Error('Programme source non trouvé');
+    }
+
+    // Créer le nouveau programme
+    const nouveauProgramme = await creerProgramme({
+      nom: data.nom,
+      dateDebut: data.dateDebut,
+      dateFin: data.dateFin,
+      edition: data.edition || 'N°01',
+      description: `Dupliqué depuis ${source.nom}`
+    }, userId);
+
+    // Copier tous les vols
+    const volsSource = await VolProgramme.find({ programme: programmeId });
+
+    for (const vol of volsSource) {
+      const nouveauVol = new VolProgramme({
+        programme: nouveauProgramme._id,
+        joursSemaine: vol.joursSemaine,
+        numeroVol: vol.numeroVol,
+        codeCompagnie: vol.codeCompagnie,
+        typeAvion: vol.typeAvion,
+        version: vol.version,
+        provenance: vol.provenance,
+        heureArrivee: vol.heureArrivee,
+        destination: vol.destination,
+        heureDepart: vol.heureDepart,
+        departLendemain: vol.departLendemain,
+        observations: vol.observations,
+        categorieVol: vol.categorieVol,
+        typeOperation: vol.typeOperation,
+        ordre: vol.ordre,
+        createdBy: userId
+      });
+      await nouveauVol.save();
+    }
+
+    // Recharger pour avoir les stats à jour
+    const programmeComplet = await obtenirProgrammeParId(nouveauProgramme._id);
+
+    // Log
+    await UserActivityLog.create({
+      user: userId,
+      action: 'DUPLICATE',
+      targetModel: 'ProgrammeVol',
+      targetId: programmeComplet._id,
+      changes: {
+        source: source.nom,
+        nouveau: programmeComplet.nom,
+        volsCopies: volsSource.length
+      },
+      metadata: {
+        description: `Duplication du programme "${source.nom}" → "${programmeComplet.nom}"`
+      }
+    });
+
+    return programmeComplet;
+
+  } catch (error) {
+    console.error('Erreur lors de la duplication du programme:', error);
     throw error;
   }
 };

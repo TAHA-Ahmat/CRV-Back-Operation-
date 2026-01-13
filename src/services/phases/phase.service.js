@@ -4,26 +4,22 @@ import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
 /**
  * INITIALISATION DES PHASES CRV (Cahier des charges §3)
  *
- * Règle métier : TOUTES les phases actives sont chargées, sans filtrage par typeOperation.
- * Le type d'opération (ARRIVEE / DEPART / TURN_AROUND) sera DÉDUIT à partir des phases
- * réellement utilisées (TERMINE ou NON_REALISE), pas imposé à la création.
- *
- * Logique :
- * - On charge ARRIVEE + DEPART + TURN_AROUND + COMMUN
- * - L'agent utilise les phases pertinentes
- * - Le système déduit le type final à la clôture
+ * Règle métier : Les phases sont filtrées selon le type d'opération du vol.
+ * - ARRIVEE : phases ARRIVEE + COMMUN
+ * - DEPART : phases DEPART + COMMUN
+ * - TURN_AROUND : phases ARRIVEE + DEPART + TURN_AROUND + COMMUN
  *
  * @param {string} crvId - ID du CRV
- * @param {string} typeOperationIndice - (OBSOLÈTE) Indice optionnel, ignoré pour le filtrage
+ * @param {string} typeOperation - Type d'opération du vol (ARRIVEE, DEPART, TURN_AROUND)
  */
-export const initialiserPhasesVol = async (crvId, typeOperationIndice = null) => {
+export const initialiserPhasesVol = async (crvId, typeOperation = null) => {
   const timestamp = new Date().toISOString();
 
   console.log('[CRV][SERVICE][INIT_PHASES_START]', {
     crvId,
     userId: null,
     role: null,
-    input: { crvId, typeOperationIndice },
+    input: { crvId, typeOperation },
     decision: null,
     reason: 'Début initialisation phases CRV',
     output: null,
@@ -31,9 +27,26 @@ export const initialiserPhasesVol = async (crvId, typeOperationIndice = null) =>
   });
 
   try {
-    // RÈGLE MÉTIER : Charger TOUTES les phases actives, sans filtrage
-    // Le type d'opération sera déduit des phases réellement utilisées
-    const phasesRef = await Phase.find({ actif: true }).sort({ ordre: 1 });
+    // Construire le filtre selon le type d'opération
+    let typeFilter;
+    if (typeOperation === 'TURN_AROUND') {
+      // TURN_AROUND = toutes les phases
+      typeFilter = ['ARRIVEE', 'DEPART', 'TURN_AROUND', 'COMMUN'];
+    } else if (typeOperation === 'ARRIVEE') {
+      // ARRIVEE = phases ARRIVEE + COMMUN uniquement
+      typeFilter = ['ARRIVEE', 'COMMUN'];
+    } else if (typeOperation === 'DEPART') {
+      // DEPART = phases DEPART + COMMUN uniquement
+      typeFilter = ['DEPART', 'COMMUN'];
+    } else {
+      // Par défaut, charger toutes les phases
+      typeFilter = ['ARRIVEE', 'DEPART', 'TURN_AROUND', 'COMMUN'];
+    }
+
+    const phasesRef = await Phase.find({
+      actif: true,
+      typeOperation: { $in: typeFilter }
+    }).sort({ ordre: 1 });
 
     // Comptage par type pour information
     const parType = {

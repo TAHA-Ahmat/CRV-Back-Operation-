@@ -1,7 +1,7 @@
 # MVS-3-Phases - AUDIT DE CONFORMITE BACKEND
 
 ## MVS : MVS-3-Phases
-## Date d'audit : 2026-01-10
+## Date d'audit : 2026-01-11 (mise a jour)
 ## Source de reference : docs/process/MVS-3-Phases/
 
 ---
@@ -21,7 +21,8 @@
 | code | String, required, unique, uppercase | String, required, unique, trim, uppercase | ✅ Conforme |
 | libelle | String, required | String, required, trim | ✅ Conforme |
 | typeOperation | String, required, enum | String, required, enum: ARRIVEE, DEPART, TURN_AROUND, COMMUN | ✅ Conforme |
-| categorie | String, required, enum | String, required, enum: PISTE, PASSAGERS, FRET, BAGAGE, TECHNIQUE, AVITAILLEMENT, NETTOYAGE, SECURITE | ✅ Conforme |
+| categorie | String, required, enum | String, required, enum: PISTE, PASSAGERS, FRET, BAGAGE, TECHNIQUE, AVITAILLEMENT, NETTOYAGE, SECURITE, BRIEFING | ✅ Conforme |
+| macroPhase | String, required, enum | String, required, enum: DEBUT, REALISATION, FIN | ✅ Conforme (ajout 2026-01-11) |
 | ordre | Number, required, min:0 | Number, required | ✅ Conforme |
 | dureeStandardMinutes | Number, required, min:0 | Number, required, min: 0 | ✅ Conforme |
 | obligatoire | Boolean, default:true | Boolean, default: true | ✅ Conforme |
@@ -281,7 +282,37 @@
 
 ---
 
-## 6. SYNTHESE MVS-3-Phases
+## 6. REFERENTIEL PHASES ARRIVEE (Mise a jour 2026-01-11)
+
+### Processus metier valide
+
+| Ordre | Code | Libelle | Categorie | MacroPhase | Obligatoire |
+|-------|------|---------|-----------|------------|-------------|
+| 1 | ARR_BRIEFING | Briefing equipes | BRIEFING | DEBUT | ✅ Oui |
+| 2 | ARR_ARRIVEE_AVION | Arrivee avion | PISTE | DEBUT | ✅ Oui |
+| 3 | ARR_OUVERTURE_SOUTES | Ouverture des soutes | BAGAGE | REALISATION | ✅ Oui |
+| 4 | ARR_DECHARGEMENT | Dechargement | BAGAGE | REALISATION | ✅ Oui |
+| 5 | ARR_LIVRAISON_BAGAGES | Livraison bagages | BAGAGE | REALISATION | ✅ Oui |
+| 6 | ARR_DEBARQUEMENT_PAX | Debarquement passagers | PASSAGERS | REALISATION | ✅ Oui |
+| 7 | ARR_MISE_CONDITION_CABINE | Mise en condition cabine | NETTOYAGE | FIN | ❌ Non |
+| 8 | ARR_DEBRIEFING | Debriefing cloture | BRIEFING | FIN | ❌ Non |
+
+### Signification des macro-phases
+
+- **DEBUT** : Phases de preparation et d'initialisation de l'operation
+- **REALISATION** : Phases operationnelles principales
+- **FIN** : Phases de cloture et finalisation
+
+### Notes metier
+
+- **Briefing** : Coordination prealable avec KI, KU, KF, manutentionnaires et chauffeurs
+- **Arrivee avion** : Englobe atterrissage, roulage vers parking et calage/securisation
+- **Mise en condition cabine** : Facultatif selon rotation (prestation hoteliere + nettoyage)
+- **Debriefing** : Facultatif, pour retour d'experience post-vol
+
+---
+
+## 7. SYNTHESE MVS-3-Phases
 
 ### Statut global : ✅ CONFORME
 

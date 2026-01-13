@@ -68,7 +68,7 @@ chronologiePhaseSchema.pre('save', async function(next) {
   });
 
   // Import dynamique pour éviter les dépendances circulaires
-  const { calculerDureeMinutes, calculerEcartHoraire } = await import('../services/calcul.service.js');
+  const { calculerDureeMinutes, calculerEcartHoraire } = await import('../../services/charges/calcul.service.js');
 
   // Calcul de la durée réelle
   if (this.heureDebutReelle && this.heureFinReelle) {

@@ -20,7 +20,12 @@ const phaseSchema = new mongoose.Schema({
   },
   categorie: {
     type: String,
-    enum: ['PISTE', 'PASSAGERS', 'FRET', 'BAGAGE', 'TECHNIQUE', 'AVITAILLEMENT', 'NETTOYAGE', 'SECURITE'],
+    enum: ['PISTE', 'PASSAGERS', 'FRET', 'BAGAGE', 'TECHNIQUE', 'AVITAILLEMENT', 'NETTOYAGE', 'SECURITE', 'BRIEFING'],
+    required: true
+  },
+  macroPhase: {
+    type: String,
+    enum: ['DEBUT', 'REALISATION', 'FIN'],
     required: true
   },
   ordre: {
