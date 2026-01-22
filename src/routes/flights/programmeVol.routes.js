@@ -225,6 +225,34 @@ router.delete('/:programmeId/vols/:id', protect, authorize(...ROLES_OPERATIONNEL
  */
 router.get('/:programmeId/export-pdf', protect, volProgrammeController.obtenirDonneesPDF);
 
+// ══════════════════════════════════════════════════════════════════════════
+// ROUTES ARCHIVAGE GOOGLE DRIVE
+// ══════════════════════════════════════════════════════════════════════════
+
+/**
+ * @route   POST /api/programmes-vol/:programmeId/archiver
+ * @desc    Archiver le PDF du programme dans Google Drive
+ * @access  Private (Opérationnels)
+ * @returns { success, message, data: { programme, archivage } }
+ */
+router.post('/:programmeId/archiver', protect, excludeQualite, volProgrammeController.archiverProgramme);
+
+/**
+ * @route   GET /api/programmes-vol/:programmeId/archivage/status
+ * @desc    Vérifier si le programme peut être archivé
+ * @access  Private (Tous)
+ * @returns { canArchive, reason?, programme? }
+ */
+router.get('/:programmeId/archivage/status', protect, volProgrammeController.verifierArchivage);
+
+/**
+ * @route   GET /api/programmes-vol/:programmeId/archivage
+ * @desc    Obtenir les informations d'archivage d'un programme
+ * @access  Private (Tous)
+ * @returns { programmeId, nom, isArchived, archivage }
+ */
+router.get('/:programmeId/archivage', protect, volProgrammeController.obtenirInfosArchivage);
+
 /**
  * @route   GET /api/programmes-vol/:programmeId/telecharger-pdf
  * @desc    Telecharger le PDF du programme de vols

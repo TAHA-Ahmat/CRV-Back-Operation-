@@ -80,12 +80,28 @@ const volSchema = new mongoose.Schema({
 
   typeVolHorsProgramme: {
     type: String,
-    enum: ['CHARTER', 'MEDICAL', 'TECHNIQUE', 'COMMERCIAL', 'AUTRE', null],
+    enum: ['CHARTER', 'MEDICAL', 'TECHNIQUE', 'COMMERCIAL', 'CARGO', 'AUTRE', null],
     default: null,
     description: 'Catégorie du vol hors programme'
-  }
+  },
 
   // FIN EXTENSION 2 - Aucune modification des champs existants ci-dessus
+
+  // ========== EXTENSION 7 - Lien avec Bulletin de Mouvement ==========
+  // NON-REGRESSION: Champ OPTIONNEL avec valeur par defaut null
+
+  /**
+   * Reference au bulletin de mouvement source
+   * Permet de tracer quel bulletin a annonce ce vol
+   */
+  bulletinMouvementReference: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'BulletinMouvement',
+    default: null,
+    description: 'Reference au bulletin de mouvement ayant annonce ce vol'
+  }
+
+  // FIN EXTENSION 7
 }, {
   timestamps: true
 });

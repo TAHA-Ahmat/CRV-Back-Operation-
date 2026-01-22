@@ -76,6 +76,18 @@ const crvSchema = new mongoose.Schema({
       type: String,
       default: null
     },
+    filename: {
+      type: String,
+      default: null
+    },
+    folderPath: {
+      type: String,
+      default: null
+    },
+    size: {
+      type: Number,
+      default: null
+    },
     archivedAt: {
       type: Date,
       default: null
@@ -84,6 +96,10 @@ const crvSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Personne',
       default: null
+    },
+    version: {
+      type: Number,
+      default: 1
     }
   },
   // Personnel affecté au vol (embedded pour saisie ad-hoc)
@@ -213,7 +229,25 @@ const crvSchema = new mongoose.Schema({
       enum: ['BROUILLON', 'EN_COURS', 'TERMINE', 'VALIDE', 'VERROUILLE', null],
       default: null
     }
+  },
+
+  // ========== EXTENSION 7 - Lien avec Bulletin de Mouvement ==========
+  // NON-REGRESSION: Champ OPTIONNEL avec valeur par defaut null
+
+  /**
+   * Reference au bulletin de mouvement
+   * Permet de tracer quel bulletin annonçait le vol documente par ce CRV
+   * HIERARCHIE: Programme → Bulletin → CRV
+   * Le CRV est la seule preuve qu'un vol a reellement opere
+   */
+  bulletinMouvementReference: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'BulletinMouvement',
+    default: null,
+    description: 'Reference au bulletin de mouvement (tracabilite previsionnel → reel)'
   }
+
+  // FIN EXTENSION 7
 }, {
   timestamps: true
 });

@@ -1,5 +1,6 @@
 import * as volProgrammeService from '../../services/flights/volProgramme.service.js';
 import * as programmeVolPdfService from '../../services/flights/programmeVolPdf.service.js';
+import * as programmeVolArchivageService from '../../services/documents/programmeVol/programmeVolArchivage.service.js';
 
 /**
  * CONTRÔLEUR VOLS PROGRAMME
@@ -562,6 +563,113 @@ export const obtenirPDFBase64 = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Erreur lors de la generation du PDF'
+    });
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+// ARCHIVAGE GOOGLE DRIVE
+// ══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Archiver le PDF du programme dans Google Drive
+ * POST /api/programmes-vol/:programmeId/archiver
+ */
+export const archiverProgramme = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { programmeId } = req.params;
+
+    console.log(`[CONTROLLER] Archivage programme ${programmeId} par user ${userId}`);
+
+    const resultat = await programmeVolArchivageService.archiverProgrammeVol(
+      programmeId,
+      userId
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Programme ${resultat.programme.nom} archivé avec succès`,
+      data: resultat
+    });
+
+  } catch (error) {
+    console.error('Erreur dans archiverProgramme:', error);
+
+    if (error.message.includes('non trouvé') || error.message.includes('non trouve')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    if (error.message.includes('non configuré') || error.message.includes('inaccessible')) {
+      return res.status(503).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'Erreur lors de l\'archivage'
+    });
+  }
+};
+
+/**
+ * Vérifier si un programme peut être archivé
+ * GET /api/programmes-vol/:programmeId/archivage/status
+ */
+export const verifierArchivage = async (req, res) => {
+  try {
+    const { programmeId } = req.params;
+
+    const status = await programmeVolArchivageService.canArchiveProgrammeVol(programmeId);
+
+    res.status(200).json({
+      success: true,
+      data: status
+    });
+
+  } catch (error) {
+    console.error('Erreur dans verifierArchivage:', error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la vérification'
+    });
+  }
+};
+
+/**
+ * Obtenir les informations d'archivage d'un programme
+ * GET /api/programmes-vol/:programmeId/archivage
+ */
+export const obtenirInfosArchivage = async (req, res) => {
+  try {
+    const { programmeId } = req.params;
+
+    const infos = await programmeVolArchivageService.getArchivageInfo(programmeId);
+
+    res.status(200).json({
+      success: true,
+      data: infos
+    });
+
+  } catch (error) {
+    console.error('Erreur dans obtenirInfosArchivage:', error);
+
+    if (error.message.includes('non trouvé')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la récupération des infos'
     });
   }
 };

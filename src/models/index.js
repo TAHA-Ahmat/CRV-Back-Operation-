@@ -35,6 +35,11 @@ export { default as AffectationEnginVol } from './resources/AffectationEnginVol.
 // MVS 6 - Vols & Programmes
 export { default as Vol } from './flights/Vol.js';
 export { default as ProgrammeVolSaisonnier } from './flights/ProgrammeVolSaisonnier.js';
+export { default as ProgrammeVol } from './flights/ProgrammeVol.js';
+export { default as VolProgramme } from './flights/VolProgramme.js';
+
+// MVS 6b - Bulletin de Mouvement (Exploitation court terme)
+export { default as BulletinMouvement } from './bulletin/BulletinMouvement.js';
 
 // MVS 7 - Validation & Qualité
 export { default as ValidationCRV } from './validation/ValidationCRV.js';

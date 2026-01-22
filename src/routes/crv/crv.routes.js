@@ -32,7 +32,12 @@ import { mettreAJourPhaseCRV } from '../../controllers/phases/phase.controller.j
 import {
   getArchivageStatus,
   archiverCRV,
-  testerArchivage
+  testerArchivage,
+  verifierArchivageCRV,
+  obtenirInfosArchivage,
+  telechargerPDF,
+  obtenirPDFBase64,
+  obtenirDonneesPDF
 } from '../../controllers/crv/crvArchivage.controller.js';
 // EXTENSION 6 - Annulation de CRV (NON-RÉGRESSION: import nouveau, aucun impact sur l'existant)
 import {
@@ -306,6 +311,37 @@ router.post('/archive/test', protect, excludeQualite, testerArchivage);
 // Archiver un CRV spécifique
 // 🔒 P0-1: QUALITE exclu
 router.post('/:id/archive', protect, excludeQualite, archiverCRV);
+
+// Vérifier si un CRV peut être archivé
+router.get('/:id/archive/status', protect, verifierArchivageCRV);
+
+// Obtenir les informations d'archivage d'un CRV
+router.get('/:id/archivage', protect, obtenirInfosArchivage);
+
+// ============================
+//   ROUTES PDF CRV
+// ============================
+
+/**
+ * @route   GET /api/crv/:id/export-pdf
+ * @desc    Obtenir les données formatées pour export PDF (aperçu JSON)
+ * @access  Private
+ */
+router.get('/:id/export-pdf', protect, obtenirDonneesPDF);
+
+/**
+ * @route   GET /api/crv/:id/telecharger-pdf
+ * @desc    Télécharger le PDF du CRV
+ * @access  Private
+ */
+router.get('/:id/telecharger-pdf', protect, telechargerPDF);
+
+/**
+ * @route   GET /api/crv/:id/pdf-base64
+ * @desc    Obtenir le PDF en base64 (preview frontend)
+ * @access  Private
+ */
+router.get('/:id/pdf-base64', protect, obtenirPDFBase64);
 
 // ============================
 //   EXTENSION 6 - ROUTES ANNULATION (PARAMÉTRISÉES)

@@ -183,6 +183,88 @@ const programmeVolSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Personne',
     default: null
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // ARCHIVAGE GOOGLE DRIVE
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Informations d'archivage du PDF dans Google Drive
+   */
+  archivage: {
+    /**
+     * ID du fichier dans Google Drive
+     */
+    driveFileId: {
+      type: String,
+      default: null,
+      description: 'ID du fichier PDF dans Google Drive'
+    },
+
+    /**
+     * URL de visualisation Drive
+     */
+    driveWebViewLink: {
+      type: String,
+      default: null,
+      description: 'URL de visualisation dans Google Drive'
+    },
+
+    /**
+     * Nom du fichier archivé
+     */
+    filename: {
+      type: String,
+      default: null,
+      description: 'Nom du fichier PDF archivé'
+    },
+
+    /**
+     * Chemin du dossier dans Drive
+     */
+    folderPath: {
+      type: String,
+      default: null,
+      description: 'Chemin du dossier dans Google Drive'
+    },
+
+    /**
+     * Taille du fichier en octets
+     */
+    size: {
+      type: Number,
+      default: null,
+      description: 'Taille du fichier en octets'
+    },
+
+    /**
+     * Date d'archivage
+     */
+    archivedAt: {
+      type: Date,
+      default: null,
+      description: 'Date et heure de l\'archivage'
+    },
+
+    /**
+     * Utilisateur ayant archivé
+     */
+    archivedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'Personne',
+      default: null,
+      description: 'Utilisateur ayant déclenché l\'archivage'
+    },
+
+    /**
+     * Version archivée (numéro)
+     */
+    version: {
+      type: Number,
+      default: 1,
+      description: 'Numéro de version archivée'
+    }
   }
 
 }, {
@@ -231,6 +313,13 @@ programmeVolSchema.virtual('estTermine').get(function() {
   return new Date() > this.dateFin;
 });
 
+/**
+ * Indique si le programme est archivé dans Drive
+ */
+programmeVolSchema.virtual('isArchived').get(function() {
+  return !!(this.archivage && this.archivage.driveFileId);
+});
+
 // ══════════════════════════════════════════════════════════════════════════
 // MÉTHODES D'INSTANCE
 // ══════════════════════════════════════════════════════════════════════════
@@ -255,6 +344,28 @@ programmeVolSchema.methods.peutEtreValide = function() {
  */
 programmeVolSchema.methods.peutEtreActive = function() {
   return this.validation.valide && !this.actif && !this.estTermine;
+};
+
+/**
+ * Met à jour les informations d'archivage
+ * @param {Object} archiveResult - Résultat de l'archivage Drive
+ * @param {ObjectId} userId - ID de l'utilisateur
+ */
+programmeVolSchema.methods.updateArchivage = async function(archiveResult, userId) {
+  const currentVersion = this.archivage?.version || 0;
+
+  this.archivage = {
+    driveFileId: archiveResult.fileId,
+    driveWebViewLink: archiveResult.webViewLink,
+    filename: archiveResult.filename,
+    folderPath: archiveResult.folderPath,
+    size: archiveResult.size,
+    archivedAt: new Date(),
+    archivedBy: userId,
+    version: currentVersion + 1
+  };
+
+  return this.save();
 };
 
 // ══════════════════════════════════════════════════════════════════════════

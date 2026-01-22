@@ -23,6 +23,8 @@ import enginRoutes from './routes/resources/engin.routes.js';
 // Routes - MVS 6: Flights
 import volRoutes from './routes/flights/vol.routes.js';
 import programmeVolRoutes from './routes/flights/programmeVol.routes.js';
+// Routes - MVS 6b: Bulletin de Mouvement
+import bulletinMouvementRoutes from './routes/bulletin/bulletinMouvement.routes.js';
 // Routes - MVS 7: Validation
 import validationRoutes from './routes/validation/validation.routes.js';
 // Routes - MVS 8: Notifications
@@ -75,6 +77,9 @@ app.use('/api/phases', phaseRoutes);
 app.use('/api/validation', validationRoutes);
 // EXTENSION 1 - Programme vol saisonnier (NON-RÉGRESSION: endpoint nouveau /api/programmes-vol/*)
 app.use('/api/programmes-vol', programmeVolRoutes);
+// EXTENSION 7 - Bulletin de mouvement (NON-RÉGRESSION: endpoint nouveau /api/bulletins/*)
+// HIERARCHIE: Programme (6 mois) → Bulletin (3-4 jours) → CRV (reel)
+app.use('/api/bulletins', bulletinMouvementRoutes);
 // EXTENSION 3 - Version et configuration avion (NON-RÉGRESSION: endpoint nouveau /api/avions/*)
 app.use('/api/avions', avionRoutes);
 // EXTENSION 4 - Catégories passagers détaillées (NON-RÉGRESSION: endpoint nouveau /api/charges/*)

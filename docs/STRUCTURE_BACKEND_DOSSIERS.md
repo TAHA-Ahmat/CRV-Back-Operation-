@@ -50,28 +50,56 @@ Back/
     │   ├── db.js                     -> Connexion MongoDB
     │   └── env.js                    -> Chargement variables environnement
     │
-    ├── models/                       [UTILISE - 18 fichiers]
-    │   ├── Personne.js               -> MVS 1 - Schema utilisateur/personnel
-    │   ├── UserActivityLog.js        -> MVS 1 - Logs audit activite
-    │   ├── CRV.js                    -> MVS 2 - Schema Compte-Rendu de Vol
-    │   ├── HistoriqueModification.js -> MVS 2 - Audit modifications CRV
-    │   ├── Observation.js            -> MVS 2 - Remarques sur CRV
-    │   ├── Phase.js                  -> MVS 3 - Referentiel phases
-    │   ├── ChronologiePhase.js       -> MVS 3 - Execution phases par CRV
-    │   ├── Horaire.js                -> MVS 3 - Horaires vol (prevus/reels)
-    │   ├── ChargeOperationnelle.js   -> MVS 4 - Passagers/bagages/fret
-    │   ├── Engin.js                  -> MVS 5 - Equipements piste
-    │   ├── AffectationEnginVol.js    -> MVS 5 - Liaison engin-vol
-    │   ├── Vol.js                    -> MVS 6 - Schema vol
-    │   ├── ProgrammeVolSaisonnier.js -> MVS 6 - Programmes recurrents
-    │   ├── ValidationCRV.js          -> MVS 7 - Validation qualite
-    │   ├── Notification.js           -> MVS 8 - Notifications in-app
-    │   ├── Avion.js                  -> MVS 9 - Configuration aeronefs
-    │   ├── EvenementOperationnel.js  -> TRANSVERSAL - Incidents/evenements
-    │   ├── AffectationPersonneVol.js -> TRANSVERSAL - Liaison personnel-vol
-    │   │
-    │   ├── CRV/                      [VIDE]
-    │   └── User/                     [VIDE]
+    models/
+    ├── index.js                          # Barrel principal (exports centralisés)
+    │
+    ├── security/                         # MVS 1
+    │   ├── index.js
+    │   ├── Personne.js
+    │   └── UserActivityLog.js
+    │
+    ├── crv/                              # MVS 2
+    │   ├── index.js
+    │   ├── CRV.js
+    │   ├── HistoriqueModification.js
+    │   └── Observation.js
+    │
+    ├── phases/                           # MVS 3
+    │   ├── index.js
+    │   ├── Phase.js
+    │   ├── ChronologiePhase.js
+    │   └── Horaire.js
+    │
+    ├── charges/                          # MVS 4
+    │   ├── index.js
+    │   └── ChargeOperationnelle.js
+    │
+    ├── resources/                        # MVS 5
+    │   ├── index.js
+    │   ├── Engin.js
+    │   └── AffectationEnginVol.js
+    │
+    ├── flights/                          # MVS 6
+    │   ├── index.js
+    │   ├── Vol.js
+    │   └── ProgrammeVolSaisonnier.js
+    │
+    ├── validation/                       # MVS 7
+    │   ├── index.js
+    │   └── ValidationCRV.js
+    │
+    ├── notifications/                    # MVS 8
+    │   ├── index.js
+    │   └── Notification.js
+    │
+    ├── referentials/                     # MVS 9
+    │   ├── index.js
+    │   └── Avion.js
+    │
+    ├── transversal/                      # Multi-MVS
+    │   ├── index.js
+    │   ├── EvenementOperationnel.js
+    │   └── AffectationPersonneVol.js
     │
     ├── controllers/                  [UTILISE - 17 fichiers]
     │   ├── auth.controller.js        -> MVS 1 - Authentification
