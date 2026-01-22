@@ -300,6 +300,30 @@ export async function archiveDocument({
       `${documentType.toUpperCase()}_ARCHIVE_UPLOAD`
     );
 
+    // ============================
+    //   PARTAGE PUBLIC (anyone + reader)
+    // ============================
+    // Rendre le fichier accessible à toute personne disposant du lien
+    // Permet aux utilisateurs de l'app de visualiser sans compte Google entreprise
+    try {
+      await withRetry(
+        async () =>
+          await drive.permissions.create({
+            fileId: response.data.id,
+            requestBody: {
+              role: 'reader',
+              type: 'anyone',
+            },
+            supportsAllDrives: true,
+          }),
+        `${documentType.toUpperCase()}_ARCHIVE_SHARE`
+      );
+      console.log(`${logPrefix} 🔓 Partage public activé`);
+    } catch (shareError) {
+      // Log l'erreur mais ne bloque pas l'archivage
+      console.warn(`${logPrefix} ⚠️ Partage public échoué (fichier archivé quand même):`, shareError.message);
+    }
+
     const uploadDuration = Date.now() - startTime;
     const result = {
       fileId: response.data.id,
@@ -310,9 +334,10 @@ export async function archiveDocument({
       folderPath: folderPath.join('/'),
       folderId: targetFolderId,
       documentType,
+      publicAccess: true,
     };
 
-    console.log(`${logPrefix} ✅ SUCCÈS : Document archivé`);
+    console.log(`${logPrefix} ✅ SUCCÈS : Document archivé (accès public)`);
     console.log(`${logPrefix} File ID: ${result.fileId}`);
     console.log(`${logPrefix} URL: ${result.webViewLink}`);
     console.log(`${logPrefix} Durée: ${uploadDuration}ms`);

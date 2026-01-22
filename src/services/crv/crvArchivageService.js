@@ -215,6 +215,30 @@ export async function archiveCRVPdf({ buffer, filename, mimeType = 'application/
       'CRV_ARCHIVE_UPLOAD'
     );
 
+    // ============================
+    //   PARTAGE PUBLIC (anyone + reader)
+    // ============================
+    // Rendre le fichier accessible à toute personne disposant du lien
+    // Permet aux utilisateurs de l'app de visualiser sans compte Google entreprise
+    try {
+      await withRetry(
+        async () =>
+          await drive.permissions.create({
+            fileId: response.data.id,
+            requestBody: {
+              role: 'reader',
+              type: 'anyone',
+            },
+            supportsAllDrives: true,
+          }),
+        'CRV_ARCHIVE_SHARE'
+      );
+      console.log(`[CRV-ARCHIVE] 🔓 Partage public activé`);
+    } catch (shareError) {
+      // Log l'erreur mais ne bloque pas l'archivage
+      console.warn(`[CRV-ARCHIVE] ⚠️ Partage public échoué (fichier archivé quand même):`, shareError.message);
+    }
+
     const uploadDuration = Date.now() - startTime;
     const result = {
       fileId: response.data.id,
@@ -222,9 +246,10 @@ export async function archiveCRVPdf({ buffer, filename, mimeType = 'application/
       filename: response.data.name,
       size: response.data.size ? Number(response.data.size) : buffer.length,
       createdTime: response.data.createdTime,
+      publicAccess: true,
     };
 
-    console.log(`[CRV-ARCHIVE] ✅ SUCCÈS : PDF archivé`);
+    console.log(`[CRV-ARCHIVE] ✅ SUCCÈS : PDF archivé (accès public)`);
     console.log(`[CRV-ARCHIVE] File ID : ${result.fileId}`);
     console.log(`[CRV-ARCHIVE] URL : ${result.webViewLink}`);
     console.log(`[CRV-ARCHIVE] Durée : ${uploadDuration}ms`);
