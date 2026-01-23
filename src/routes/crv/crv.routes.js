@@ -109,10 +109,10 @@ router.get('/:id', protect, obtenirCRV);
 /**
  * @route   DELETE /api/crv/:id
  * @desc    Supprimer un CRV (et toutes ses données associées)
- * @access  Private (SUPERVISEUR, MANAGER uniquement)
+ * @access  Private (tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @note    Refusé si CRV verrouillé (code: CRV_VERROUILLE)
  */
-router.delete('/:id', protect, authorize('SUPERVISEUR', 'MANAGER'), auditLog('SUPPRESSION'), supprimerCRV);
+router.delete('/:id', protect, excludeQualite, auditLog('SUPPRESSION'), supprimerCRV);
 
 // ============================
 //   TRANSITIONS DE STATUT CRV
