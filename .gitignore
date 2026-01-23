@@ -37,3 +37,12 @@ coverage/
 # Temporary files
 tmp/
 temp/
+tmpclaude-*/
+nul
+
+# Generated files
+exports/
+vols-data.json
+
+# Claude Code local settings
+.claude/

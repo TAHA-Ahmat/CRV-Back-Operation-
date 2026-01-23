@@ -9,7 +9,8 @@
     "dev": "nodemon src/server.js",
     "seed:phases": "node src/utils/seedPhases.js",
     "seed:admin": "node src/utils/seedAdmin.js",
-    "test:archivage": "node test-archivage.js",
+    "seed:programme-vols": "node src/utils/seedProgrammeVols.js",
+    "generate:programme-vols": "node src/utils/generateProgrammeVols.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
