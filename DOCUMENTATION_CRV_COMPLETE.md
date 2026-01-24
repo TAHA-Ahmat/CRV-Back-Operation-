@@ -623,9 +623,15 @@ Jours: 0=Dimanche, 1=Lundi, ..., 6=Samedi
 
 Document previsionnel a court terme (3-4 jours).
 
-### Endpoints principaux
+### Workflow
+```
+BROUILLON -> PUBLIE -> ARCHIVE
+```
+
+### Endpoints
 
 #### POST /api/bulletins
+Creer un nouveau bulletin.
 ```json
 // Body
 {
@@ -639,7 +645,20 @@ Document previsionnel a court terme (3-4 jours).
 #### POST /api/bulletins/depuis-programme
 Pre-remplit depuis le programme actif.
 
+#### GET /api/bulletins
+Lister tous les bulletins. Query: `escale`, `statut`, `page`, `limit`
+
+#### GET /api/bulletins/en-cours/:escale
+Obtenir le bulletin en cours pour une escale.
+
+#### GET /api/bulletins/:id
+Obtenir un bulletin par ID.
+
+#### DELETE /api/bulletins/:id
+Supprimer un bulletin (BROUILLON uniquement).
+
 #### POST /api/bulletins/:id/mouvements
+Ajouter un mouvement au bulletin.
 ```json
 // Body
 {
@@ -651,8 +670,26 @@ Pre-remplit depuis le programme actif.
 }
 ```
 
+#### POST /api/bulletins/:id/mouvements/hors-programme
+Ajouter un vol hors programme au bulletin.
+
+#### PATCH /api/bulletins/:id/mouvements/:mouvementId
+Modifier un mouvement existant.
+
+#### DELETE /api/bulletins/:id/mouvements/:mouvementId
+Supprimer un mouvement du bulletin.
+
+#### POST /api/bulletins/:id/mouvements/:mouvementId/annuler
+Annuler un mouvement (le marque comme annule sans le supprimer).
+
 #### POST /api/bulletins/:id/publier
 Transition: BROUILLON -> PUBLIE
+
+#### POST /api/bulletins/:id/archiver
+Transition: PUBLIE -> ARCHIVE
+
+#### POST /api/bulletins/:id/creer-vols
+Creer les vols operationnels a partir des mouvements du bulletin
 
 ---
 
