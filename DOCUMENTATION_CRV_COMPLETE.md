@@ -29,14 +29,15 @@
 - [4.2 Gestion des Personnes](#42-gestion-des-personnes)
 - [4.3 Programme de Vol](#43-programme-de-vol)
 - [4.4 Bulletin de Mouvement](#44-bulletin-de-mouvement)
-- [4.5 CRV](#45-crv)
-- [4.6 Phases](#46-phases)
-- [4.7 Charges](#47-charges)
-- [4.8 Engins](#48-engins)
-- [4.9 Avions](#49-avions)
-- [4.10 Validation](#410-validation)
-- [4.11 Notifications](#411-notifications)
-- [4.12 SLA](#412-sla)
+- [4.5 Vols Operationnels](#45-vols-operationnels)
+- [4.6 CRV](#46-crv)
+- [4.7 Phases](#47-phases)
+- [4.8 Charges](#48-charges)
+- [4.9 Engins](#49-engins)
+- [4.10 Avions](#410-avions)
+- [4.11 Validation](#411-validation)
+- [4.12 Notifications](#412-notifications)
+- [4.13 SLA](#413-sla)
 
 ### PARTIE 5 - WORKFLOWS ET MODELES
 - [5.1 Workflows de statut](#51-workflows-de-statut)
@@ -655,7 +656,81 @@ Transition: BROUILLON -> PUBLIE
 
 ---
 
-## 4.5 CRV
+## 4.5 Vols Operationnels
+
+### Concept metier
+
+Les vols operationnels representent les **vols reels du jour**, a distinguer des vols du programme saisonnier.
+
+- **Programme de vol** : Planning theorique sur une saison (IATA Summer/Winter)
+- **Vol operationnel** : Vol effectivement prevu/realise pour une date donnee
+
+### Types d'operations
+
+| Type | Description |
+|------|-------------|
+| `ARRIVEE` | Vol en arrivee uniquement |
+| `DEPART` | Vol en depart uniquement |
+| `TURN_AROUND` | Vol avec arrivee puis depart (meme avion) |
+
+### Endpoints
+
+#### POST /api/vols
+**Creer un vol operationnel**
+
+Acces: Operationnels (excludeQualite)
+
+```json
+// Body
+{
+  "numeroVol": "ET939",
+  "typeOperation": "ARRIVEE|DEPART|TURN_AROUND",
+  "compagnieAerienne": "Ethiopian Airlines",
+  "codeIATA": "ET",
+  "dateVol": "2026-01-24"
+}
+```
+
+**Validations:**
+- `numeroVol` : Obligatoire
+- `typeOperation` : Doit etre ARRIVEE, DEPART ou TURN_AROUND
+- `compagnieAerienne` : Obligatoire
+- `codeIATA` : Exactement 2 caracteres
+- `dateVol` : Format ISO8601
+
+#### GET /api/vols
+**Lister les vols operationnels**
+
+Acces: Tous les utilisateurs authentifies
+
+Query params disponibles:
+- `dateVol` : Filtrer par date
+- `compagnie` : Filtrer par compagnie
+- `typeOperation` : Filtrer par type
+
+#### GET /api/vols/:id
+**Obtenir un vol par ID**
+
+Acces: Tous les utilisateurs authentifies
+
+#### PATCH /api/vols/:id
+**Mettre a jour un vol**
+
+Acces: Operationnels (excludeQualite)
+
+```json
+// Body (champs modifiables)
+{
+  "numeroVol": "ET940",
+  "typeOperation": "DEPART",
+  "heureArriveeReelle": "2026-01-24T12:15:00Z",
+  "heureDepartReel": "2026-01-24T14:10:00Z"
+}
+```
+
+---
+
+## 4.6 CRV
 
 ### Concept metier
 
@@ -734,7 +809,7 @@ Retourne fichier XLSX. Query: `dateDebut`, `dateFin`, `statut`, `escale`
 
 ---
 
-## 4.6 Phases
+## 4.7 Phases
 
 ### Endpoints
 
@@ -755,7 +830,7 @@ Termine une phase.
 
 ---
 
-## 4.7 Charges
+## 4.8 Charges
 
 ### Endpoints critiques
 
@@ -830,7 +905,7 @@ Termine une phase.
 
 ---
 
-## 4.8 Engins
+## 4.9 Engins
 
 ### Endpoints
 
@@ -851,7 +926,7 @@ Query: `typeEngin`
 
 ---
 
-## 4.9 Avions
+## 4.10 Avions
 
 ### Endpoints
 
@@ -885,7 +960,7 @@ Query: `joursAvance` (defaut: 30)
 
 ---
 
-## 4.10 Validation
+## 4.11 Validation
 
 ### Endpoints
 
@@ -908,7 +983,7 @@ Transition: VERROUILLE -> EN_COURS
 
 ---
 
-## 4.11 Notifications
+## 4.12 Notifications
 
 ### Endpoints
 
@@ -923,7 +998,7 @@ Types: INFO, WARNING, ERROR, SUCCESS, ALERTE_SLA
 
 ---
 
-## 4.12 SLA
+## 4.13 SLA
 
 ### Endpoints
 
