@@ -5,7 +5,7 @@ import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
 import ChargeOperationnelle from '../../models/charges/ChargeOperationnelle.js';
 import EvenementOperationnel from '../../models/transversal/EvenementOperationnel.js';
 import Observation from '../../models/crv/Observation.js';
-import { genererNumeroCRV, calculerCompletude } from '../../services/crv/crv.service.js';
+import { genererNumeroCRV, calculerCompletude, detecterDoublonCRV, creerVolDepuisMouvement } from '../../services/crv/crv.service.js';
 import { initialiserPhasesVol } from '../../services/phases/phase.service.js';
 
 // ============================================================================
@@ -26,44 +26,233 @@ export const creerCRV = async (req, res, next) => {
     timestamp
   });
 
-  console.log('[CRV][TRY_ENTER][CREER_CRV]', {
-    crvId: null,
-    userId: req.user?._id || null,
-    role: req.user?.fonction || null,
-    input: req.body,
-    decision: null,
-    reason: 'Début création CRV',
-    output: null,
-    timestamp
-  });
-
   try {
-    let { volId, responsableVolId, type, date, escale } = req.body;
+    const {
+      // PATH 1: Depuis bulletin
+      mouvementId,
+      bulletinId,
+      // PATH 2: Hors programme / hors bulletin
+      vol: volData,
+      // PATH 3: Vol existant (backward compat)
+      volId: volIdParam,
+      // PATH LEGACY: auto-création
+      type,
+      date,
+      // Commun
+      responsableVolId,
+      escale,
+      forceDoublon,
+      confirmationLevel
+    } = req.body;
 
-    // Escale par défaut si non fournie (code IATA de l'aéroport local)
-    escale = escale || 'TLS';
-
-    // Si aucun volId n'est fourni, créer un vol automatiquement
+    let volId = volIdParam;
+    const escaleCode = (escale || 'TLS').toUpperCase();
     let vol;
-    if (!volId) {
-      console.log('[CRV][DECISION_CHECK][VOL_AUTO_CREATE]', {
-        crvId: null,
-        userId: req.user?._id || null,
-        role: req.user?.fonction || null,
-        input: { volId, type },
-        decision: true,
-        reason: 'Aucun volId fourni - création automatique',
-        output: null,
+    let horaire;
+    let bulletinReference = null;
+
+    // ========================================================================
+    // PATH 1: CRV depuis bulletin de mouvement
+    // ========================================================================
+    if (bulletinId && mouvementId) {
+      console.log('[CRV][DECISION_CHECK][PATH_BULLETIN]', {
+        crvId: null, userId: req.user?._id || null, role: req.user?.fonction || null,
+        input: { bulletinId, mouvementId },
+        decision: true, reason: 'Création CRV depuis bulletin de mouvement',
+        output: null, timestamp: new Date().toISOString()
+      });
+
+      const BulletinMouvement = (await import('../../models/bulletin/BulletinMouvement.js')).default;
+      const bulletin = await BulletinMouvement.findById(bulletinId);
+
+      if (!bulletin) {
+        return res.status(404).json({
+          success: false,
+          message: 'Bulletin de mouvement non trouvé'
+        });
+      }
+
+      const mouvement = bulletin.mouvements.id(mouvementId);
+      if (!mouvement) {
+        return res.status(404).json({
+          success: false,
+          message: 'Mouvement non trouvé dans le bulletin'
+        });
+      }
+
+      // Détection doublon
+      const crvExistant = await detecterDoublonCRV(
+        mouvement.numeroVol,
+        mouvement.dateMouvement,
+        bulletin.escale
+      );
+
+      if (crvExistant && (!forceDoublon || confirmationLevel !== 2)) {
+        return res.status(409).json({
+          success: false,
+          message: 'Un CRV existe déjà pour ce vol sur cette escale. Pour forcer: forceDoublon=true ET confirmationLevel=2',
+          code: 'CRV_DOUBLON',
+          crvExistantId: crvExistant._id,
+          numeroCRV: crvExistant.numeroCRV
+        });
+      }
+
+      // Créer Vol depuis mouvement (service dédié)
+      vol = await creerVolDepuisMouvement(mouvement, bulletin);
+      volId = vol._id;
+
+      // Lier mouvement.vol au Vol créé (mise à jour du sous-document)
+      mouvement.vol = vol._id;
+      await bulletin.save();
+
+      // Créer Horaire avec heures prévues du bulletin
+      horaire = await Horaire.create({
+        vol: vol._id,
+        heureAtterrisagePrevue: mouvement.heureArriveePrevue || null,
+        heureDecollagePrevue: mouvement.heureDepartPrevue || null
+      });
+
+      bulletinReference = bulletin._id;
+
+      console.log('[CRV][PATH_BULLETIN_SUCCESS]', {
+        crvId: null, userId: req.user?._id || null, role: req.user?.fonction || null,
+        input: { bulletinId, mouvementId },
+        decision: true, reason: 'Vol et Horaire créés depuis bulletin',
+        output: { volId: vol._id, horaireId: horaire._id },
         timestamp: new Date().toISOString()
       });
 
-      // Déterminer le type d'opération à partir du type de CRV
-      let typeOperation = 'DEPART'; // Par défaut
+    // ========================================================================
+    // PATH 2: CRV hors programme / hors bulletin
+    // ========================================================================
+    } else if (volData && !volId) {
+      console.log('[CRV][DECISION_CHECK][PATH_HORS_PROGRAMME]', {
+        crvId: null, userId: req.user?._id || null, role: req.user?.fonction || null,
+        input: { volData },
+        decision: true, reason: 'Création CRV hors programme',
+        output: null, timestamp: new Date().toISOString()
+      });
+
+      // Validation champs obligatoires
+      const champsRequis = ['numeroVol', 'compagnieAerienne', 'codeIATA', 'dateVol', 'typeOperation', 'typeVolHorsProgramme', 'raisonHorsProgramme'];
+      const champsManquants = champsRequis.filter(champ => !volData[champ]);
+
+      if (champsManquants.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Champs obligatoires manquants pour vol hors programme',
+          champsManquants
+        });
+      }
+
+      // Validation aéroports conditionnelle
+      if (['ARRIVEE', 'TURN_AROUND'].includes(volData.typeOperation) && !volData.aeroportOrigine) {
+        return res.status(400).json({
+          success: false,
+          message: 'aeroportOrigine requis pour ARRIVEE ou TURN_AROUND'
+        });
+      }
+      if (['DEPART', 'TURN_AROUND'].includes(volData.typeOperation) && !volData.aeroportDestination) {
+        return res.status(400).json({
+          success: false,
+          message: 'aeroportDestination requis pour DEPART ou TURN_AROUND'
+        });
+      }
+
+      // Détection doublon
+      const crvExistant = await detecterDoublonCRV(
+        volData.numeroVol,
+        new Date(volData.dateVol),
+        escaleCode
+      );
+
+      if (crvExistant && (!forceDoublon || confirmationLevel !== 2)) {
+        return res.status(409).json({
+          success: false,
+          message: 'Un CRV existe déjà pour ce vol sur cette escale. Pour forcer: forceDoublon=true ET confirmationLevel=2',
+          code: 'CRV_DOUBLON',
+          crvExistantId: crvExistant._id,
+          numeroCRV: crvExistant.numeroCRV
+        });
+      }
+
+      // Créer Vol hors programme
+      vol = await Vol.create({
+        numeroVol: volData.numeroVol.toUpperCase(),
+        compagnieAerienne: volData.compagnieAerienne,
+        codeIATA: volData.codeIATA.toUpperCase(),
+        dateVol: new Date(volData.dateVol),
+        typeOperation: volData.typeOperation,
+        aeroportOrigine: volData.aeroportOrigine?.toUpperCase() || null,
+        aeroportDestination: volData.aeroportDestination?.toUpperCase() || null,
+        horsProgramme: true, // FORCÉ à true
+        typeVolHorsProgramme: volData.typeVolHorsProgramme,
+        raisonHorsProgramme: volData.raisonHorsProgramme,
+        avion: volData.avion || null,
+        statut: 'PROGRAMME'
+      });
+      volId = vol._id;
+
+      horaire = await Horaire.create({ vol: vol._id });
+
+      console.log('[CRV][PATH_HORS_PROGRAMME_SUCCESS]', {
+        crvId: null, userId: req.user?._id || null, role: req.user?.fonction || null,
+        input: { volData },
+        decision: true, reason: 'Vol hors programme créé',
+        output: { volId: vol._id, horaireId: horaire._id },
+        timestamp: new Date().toISOString()
+      });
+
+    // ========================================================================
+    // PATH 3: Vol existant (backward compat)
+    // ========================================================================
+    } else if (volId) {
+      console.log('[CRV][DECISION_CHECK][PATH_VOL_EXISTANT]', {
+        crvId: null, userId: req.user?._id || null, role: req.user?.fonction || null,
+        input: { volId },
+        decision: true, reason: 'Création CRV avec Vol existant (backward compat)',
+        output: null, timestamp: new Date().toISOString()
+      });
+
+      vol = await Vol.findById(volId);
+      if (!vol) {
+        return res.status(404).json({
+          success: false,
+          message: 'Vol non trouvé'
+        });
+      }
+
+      // Détection doublon
+      const crvExistant = await detecterDoublonCRV(vol.numeroVol, vol.dateVol, escaleCode);
+      if (crvExistant && (!forceDoublon || confirmationLevel !== 2)) {
+        return res.status(409).json({
+          success: false,
+          message: 'Un CRV existe déjà pour ce vol sur cette escale. Pour forcer: forceDoublon=true ET confirmationLevel=2',
+          code: 'CRV_DOUBLON',
+          crvExistantId: crvExistant._id,
+          numeroCRV: crvExistant.numeroCRV
+        });
+      }
+
+      horaire = await Horaire.create({ vol: vol._id });
+      bulletinReference = vol.bulletinMouvementReference || null;
+
+    // ========================================================================
+    // PATH LEGACY: auto-création Vol (comportement original préservé)
+    // ========================================================================
+    } else {
+      console.warn('[CRV][LEGACY_PATH_CONFIRMED_BY_USER]', {
+        crvId: null, userId: req.user?._id || null, role: req.user?.fonction || null,
+        input: { type },
+        decision: true, reason: 'Création exceptionnelle confirmée par utilisateur via UI (legacy path)',
+        output: null, timestamp: new Date().toISOString()
+      });
+
+      let typeOperation = 'DEPART';
       if (type === 'arrivee') typeOperation = 'ARRIVEE';
       else if (type === 'depart') typeOperation = 'DEPART';
       else if (type === 'turnaround') typeOperation = 'TURN_AROUND';
 
-      // Créer un vol temporaire
       const count = await Vol.countDocuments();
       vol = await Vol.create({
         numeroVol: `VOL${String(count + 1).padStart(4, '0')}`,
@@ -75,81 +264,51 @@ export const creerCRV = async (req, res, next) => {
       });
       volId = vol._id;
 
-      console.log('[CRV][VOL_CREATED]', {
-        crvId: null,
-        userId: req.user?._id || null,
-        role: req.user?.fonction || null,
-        input: { type },
-        decision: true,
-        reason: 'Vol auto-créé',
-        output: { volId: vol._id, numeroVol: vol.numeroVol, typeOperation },
-        timestamp: new Date().toISOString()
-      });
-    } else {
-      vol = await Vol.findById(volId);
-      if (!vol) {
-        console.warn('[CRV][API_REJECT][VOL_NOT_FOUND]', {
-          crvId: null,
-          userId: req.user?._id || null,
-          role: req.user?.fonction || null,
-          input: { volId },
-          decision: false,
-          reason: 'Vol non trouvé',
-          output: null,
-          timestamp: new Date().toISOString()
-        });
-        return res.status(404).json({
-          success: false,
-          message: 'Vol non trouvé'
-        });
-      }
+      horaire = await Horaire.create({ vol: vol._id });
     }
 
-    const numeroCRV = await genererNumeroCRV(vol);
+    // ========================================================================
+    // CRÉATION CRV (commun à tous les paths)
+    // ========================================================================
 
-    const horaire = await Horaire.create({
-      vol: volId
-    });
+    const numeroCRV = await genererNumeroCRV(vol);
 
     const crv = await CRV.create({
       numeroCRV,
       vol: volId,
-      escale,
+      escale: escaleCode,
       horaire: horaire._id,
       creePar: req.user._id,
-      responsableVol: responsableVolId,
-      statut: 'BROUILLON'
+      responsableVol: responsableVolId || null,
+      statut: 'BROUILLON',
+      bulletinMouvementReference: bulletinReference,
+      crvDoublon: !!forceDoublon
     });
 
     console.log('[CRV][CRV_CREATED]', {
-      crvId: crv._id,
-      userId: req.user?._id || null,
-      role: req.user?.fonction || null,
-      input: req.body,
-      decision: true,
-      reason: 'CRV créé avec succès',
-      output: { numeroCRV: crv.numeroCRV, statut: crv.statut },
+      crvId: crv._id, userId: req.user?._id || null, role: req.user?.fonction || null,
+      input: req.body, decision: true, reason: 'CRV créé avec succès',
+      output: { numeroCRV: crv.numeroCRV, statut: crv.statut, doublon: crv.crvDoublon, bulletinRef: !!bulletinReference },
       timestamp: new Date().toISOString()
     });
 
     await initialiserPhasesVol(crv._id, vol.typeOperation);
-
     await calculerCompletude(crv._id);
 
     const crvPopulated = await CRV.findById(crv._id)
       .populate('vol')
       .populate('horaire')
       .populate('creePar')
-      .populate('responsableVol');
+      .populate('responsableVol')
+      .populate('bulletinMouvementReference');
 
     console.log('[CRV][API_SUCCESS][CREER_CRV]', {
-      crvId: crv._id,
-      userId: req.user?._id || null,
-      role: req.user?.fonction || null,
-      input: req.body,
-      decision: true,
-      reason: 'Création réussie',
-      output: { numeroCRV: crvPopulated.numeroCRV, statut: crvPopulated.statut, completude: crvPopulated.completude },
+      crvId: crv._id, userId: req.user?._id || null, role: req.user?.fonction || null,
+      input: req.body, decision: true, reason: 'Création réussie',
+      output: {
+        numeroCRV: crvPopulated.numeroCRV, statut: crvPopulated.statut, completude: crvPopulated.completude,
+        path: bulletinId ? 'bulletin' : (volData ? 'hors-programme' : (volIdParam ? 'vol-existant' : 'legacy'))
+      },
       timestamp: new Date().toISOString()
     });
 
@@ -159,14 +318,77 @@ export const creerCRV = async (req, res, next) => {
     });
   } catch (error) {
     console.error('[CRV][ERROR][CREER_CRV]', {
-      crvId: null,
-      userId: req.user?._id || null,
-      role: req.user?.fonction || null,
-      input: req.body,
-      decision: false,
-      reason: error.message,
-      output: { stack: error.stack },
-      timestamp: new Date().toISOString()
+      crvId: null, userId: req.user?._id || null, role: req.user?.fonction || null,
+      input: req.body, decision: false, reason: error.message,
+      output: { stack: error.stack }, timestamp: new Date().toISOString()
+    });
+    next(error);
+  }
+};
+
+/**
+ * OBTENIR VOLS DU JOUR SANS CRV
+ *
+ * Retourne les vols d'une date donnée qui ont un bulletin mais pas encore de CRV.
+ * Inclut les vols planifiés ET hors programme.
+ *
+ * @route GET /api/crv/vols-sans-crv?date=YYYY-MM-DD
+ */
+export const obtenirVolsSansCRV = async (req, res, next) => {
+  const timestamp = new Date().toISOString();
+
+  console.log('[CRV][API_ENTER][VOLS_SANS_CRV]', {
+    crvId: null, userId: req.user?._id || null, role: req.user?.fonction || null,
+    input: { query: req.query }, decision: null, reason: null, output: null, timestamp
+  });
+
+  try {
+    const { date } = req.query;
+
+    if (!date) {
+      return res.status(400).json({
+        success: false,
+        message: 'Paramètre date requis (format: YYYY-MM-DD)'
+      });
+    }
+
+    const dateDebut = new Date(date);
+    dateDebut.setHours(0, 0, 0, 0);
+    const dateFin = new Date(date);
+    dateFin.setHours(23, 59, 59, 999);
+
+    // Vols du jour avec bulletin
+    const vols = await Vol.find({
+      dateVol: { $gte: dateDebut, $lte: dateFin },
+      bulletinMouvementReference: { $ne: null }
+    }).populate('bulletinMouvementReference');
+
+    // Filtrer ceux sans CRV
+    const volsSansCRV = [];
+    for (const v of vols) {
+      const crvExistant = await CRV.findOne({ vol: v._id });
+      if (!crvExistant) {
+        volsSansCRV.push(v);
+      }
+    }
+
+    console.log('[CRV][API_SUCCESS][VOLS_SANS_CRV]', {
+      crvId: null, userId: req.user?._id || null, role: req.user?.fonction || null,
+      input: { date }, decision: true, reason: 'Vols sans CRV récupérés',
+      output: { count: volsSansCRV.length, date }, timestamp: new Date().toISOString()
+    });
+
+    res.status(200).json({
+      success: true,
+      data: volsSansCRV,
+      count: volsSansCRV.length,
+      date
+    });
+  } catch (error) {
+    console.error('[CRV][ERROR][VOLS_SANS_CRV]', {
+      crvId: null, userId: req.user?._id || null, role: req.user?.fonction || null,
+      input: req.query, decision: false, reason: error.message,
+      output: { stack: error.stack }, timestamp: new Date().toISOString()
     });
     next(error);
   }
@@ -1957,6 +2179,20 @@ export const demarrerCRV = async (req, res, next) => {
     crv.modifiePar = req.user._id;
     await crv.save();
 
+    // EXTENSION 8 - Sync Vol.statut → EN_COURS
+    const volDemarrer = await Vol.findById(crv.vol);
+    if (volDemarrer) {
+      volDemarrer.statut = 'EN_COURS';
+      await volDemarrer.save();
+      console.log('[CRV][VOL_STATUS_SYNC]', {
+        crvId: crv._id, userId: req.user?._id || null, role: req.user?.fonction || null,
+        input: { crvStatut: 'EN_COURS' }, decision: 'SYNC',
+        reason: 'Vol status synchronized with CRV',
+        output: { volId: volDemarrer._id, volStatut: 'EN_COURS' },
+        timestamp: new Date().toISOString()
+      });
+    }
+
     const crvUpdated = await CRV.findById(crv._id)
       .populate('vol')
       .populate('horaire')
@@ -2159,6 +2395,20 @@ export const terminerCRV = async (req, res, next) => {
     crv.statut = 'TERMINE';
     crv.modifiePar = req.user._id;
     await crv.save();
+
+    // EXTENSION 8 - Sync Vol.statut → TERMINE
+    const volTerminer = await Vol.findById(crv.vol);
+    if (volTerminer) {
+      volTerminer.statut = 'TERMINE';
+      await volTerminer.save();
+      console.log('[CRV][VOL_STATUS_SYNC]', {
+        crvId: crv._id, userId: req.user?._id || null, role: req.user?.fonction || null,
+        input: { crvStatut: 'TERMINE' }, decision: 'SYNC',
+        reason: 'Vol status synchronized with CRV',
+        output: { volId: volTerminer._id, volStatut: 'TERMINE' },
+        timestamp: new Date().toISOString()
+      });
+    }
 
     const crvUpdated = await CRV.findById(crv._id)
       .populate('vol')

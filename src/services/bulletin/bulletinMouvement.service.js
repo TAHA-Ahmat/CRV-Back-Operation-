@@ -244,7 +244,41 @@ export const obtenirBulletinParId = async (bulletinId) => {
 export const obtenirBulletinEnCours = async (escale) => {
   try {
     const bulletin = await BulletinMouvement.getBulletinEnCours(escale);
-    return bulletin;
+
+    if (!bulletin) return null;
+
+    // Enrichissement dynamique : injecter crvId sur chaque mouvement
+    // SANS modifier le schema, SANS save() — injection dans la réponse API uniquement
+    const CRV = (await import('../../models/crv/CRV.js')).default;
+
+    // Collecter tous les volIds non-null des mouvements
+    const volIds = bulletin.mouvements
+      .filter(m => m.vol)
+      .map(m => m.vol);
+
+    // Rechercher tous les CRV liés à ces vols en une seule requête
+    const crvs = volIds.length > 0
+      ? await CRV.find({ vol: { $in: volIds } }).select('_id vol').lean()
+      : [];
+
+    // Construire un map vol → crvId
+    const volToCrv = new Map();
+    for (const crv of crvs) {
+      volToCrv.set(crv.vol.toString(), crv._id);
+    }
+
+    // Convertir en objet plain pour pouvoir injecter crvId
+    const bulletinObj = bulletin.toObject();
+
+    for (const mouvement of bulletinObj.mouvements) {
+      if (mouvement.vol) {
+        mouvement.crvId = volToCrv.get(mouvement.vol.toString()) || null;
+      } else {
+        mouvement.crvId = null;
+      }
+    }
+
+    return bulletinObj;
   } catch (error) {
     console.error('Erreur lors de la recuperation du bulletin en cours:', error);
     throw error;
@@ -808,6 +842,24 @@ export const creerVolsDepuisBulletin = async (bulletinId, userId) => {
 };
 
 // ══════════════════════════════════════════════════════════════════════════
+// ESCALES ACTIVES
+// ══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Retourne les escales ayant un bulletin PUBLIE couvrant une date donnee
+ * @param {Date} date - Date a verifier
+ * @returns {String[]} Liste des codes escale
+ */
+export const getEscalesActives = async (date) => {
+  const escales = await BulletinMouvement.distinct('escale', {
+    statut: 'PUBLIE',
+    dateDebut: { $lte: date },
+    dateFin: { $gte: date }
+  });
+  return escales;
+};
+
+// ══════════════════════════════════════════════════════════════════════════
 // SUPPRESSION
 // ══════════════════════════════════════════════════════════════════════════
 
@@ -870,5 +922,6 @@ export default {
   publierBulletin,
   archiverBulletin,
   creerVolsDepuisBulletin,
-  supprimerBulletin
+  supprimerBulletin,
+  getEscalesActives
 };

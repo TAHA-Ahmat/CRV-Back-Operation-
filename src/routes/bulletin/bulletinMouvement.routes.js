@@ -61,6 +61,14 @@ router.get('/', protect, bulletinController.listerBulletins);
 router.get('/en-cours/:escale', protect, bulletinController.obtenirBulletinEnCours);
 
 /**
+ * @route   GET /api/bulletins/escales-actives
+ * @desc    Escales ayant un bulletin PUBLIE couvrant la date donnee
+ * @access  Private (Tous)
+ * @query   date (YYYY-MM-DD, requis)
+ */
+router.get('/escales-actives', protect, bulletinController.getEscalesActives);
+
+/**
  * @route   GET /api/bulletins/:id
  * @desc    Obtenir un bulletin par ID
  * @access  Private (Tous)

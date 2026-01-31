@@ -488,3 +488,163 @@ export const mettreAJourTypeOperation = async (crvId) => {
     return { success: false, typeOperation: null, message: error.message };
   }
 };
+
+// ========== EXTENSION 8 - Création CRV depuis bulletin et hors programme ==========
+// NON-REGRESSION: Fonctions AJOUTÉES, aucune fonction existante modifiée
+
+import Vol from '../../models/flights/Vol.js';
+
+/**
+ * DÉTECTION DE DOUBLON CRV
+ *
+ * Vérifie si un CRV existe déjà pour le même vol (numeroVol + dateVol + escale)
+ * Règle métier : 1 vol + 1 escale + 1 date = 1 CRV unique
+ *
+ * @param {string} numeroVol - Numéro de vol
+ * @param {Date} dateVol - Date du vol
+ * @param {string} escale - Code IATA escale
+ * @returns {Object|null} CRV existant ou null
+ */
+export const detecterDoublonCRV = async (numeroVol, dateVol, escale) => {
+  const timestamp = new Date().toISOString();
+
+  console.log('[CRV][SERVICE][DETECTER_DOUBLON_START]', {
+    crvId: null,
+    userId: null,
+    role: null,
+    input: { numeroVol, dateVol, escale },
+    decision: null,
+    reason: 'Début détection doublon CRV',
+    output: null,
+    timestamp
+  });
+
+  try {
+    const dateDebut = new Date(dateVol);
+    dateDebut.setHours(0, 0, 0, 0);
+    const dateFin = new Date(dateVol);
+    dateFin.setHours(23, 59, 59, 999);
+
+    // Recherche TOUS les Vol correspondants (pas un seul)
+    // Règle métier : unicité sur { numeroVol, dateVol, escale } même si plusieurs Vol existent
+    const vols = await Vol.find({
+      numeroVol: numeroVol.toUpperCase(),
+      dateVol: { $gte: dateDebut, $lte: dateFin }
+    });
+
+    if (vols.length === 0) {
+      console.log('[CRV][SERVICE][DETECTER_DOUBLON_RESULT]', {
+        crvId: null, userId: null, role: null,
+        input: { numeroVol, dateVol, escale },
+        decision: 'AUCUN_VOL',
+        reason: 'Aucun vol trouvé - pas de doublon',
+        output: null,
+        timestamp: new Date().toISOString()
+      });
+      return null;
+    }
+
+    // Chercher un CRV sur N'IMPORTE lequel de ces Vol pour cette escale
+    const volIds = vols.map(v => v._id);
+    const crvExistant = await CRV.findOne({
+      vol: { $in: volIds },
+      escale: escale.toUpperCase()
+    });
+
+    if (crvExistant) {
+      console.log('[CRV][SERVICE][DETECTER_DOUBLON_FOUND]', {
+        crvId: crvExistant._id, userId: null, role: null,
+        input: { numeroVol, dateVol, escale },
+        decision: 'DOUBLON_DETECTE',
+        reason: `CRV existant trouvé: ${crvExistant.numeroCRV}`,
+        output: { crvExistantId: crvExistant._id, numeroCRV: crvExistant.numeroCRV, volsVerifies: volIds.length },
+        timestamp: new Date().toISOString()
+      });
+      return crvExistant;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('[CRV][SERVICE][DETECTER_DOUBLON_ERROR]', {
+      crvId: null, userId: null, role: null,
+      input: { numeroVol, dateVol, escale },
+      decision: 'ERROR', reason: error.message,
+      output: null, timestamp: new Date().toISOString()
+    });
+    return null;
+  }
+};
+
+/**
+ * CRÉER VOL DEPUIS MOUVEMENT BULLETIN
+ *
+ * Crée un Vol à partir des données d'un mouvement de bulletin.
+ * Mapping complet mouvement → Vol selon spécifications fonctionnelles.
+ *
+ * NE MODIFIE PAS le modèle BulletinMouvement (lecture seule).
+ *
+ * @param {Object} mouvement - Sous-document mouvement du bulletin
+ * @param {Object} bulletin - Document BulletinMouvement parent
+ * @returns {Object} Vol créé
+ */
+export const creerVolDepuisMouvement = async (mouvement, bulletin) => {
+  const timestamp = new Date().toISOString();
+
+  console.log('[CRV][SERVICE][CREER_VOL_MOUVEMENT_START]', {
+    crvId: null, userId: null, role: null,
+    input: { mouvementId: mouvement._id, bulletinId: bulletin._id, numeroVol: mouvement.numeroVol },
+    decision: null, reason: 'Début création Vol depuis mouvement',
+    output: null, timestamp
+  });
+
+  try {
+    // Déduire typeOperation si non renseigné dans le mouvement
+    let typeOperation = mouvement.typeOperation;
+    if (!typeOperation) {
+      if (mouvement.heureArriveePrevue && mouvement.heureDepartPrevue) {
+        typeOperation = 'TURN_AROUND';
+      } else if (mouvement.heureArriveePrevue) {
+        typeOperation = 'ARRIVEE';
+      } else if (mouvement.heureDepartPrevue) {
+        typeOperation = 'DEPART';
+      }
+    }
+
+    const vol = await Vol.create({
+      numeroVol: mouvement.numeroVol,
+      codeIATA: mouvement.codeCompagnie || mouvement.numeroVol?.match(/^([A-Z]{2,3})/)?.[1] || '',
+      compagnieAerienne: mouvement.codeCompagnie || mouvement.numeroVol?.match(/^([A-Z]{2,3})/)?.[1] || '',
+      dateVol: mouvement.dateMouvement,
+      aeroportOrigine: mouvement.provenance || null,
+      aeroportDestination: mouvement.destination || null,
+      typeOperation,
+      horsProgramme: mouvement.origine === 'HORS_PROGRAMME',
+      typeVolHorsProgramme: mouvement.typeHorsProgramme || null,
+      raisonHorsProgramme: mouvement.raisonHorsProgramme || null,
+      programmeVolReference: mouvement.programmeVolReference || null,
+      bulletinMouvementReference: bulletin._id,
+      statut: 'PROGRAMME'
+    });
+
+    console.log('[CRV][SERVICE][CREER_VOL_MOUVEMENT_SUCCESS]', {
+      crvId: null, userId: null, role: null,
+      input: { mouvementId: mouvement._id },
+      decision: 'VOL_CREE',
+      reason: 'Vol créé depuis mouvement bulletin',
+      output: { volId: vol._id, numeroVol: vol.numeroVol, typeOperation, horsProgramme: vol.horsProgramme },
+      timestamp: new Date().toISOString()
+    });
+
+    return vol;
+  } catch (error) {
+    console.error('[CRV][SERVICE][CREER_VOL_MOUVEMENT_ERROR]', {
+      crvId: null, userId: null, role: null,
+      input: { mouvementId: mouvement._id },
+      decision: 'ERROR', reason: error.message,
+      output: null, timestamp: new Date().toISOString()
+    });
+    throw error;
+  }
+};
+
+// FIN EXTENSION 8

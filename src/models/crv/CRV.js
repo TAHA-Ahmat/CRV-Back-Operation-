@@ -245,9 +245,25 @@ const crvSchema = new mongoose.Schema({
     ref: 'BulletinMouvement',
     default: null,
     description: 'Reference au bulletin de mouvement (tracabilite previsionnel → reel)'
-  }
+  },
 
   // FIN EXTENSION 7
+
+  // ========== EXTENSION 8 - Gestion doublons CRV ==========
+  // NON-REGRESSION: Champ OPTIONNEL avec valeur par defaut false
+
+  /**
+   * Indique si ce CRV a ete cree en forcant un doublon
+   * (meme numeroVol + dateVol + escale qu'un CRV existant)
+   * Cas d'usage: correction, vol reprogramme, etc.
+   */
+  crvDoublon: {
+    type: Boolean,
+    default: false,
+    description: 'CRV cree en forcant un doublon (confirmation explicite utilisateur)'
+  }
+
+  // FIN EXTENSION 8
 }, {
   timestamps: true
 });

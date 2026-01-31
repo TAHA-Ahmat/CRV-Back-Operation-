@@ -308,6 +308,55 @@ export const supprimerBulletin = async (req, res) => {
   }
 };
 
+/**
+ * Obtenir les escales ayant un bulletin actif pour une date
+ * GET /api/bulletins/escales-actives?date=YYYY-MM-DD
+ */
+export const getEscalesActives = async (req, res) => {
+  try {
+    const { date } = req.query;
+
+    if (!date) {
+      return res.status(400).json({
+        success: false,
+        message: 'Le parametre date est requis (format YYYY-MM-DD)'
+      });
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Format de date invalide. Attendu: YYYY-MM-DD'
+      });
+    }
+
+    const parsedDate = new Date(date + 'T00:00:00.000Z');
+
+    if (isNaN(parsedDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Date invalide'
+      });
+    }
+
+    const escales = await bulletinService.getEscalesActives(parsedDate);
+
+    res.status(200).json({
+      success: true,
+      escales,
+      date
+    });
+
+  } catch (error) {
+    console.error('Erreur dans getEscalesActives:', error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Erreur lors de la recuperation des escales actives'
+    });
+  }
+};
+
 // ══════════════════════════════════════════════════════════════════════════
 // GESTION DES MOUVEMENTS
 // ══════════════════════════════════════════════════════════════════════════
@@ -696,5 +745,6 @@ export default {
   annulerMouvement,
   publierBulletin,
   archiverBulletin,
-  creerVolsDepuisBulletin
+  creerVolsDepuisBulletin,
+  getEscalesActives
 };

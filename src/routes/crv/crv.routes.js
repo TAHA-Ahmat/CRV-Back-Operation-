@@ -20,7 +20,8 @@ import {
   annulerConfirmationAbsence,
   mettreAJourPersonnel,
   ajouterPersonnel,
-  supprimerPersonnel
+  supprimerPersonnel,
+  obtenirVolsSansCRV
 } from '../../controllers/crv/crv.controller.js';
 import {
   obtenirEnginsAffectes,
@@ -60,8 +61,24 @@ const router = express.Router();
 
 // 🔒 P0-1: QUALITE exclu (lecture seule)
 router.post('/', protect, excludeQualite, [
-  body('volId').optional(),
+  // PATH 1: Bulletin
+  body('bulletinId').optional().isMongoId().withMessage('bulletinId invalide'),
+  body('mouvementId').optional().isMongoId().withMessage('mouvementId invalide'),
+  // PATH 2: Hors programme
+  body('vol').optional().isObject().withMessage('vol doit être un objet'),
+  body('vol.numeroVol').optional().notEmpty().withMessage('vol.numeroVol requis'),
+  body('vol.compagnieAerienne').optional().notEmpty().withMessage('vol.compagnieAerienne requis'),
+  body('vol.codeIATA').optional().notEmpty().withMessage('vol.codeIATA requis'),
+  body('vol.dateVol').optional().isISO8601().withMessage('vol.dateVol doit être une date valide'),
+  body('vol.typeOperation').optional().isIn(['ARRIVEE', 'DEPART', 'TURN_AROUND']).withMessage('vol.typeOperation invalide'),
+  body('vol.typeVolHorsProgramme').optional().isIn(['CHARTER', 'MEDICAL', 'TECHNIQUE', 'COMMERCIAL', 'CARGO', 'AUTRE']).withMessage('vol.typeVolHorsProgramme invalide'),
+  // PATH 3: Legacy
+  body('volId').optional().isMongoId().withMessage('volId invalide'),
   body('type').optional().isIn(['arrivee', 'depart', 'turnaround']).withMessage('Type invalide'),
+  // Commun
+  body('escale').optional().isLength({ min: 3, max: 4 }).withMessage('escale doit faire 3-4 caractères'),
+  body('forceDoublon').optional().isBoolean().withMessage('forceDoublon doit être un booléen'),
+  body('confirmationLevel').optional().isInt({ min: 2, max: 2 }).withMessage('confirmationLevel doit être égal à 2 pour forcer un doublon'),
   validate
 ], verifierPhasesAutoriseesCreationCRV, auditLog('CREATION'), creerCRV);
 
@@ -79,6 +96,9 @@ router.get('/stats', protect, obtenirStatsCRV);
 
 // Export Excel/CSV
 router.get('/export', protect, exporterCRVExcel);
+
+// EXTENSION 8 - Vols du jour sans CRV (avant /:id)
+router.get('/vols-sans-crv', protect, obtenirVolsSansCRV);
 
 // ============================
 //   EXTENSION 6 - ROUTES ANNULATION (NON-PARAMÉTRISÉES)
