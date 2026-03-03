@@ -1,8 +1,19 @@
+import mongoose from 'mongoose';
 import CRV from '../../models/crv/CRV.js';
 import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
 import ChargeOperationnelle from '../../models/charges/ChargeOperationnelle.js';
 import EvenementOperationnel from '../../models/transversal/EvenementOperationnel.js';
 import Observation from '../../models/crv/Observation.js';
+
+/**
+ * Compteur atomique pour séquences CRV journalières.
+ * findOneAndUpdate + $inc + upsert garantit l'unicité même sous concurrence.
+ */
+const compteurSchema = new mongoose.Schema({
+  _id: String,
+  seq: { type: Number, default: 0 }
+});
+const Compteur = mongoose.models.Compteur || mongoose.model('Compteur', compteurSchema);
 
 /**
  * CALCUL DE COMPLÉTUDE CRV
@@ -200,22 +211,31 @@ export const verifierConformiteSLA = async (crvId, compagnieAerienne) => {
   }
 };
 
+/**
+ * Génère un numéro CRV unique via compteur atomique.
+ *
+ * AVANT : countDocuments + 1 → race condition (deux requêtes lisent le même count)
+ * APRES : findOneAndUpdate + $inc → atomique, garanti unique par jour.
+ *
+ * Format : CRV{AAMMJJ}-{XXXX}  (ex: CRV260303-0001)
+ * L'index unique sur CRV.numeroCRV reste le filet de sécurité final.
+ */
 export const genererNumeroCRV = async (vol) => {
   const date = new Date();
   const year = date.getFullYear().toString().slice(-2);
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
+  const dateKey = `${year}${month}${day}`;
 
-  const count = await CRV.countDocuments({
-    dateCreation: {
-      $gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-      $lt: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
-    }
-  });
+  const compteur = await Compteur.findOneAndUpdate(
+    { _id: `CRV-${dateKey}` },
+    { $inc: { seq: 1 } },
+    { upsert: true, new: true }
+  );
 
-  const sequence = (count + 1).toString().padStart(4, '0');
+  const sequence = compteur.seq.toString().padStart(4, '0');
 
-  return `CRV${year}${month}${day}-${sequence}`;
+  return `CRV${dateKey}-${sequence}`;
 };
 
 export const calculerDureesPhases = (heureDebut, heureFin) => {
@@ -454,7 +474,7 @@ export const mettreAJourTypeOperation = async (crvId) => {
     }
 
     // Mise à jour du Vol avec le type déduit
-    const Vol = (await import('../models/Vol.js')).default;
+    const Vol = (await import('../../models/flights/Vol.js')).default;
     await Vol.findByIdAndUpdate(crv.vol._id, { typeOperation });
 
     console.log('[CRV][SERVICE][MAJ_TYPE_OPERATION_SUCCESS]', {

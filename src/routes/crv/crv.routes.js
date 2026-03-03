@@ -121,6 +121,16 @@ router.get('/annules', protect, obtenirCRVAnnules);
 router.get('/statistiques/annulations', protect, excludeQualite, obtenirStatistiquesAnnulations);
 
 // ============================
+//   ROUTES ARCHIVAGE STATIQUES (AVANT /:id pour éviter le shadowing)
+// ============================
+
+// Vérifier le statut du service d'archivage
+router.get('/archive/status', protect, getArchivageStatus);
+
+// Tester l'archivage avec un PDF de test
+router.post('/archive/test', protect, excludeQualite, testerArchivage);
+
+// ============================
 //   ROUTES PARAMÉTRISÉES
 // ============================
 
@@ -318,15 +328,8 @@ router.put('/:crvId/phases/:phaseId', protect, excludeQualite, auditLog('MISE_A_
 router.put('/:id/horaire', protect, excludeQualite, verifierCRVNonVerrouille, auditLog('MISE_A_JOUR'), mettreAJourHoraire);
 
 // ============================
-//   ROUTES ARCHIVAGE GOOGLE DRIVE
+//   ROUTES ARCHIVAGE GOOGLE DRIVE (PARAMÉTRISÉES)
 // ============================
-
-// Vérifier le statut du service d'archivage
-router.get('/archive/status', getArchivageStatus);
-
-// Tester l'archivage avec un PDF de test
-// 🔒 P0-1: QUALITE exclu
-router.post('/archive/test', protect, excludeQualite, testerArchivage);
 
 // Archiver un CRV spécifique
 // 🔒 P0-1: QUALITE exclu

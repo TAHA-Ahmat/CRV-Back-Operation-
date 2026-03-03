@@ -20,9 +20,15 @@ const generator = new CrvGenerator();
  * Génère et archive un CRV dans Google Drive
  * Crée automatiquement l'arborescence : CRV/{Année}/{Mois}/{Compagnie}/
  *
+ * IDEMPOTENCE (P0#7) :
+ * Si le CRV est déjà archivé (archivage.driveFileId présent), la fonction
+ * retourne directement le résultat existant SANS régénérer le PDF ni
+ * re-uploader vers Drive. Pour forcer un ré-archivage, passer options.force = true.
+ *
  * @param {string} crvId - ID du CRV
  * @param {string} userId - ID de l'utilisateur
  * @param {Object} options - Options supplémentaires
+ * @param {boolean} [options.force=false] - Forcer le ré-archivage même si déjà archivé
  * @returns {Promise<Object>} Résultat de l'archivage
  */
 export async function archiverCRV(crvId, userId, options = {}) {
@@ -43,6 +49,30 @@ export async function archiverCRV(crvId, userId, options = {}) {
     const error = new Error(canArchive.reason);
     error.status = 400;
     throw error;
+  }
+
+  // 2b. IDEMPOTENCE (P0#7) : si déjà archivé et pas de force, retourner l'existant
+  if (crv.archivage?.driveFileId && !options.force) {
+    console.log(`[CRV-ARCHIVE-UNIFIED] CRV ${crv.numeroCRV} déjà archivé (idempotent) — version ${crv.archivage.version}`);
+    return {
+      success: true,
+      idempotent: true,
+      crv: {
+        id: crv._id,
+        numeroCRV: crv.numeroCRV,
+        escale: crv.escale,
+        statut: crv.statut
+      },
+      archivage: {
+        fileId: crv.archivage.driveFileId,
+        webViewLink: crv.archivage.driveWebViewLink,
+        filename: crv.archivage.filename,
+        folderPath: crv.archivage.folderPath,
+        size: crv.archivage.size,
+        archivedAt: crv.archivage.archivedAt,
+        version: crv.archivage.version
+      }
+    };
   }
 
   // 3. Générer le PDF
