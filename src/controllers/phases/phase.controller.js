@@ -3,6 +3,7 @@ import CRV from '../../models/crv/CRV.js';
 import Phase from '../../models/phases/Phase.js';
 import { demarrerPhase, terminerPhase } from '../../services/phases/phase.service.js';
 import { calculerCompletude } from '../../services/crv/crv.service.js';
+import { creerHorodatageDeclaration } from '../../utils/horodatage.js';
 
 /**
  * Obtenir une phase individuelle (ChronologiePhase)
@@ -307,8 +308,13 @@ export const mettreAJourPhase = async (req, res, next) => {
       heureFinPrevue,
       heureDebutReelle,
       heureFinReelle,
-      remarques
+      remarques,
+      sourceHorodatage,       // Optionnel : source explicite (CORRECTION, IMPORT)
+      timezoneAeroport        // Optionnel : timezone aéroport
     } = req.body;
+
+    const userId = req.user?._id || null;
+    const timezone = timezoneAeroport || 'UTC';
 
     console.log('\n── CHAMPS À METTRE À JOUR ──');
     if (heureDebutPrevue) {
@@ -320,12 +326,24 @@ export const mettreAJourPhase = async (req, res, next) => {
       console.log(`   heureFinPrevue: ${heureFinPrevue} → ${chronoPhase.heureFinPrevue}`);
     }
     if (heureDebutReelle) {
-      chronoPhase.heureDebutReelle = convertirHeureEnDate(heureDebutReelle);
+      const heureConvertie = convertirHeureEnDate(heureDebutReelle);
+      chronoPhase.heureDebutReelle = heureConvertie;
+      // Double horodatage — déclaration manuelle de l'heure de début
+      chronoPhase.horodatageDebut = creerHorodatageDeclaration(
+        heureConvertie, userId, timezone, sourceHorodatage
+      );
       console.log(`   heureDebutReelle: ${heureDebutReelle} → ${chronoPhase.heureDebutReelle}`);
+      console.log(`   horodatageDebut.source: ${chronoPhase.horodatageDebut.source} (écart: ${chronoPhase.horodatageDebut.ecartSaisieMinutes} min)`);
     }
     if (heureFinReelle) {
-      chronoPhase.heureFinReelle = convertirHeureEnDate(heureFinReelle);
+      const heureConvertie = convertirHeureEnDate(heureFinReelle);
+      chronoPhase.heureFinReelle = heureConvertie;
+      // Double horodatage — déclaration manuelle de l'heure de fin
+      chronoPhase.horodatageFin = creerHorodatageDeclaration(
+        heureConvertie, userId, timezone, sourceHorodatage
+      );
       console.log(`   heureFinReelle: ${heureFinReelle} → ${chronoPhase.heureFinReelle}`);
+      console.log(`   horodatageFin.source: ${chronoPhase.horodatageFin.source} (écart: ${chronoPhase.horodatageFin.ecartSaisieMinutes} min)`);
     }
     if (remarques !== undefined) {
       chronoPhase.remarques = remarques;
@@ -412,8 +430,13 @@ export const mettreAJourPhaseCRV = async (req, res, next) => {
       heureFinReelle,
       motifNonRealisation,
       detailMotif,
-      remarques
+      remarques,
+      sourceHorodatage,       // Optionnel : source explicite (CORRECTION, IMPORT)
+      timezoneAeroport        // Optionnel : timezone aéroport
     } = req.body;
+
+    const userId = req.user?._id || null;
+    const timezone = timezoneAeroport || 'UTC';
 
     // Mise à jour du statut
     if (statut && ['NON_COMMENCE', 'EN_COURS', 'TERMINE', 'NON_REALISE'].includes(statut)) {
@@ -421,15 +444,33 @@ export const mettreAJourPhaseCRV = async (req, res, next) => {
       console.log(`   → Nouveau statut: ${statut}`);
     }
 
-    // Mise à jour des heures (accepte HH:mm ou ISO)
+    // Mise à jour des heures (accepte HH:mm ou ISO) + double horodatage
     if (heureDebutReelle !== undefined) {
-      chronoPhase.heureDebutReelle = heureDebutReelle ? convertirHeureEnDate(heureDebutReelle) : null;
-      console.log(`   → heureDebutReelle: ${heureDebutReelle}`);
+      const heureConvertie = heureDebutReelle ? convertirHeureEnDate(heureDebutReelle) : null;
+      chronoPhase.heureDebutReelle = heureConvertie;
+      if (heureConvertie) {
+        chronoPhase.horodatageDebut = creerHorodatageDeclaration(
+          heureConvertie, userId, timezone, sourceHorodatage
+        );
+        console.log(`   → heureDebutReelle: ${heureDebutReelle} (source: ${chronoPhase.horodatageDebut.source}, écart: ${chronoPhase.horodatageDebut.ecartSaisieMinutes} min)`);
+      } else {
+        chronoPhase.horodatageDebut = undefined;
+        console.log(`   → heureDebutReelle: null`);
+      }
     }
 
     if (heureFinReelle !== undefined) {
-      chronoPhase.heureFinReelle = heureFinReelle ? convertirHeureEnDate(heureFinReelle) : null;
-      console.log(`   → heureFinReelle: ${heureFinReelle}`);
+      const heureConvertie = heureFinReelle ? convertirHeureEnDate(heureFinReelle) : null;
+      chronoPhase.heureFinReelle = heureConvertie;
+      if (heureConvertie) {
+        chronoPhase.horodatageFin = creerHorodatageDeclaration(
+          heureConvertie, userId, timezone, sourceHorodatage
+        );
+        console.log(`   → heureFinReelle: ${heureFinReelle} (source: ${chronoPhase.horodatageFin.source}, écart: ${chronoPhase.horodatageFin.ecartSaisieMinutes} min)`);
+      } else {
+        chronoPhase.horodatageFin = undefined;
+        console.log(`   → heureFinReelle: null`);
+      }
     }
 
     // Motif de non-réalisation

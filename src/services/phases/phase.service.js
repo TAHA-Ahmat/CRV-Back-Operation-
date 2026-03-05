@@ -1,5 +1,6 @@
 import Phase from '../../models/phases/Phase.js';
 import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
+import { creerHorodatageTempsReel } from '../../utils/horodatage.js';
 
 /**
  * INITIALISATION DES PHASES CRV (Cahier des charges §3)
@@ -195,12 +196,16 @@ export const demarrerPhase = async (chronoPhaseId, userId) => {
       throw new Error(`Prérequis non satisfaits: ${verif.prerequisManquants.join(', ')}`);
     }
 
+    const now = new Date();
+    const horodatageDebut = creerHorodatageTempsReel(userId);
+
     const chronoPhase = await ChronologiePhase.findByIdAndUpdate(
       chronoPhaseId,
       {
-        heureDebutReelle: new Date(),
+        heureDebutReelle: now,
         statut: 'EN_COURS',
-        responsable: userId
+        responsable: userId,
+        horodatageDebut
       },
       { new: true }
     ).populate('phase');
@@ -283,8 +288,13 @@ export const terminerPhase = async (chronoPhaseId) => {
     }
 
     const statutPrecedent = chronoPhase.statut;
-    chronoPhase.heureFinReelle = new Date();
+    const now = new Date();
+    chronoPhase.heureFinReelle = now;
     chronoPhase.statut = 'TERMINE';
+
+    // Double horodatage — fin de phase en temps réel
+    const horodatageFin = creerHorodatageTempsReel(chronoPhase.responsable);
+    chronoPhase.horodatageFin = horodatageFin;
 
     await chronoPhase.save();
 
