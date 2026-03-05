@@ -18,7 +18,7 @@ router.post('/register', [
   body('prenom').notEmpty().withMessage('Prénom requis'),
   body('matricule').notEmpty().withMessage('Matricule requis'),
   body('email').isEmail().withMessage('Email invalide'),
-  body('password').isLength({ min: 6 }).withMessage('Mot de passe minimum 6 caractères'),
+  body('password').isLength({ min: 12 }).withMessage('Mot de passe minimum 12 caractères'),
   // fonction supprimée de la validation : forcée à AGENT_ESCALE côté controller
   validate
 ], register);
@@ -50,8 +50,8 @@ router.post('/inscription', [
   body('prenom').notEmpty().withMessage('Prénom requis'),
   body('matricule').notEmpty().withMessage('Matricule requis'),
   body('email').isEmail().withMessage('Email invalide'),
-  body('motDePasse').optional().isLength({ min: 6 }).withMessage('Mot de passe minimum 6 caractères'),
-  body('password').optional().isLength({ min: 6 }).withMessage('Mot de passe minimum 6 caractères'),
+  body('motDePasse').optional().isLength({ min: 12 }).withMessage('Mot de passe minimum 12 caractères'),
+  body('password').optional().isLength({ min: 12 }).withMessage('Mot de passe minimum 12 caractères'),
   validate
 ], register);
 

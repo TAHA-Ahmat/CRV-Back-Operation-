@@ -104,7 +104,7 @@ export const register = async (req, res, next) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'Email ou matricule déjà utilisé'
+        message: 'Impossible de créer le compte. Vérifiez vos informations.'
       });
     }
 
@@ -161,10 +161,10 @@ export const changerMotDePasse = async (req, res, next) => {
       });
     }
 
-    if (nouveauMotDePasse.length < 6) {
+    if (nouveauMotDePasse.length < 12) {
       return res.status(400).json({
         success: false,
-        message: 'Le nouveau mot de passe doit faire au moins 6 caractères'
+        message: 'Le nouveau mot de passe doit faire au moins 12 caractères'
       });
     }
 
