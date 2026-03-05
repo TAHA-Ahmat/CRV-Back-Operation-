@@ -319,7 +319,7 @@ describe('Mission 005 — Tests HTTP critiques', () => {
   // ═══════════════════════════════════════════════════
   describe('Test 4 — Validation échoue si Drive échoue', () => {
     it('POST /api/validation/:id/valider → erreur si archiverCRV throw', async () => {
-      const user = mockAuthenticatedUser();
+      const user = mockAuthenticatedUser({ fonction: 'SUPERVISEUR' });
       const CRV_ID = '507f1f77bcf86cd799439022';
 
       // Le service validerCRV throw (archivage échoue en interne)
@@ -344,7 +344,7 @@ describe('Mission 005 — Tests HTTP critiques', () => {
   // ═══════════════════════════════════════════════════
   describe('Test 5 — Validation réussit si Drive OK', () => {
     it('POST /api/validation/:id/valider → 200 si archivage OK', async () => {
-      const user = mockAuthenticatedUser();
+      const user = mockAuthenticatedUser({ fonction: 'SUPERVISEUR' });
       const CRV_ID = '507f1f77bcf86cd799439033';
       const VALIDATION_ID = '507f1f77bcf86cd799439044';
 
