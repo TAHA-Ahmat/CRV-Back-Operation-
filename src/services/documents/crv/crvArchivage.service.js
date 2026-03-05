@@ -152,6 +152,17 @@ export async function archiverCRV(crvId, userId, options = {}) {
 }
 
 /**
+ * Vérifie si un CRV est immuable (archivé avec succès dans Drive)
+ * Un CRV immuable ne peut plus être déverrouillé ni modifié.
+ *
+ * @param {Object} crv - Document CRV
+ * @returns {boolean} true si le CRV a été archivé (archivedAt défini)
+ */
+export function isCRVImmutable(crv) {
+  return !!(crv?.archivage?.archivedAt);
+}
+
+/**
  * Vérifie si un CRV peut être archivé
  * @param {Object} crv - Document CRV (ou ID)
  * @returns {{canArchive: boolean, reason?: string}}
@@ -269,6 +280,7 @@ export async function getArchiveServiceStatus() {
 
 export default {
   archiverCRV,
+  isCRVImmutable,
   canArchiveCRV,
   canArchiveCRVById,
   getArchivageInfo,

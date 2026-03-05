@@ -5,6 +5,7 @@ import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
 import ChargeOperationnelle from '../../models/charges/ChargeOperationnelle.js';
 import EvenementOperationnel from '../../models/transversal/EvenementOperationnel.js';
 import Observation from '../../models/crv/Observation.js';
+import ValidationCRV from '../../models/validation/ValidationCRV.js';
 import { genererNumeroCRV, calculerCompletude, detecterDoublonCRV, creerVolDepuisMouvement } from '../../services/crv/crv.service.js';
 import { initialiserPhasesVol } from '../../services/phases/phase.service.js';
 
@@ -2896,22 +2897,22 @@ export const supprimerCRV = async (req, res, next) => {
       });
     }
 
-    // Vérifier si le CRV est verrouillé
-    if (crv.statut === 'VERROUILLE') {
-      console.warn('[CRV][API_REJECT][CRV_VERROUILLE]', {
+    // Bloquer suppression si statut ≥ TERMINÉ (données de facturation)
+    if (['TERMINE', 'VALIDE', 'VERROUILLE'].includes(crv.statut)) {
+      console.warn('[CRV][API_REJECT][SUPPRESSION_INTERDITE]', {
         crvId: crv._id,
         userId: req.user?._id || null,
         role: req.user?.fonction || null,
         input: { statut: crv.statut },
         decision: false,
-        reason: 'CRV verrouillé - suppression impossible',
-        output: { code: 'CRV_VERROUILLE' },
+        reason: `Suppression interdite - CRV en statut ${crv.statut}`,
+        output: { code: 'SUPPRESSION_INTERDITE' },
         timestamp: new Date().toISOString()
       });
       return res.status(403).json({
         success: false,
-        message: 'Impossible de supprimer un CRV verrouillé',
-        code: 'CRV_VERROUILLE'
+        message: `Impossible de supprimer un CRV en statut ${crv.statut}`,
+        code: 'SUPPRESSION_INTERDITE'
       });
     }
 
@@ -2920,6 +2921,7 @@ export const supprimerCRV = async (req, res, next) => {
     await ChargeOperationnelle.deleteMany({ crv: crv._id });
     await EvenementOperationnel.deleteMany({ crv: crv._id });
     await Observation.deleteMany({ crv: crv._id });
+    await ValidationCRV.deleteMany({ crv: crv._id });
 
     // Supprimer l'horaire si existe
     if (crv.horaire) {

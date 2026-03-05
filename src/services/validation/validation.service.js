@@ -2,6 +2,7 @@ import CRV from '../../models/crv/CRV.js';
 import ValidationCRV from '../../models/validation/ValidationCRV.js';
 import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
 import { calculerCompletude, verifierConformiteSLA } from '../crv/crv.service.js';
+import { archiverCRV, isCRVImmutable } from '../documents/crv/crvArchivage.service.js';
 
 /**
  * FLUX DE VALIDATION CRV
@@ -141,6 +142,46 @@ export const validerCRV = async (crvId, userId, commentaires, verrouillageAutoma
       verrouille: false,
       dateVerrouillage: null
     });
+
+    // ============================================================
+    // ARCHIVAGE — Tentative d'archivage Drive avant transition.
+    // Si Drive échoue, la validation CONTINUE (mode dégradé).
+    // L'archivage sera réessayé ultérieurement.
+    // Révision Mission 006 : Drive ne doit pas bloquer l'exploitation.
+    // ============================================================
+    if (statutValidation === 'VALIDE') {
+      console.log('[CRV][SERVICE][ARCHIVAGE_AVANT_TRANSITION]', {
+        crvId,
+        userId,
+        reason: 'Tentative archivage avant transition VALIDE/VERROUILLE',
+        timestamp: new Date().toISOString()
+      });
+
+      try {
+        await archiverCRV(crvId, userId);
+
+        console.log('[CRV][SERVICE][ARCHIVAGE_OK]', {
+          crvId,
+          userId,
+          reason: 'Archivage réussi — transition autorisée',
+          timestamp: new Date().toISOString()
+        });
+      } catch (archiveError) {
+        console.error('[CRV][SERVICE][ARCHIVAGE_ECHEC_NON_BLOQUANT]', {
+          crvId,
+          userId,
+          reason: 'Archivage échoué — validation continue en mode dégradé',
+          error: archiveError.message,
+          timestamp: new Date().toISOString()
+        });
+
+        await CRV.findByIdAndUpdate(crvId, {
+          'archivage.statut': 'EN_ATTENTE',
+          'archivage.erreur': archiveError.message,
+          'archivage.derniereErreurAt': new Date()
+        });
+      }
+    }
 
     // Mettre à jour le statut du CRV
     let nouveauStatut = crv.statut;
@@ -366,6 +407,30 @@ export const deverrouillerCRV = async (crvId, userId, raison) => {
         timestamp: new Date().toISOString()
       });
       throw new Error('Le CRV n\'est pas verrouillé');
+    }
+
+    // ============================================================
+    // IMMUTABILITÉ — Un CRV archivé ne peut plus être déverrouillé.
+    // Mission 003 : protection contre la rupture de la chaîne
+    // Validation → Archivage → Immutabilité.
+    // ============================================================
+    if (isCRVImmutable(crv)) {
+      console.log('[CRV][SERVICE][DEVERROUILLER_CRV_IMMUTABLE]', {
+        crvId,
+        userId,
+        role: null,
+        input: { crvId, raison },
+        decision: 'REJECT',
+        reason: 'CRV archivé et immuable — déverrouillage interdit',
+        output: {
+          archivedAt: crv.archivage?.archivedAt,
+          driveFileId: crv.archivage?.driveFileId
+        },
+        timestamp: new Date().toISOString()
+      });
+      const err = new Error('Ce CRV est archivé et immuable. Le déverrouillage est interdit.');
+      err.status = 403;
+      throw err;
     }
 
     await CRV.findByIdAndUpdate(crvId, {

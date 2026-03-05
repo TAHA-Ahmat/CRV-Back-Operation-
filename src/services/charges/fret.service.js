@@ -14,6 +14,32 @@ import UserActivityLog from '../../models/security/UserActivityLog.js';
  */
 
 /**
+ * Initialise fretDetaille si absent (charges pré-Extension 5).
+ * Correction P0#3 — évite TypeError sur accès à undefined.
+ * @param {Object} charge - Document ChargeOperationnelle
+ */
+function ensureFretDetaille(charge) {
+  if (!charge.fretDetaille) {
+    charge.fretDetaille = {};
+  }
+  if (!charge.fretDetaille.categoriesFret) {
+    charge.fretDetaille.categoriesFret = {};
+  }
+  if (!charge.fretDetaille.marchandisesDangereuses) {
+    charge.fretDetaille.marchandisesDangereuses = { present: false, details: [] };
+  }
+  if (!charge.fretDetaille.logistique) {
+    charge.fretDetaille.logistique = {};
+  }
+  if (!charge.fretDetaille.douanes) {
+    charge.fretDetaille.douanes = {};
+  }
+  if (!charge.fretDetaille.conditionsTransport) {
+    charge.fretDetaille.conditionsTransport = {};
+  }
+}
+
+/**
  * Met à jour le fret détaillé d'une charge
  * @param {String} chargeId - ID de la charge opérationnelle
  * @param {Object} fretDetaille - Détails du fret
@@ -31,6 +57,9 @@ export const mettreAJourFretDetaille = async (chargeId, fretDetaille, userId) =>
     if (charge.typeCharge !== 'FRET') {
       throw new Error('Cette charge n\'est pas de type FRET');
     }
+
+    // P0#3 : initialiser fretDetaille si absent (charges pré-Extension 5)
+    ensureFretDetaille(charge);
 
     // Sauvegarder l'ancienne configuration
     const ancienFret = charge.fretDetaille ? { ...charge.fretDetaille } : null;
@@ -120,6 +149,9 @@ export const ajouterMarchandiseDangereuse = async (chargeId, marchandise, userId
       throw new Error('Cette charge n\'est pas de type FRET');
     }
 
+    // P0#3 : initialiser fretDetaille si absent (charges pré-Extension 5)
+    ensureFretDetaille(charge);
+
     // Validation des champs requis
     if (!marchandise.codeONU || !marchandise.classeONU || !marchandise.designationOfficielle) {
       throw new Error('Les champs codeONU, classeONU et designationOfficielle sont requis');
@@ -169,6 +201,9 @@ export const retirerMarchandiseDangereuse = async (chargeId, marchandiseId, user
     if (!charge) {
       throw new Error('Charge opérationnelle non trouvée');
     }
+
+    // P0#3 : initialiser fretDetaille si absent (charges pré-Extension 5)
+    ensureFretDetaille(charge);
 
     // Retirer la marchandise
     const marchandiseRetiree = charge.fretDetaille.marchandisesDangereuses.details.id(marchandiseId);

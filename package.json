@@ -11,7 +11,8 @@
     "seed:admin": "node src/utils/seedAdmin.js",
     "seed:programme-vols": "node src/utils/seedProgrammeVols.js",
     "generate:programme-vols": "node src/utils/generateProgrammeVols.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "crv",
@@ -39,7 +40,9 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "supertest": "^7.2.2",
+    "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=18.0.0"
