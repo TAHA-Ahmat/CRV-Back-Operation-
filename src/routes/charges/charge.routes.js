@@ -2,6 +2,7 @@ import express from 'express';
 import * as passagerController from '../../controllers/charges/passager.controller.js';
 import * as fretController from '../../controllers/charges/fret.controller.js';
 import { protect, authorize, excludeQualite } from '../../middlewares/auth.middleware.js';
+import { verifierCRVNonVerrouilleViaCharge } from '../../middlewares/verrouillage.middleware.js';
 
 /**
  * EXTENSIONS 4 & 5 - Routes Charges (Passagers & Fret détaillés)
@@ -31,8 +32,8 @@ const router = express.Router();
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { bebes, enfants, adolescents, adultes, seniors, pmr*, transit*, vip, equipage, deportes }
  */
-// 🔒 P0-1: QUALITE exclu
-router.put('/:id/categories-detaillees', protect, excludeQualite, passagerController.mettreAJourCategoriesDetaillees);
+// 🔒 P0-1: QUALITE exclu | 🔒 Mission 009: Verrouillage
+router.put('/:id/categories-detaillees', protect, excludeQualite, verifierCRVNonVerrouilleViaCharge, passagerController.mettreAJourCategoriesDetaillees);
 
 /**
  * @route   PUT /api/charges/:id/classes
@@ -40,8 +41,8 @@ router.put('/:id/categories-detaillees', protect, excludeQualite, passagerContro
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { premiere, affaires, economique }
  */
-// 🔒 P0-1: QUALITE exclu
-router.put('/:id/classes', protect, excludeQualite, passagerController.mettreAJourClassePassagers);
+// 🔒 P0-1: QUALITE exclu | 🔒 Mission 009: Verrouillage
+router.put('/:id/classes', protect, excludeQualite, verifierCRVNonVerrouilleViaCharge, passagerController.mettreAJourClassePassagers);
 
 /**
  * @route   PUT /api/charges/:id/besoins-medicaux
@@ -49,8 +50,8 @@ router.put('/:id/classes', protect, excludeQualite, passagerController.mettreAJo
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { oxygeneBord, brancardier, accompagnementMedical }
  */
-// 🔒 P0-1: QUALITE exclu
-router.put('/:id/besoins-medicaux', protect, excludeQualite, passagerController.mettreAJourBesoinsMedicaux);
+// 🔒 P0-1: QUALITE exclu | 🔒 Mission 009: Verrouillage
+router.put('/:id/besoins-medicaux', protect, excludeQualite, verifierCRVNonVerrouilleViaCharge, passagerController.mettreAJourBesoinsMedicaux);
 
 /**
  * @route   PUT /api/charges/:id/mineurs
@@ -58,8 +59,8 @@ router.put('/:id/besoins-medicaux', protect, excludeQualite, passagerController.
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { mineurNonAccompagne, bebeNonAccompagne }
  */
-// 🔒 P0-1: QUALITE exclu
-router.put('/:id/mineurs', protect, excludeQualite, passagerController.mettreAJourMineurs);
+// 🔒 P0-1: QUALITE exclu | 🔒 Mission 009: Verrouillage
+router.put('/:id/mineurs', protect, excludeQualite, verifierCRVNonVerrouilleViaCharge, passagerController.mettreAJourMineurs);
 
 // ========== ROUTES POUR CONVERSION ==========
 
@@ -69,8 +70,8 @@ router.put('/:id/mineurs', protect, excludeQualite, passagerController.mettreAJo
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { mapping?: object } (optionnel)
  */
-// 🔒 P0-1: QUALITE exclu
-router.post('/:id/convertir-categories-detaillees', protect, excludeQualite, passagerController.convertirVersCategoriesDetaillees);
+// 🔒 P0-1: QUALITE exclu | 🔒 Mission 009: Verrouillage
+router.post('/:id/convertir-categories-detaillees', protect, excludeQualite, verifierCRVNonVerrouilleViaCharge, passagerController.convertirVersCategoriesDetaillees);
 
 // ========== ROUTES POUR STATISTIQUES ==========
 
@@ -97,8 +98,8 @@ router.get('/crv/:crvId/statistiques-passagers', protect, passagerController.obt
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { categoriesFret, marchandisesDangereuses, logistique, douanes, conditionsTransport }
  */
-// 🔒 P0-1: QUALITE exclu
-router.put('/:id/fret-detaille', protect, excludeQualite, fretController.mettreAJourFretDetaille);
+// 🔒 P0-1: QUALITE exclu | 🔒 Mission 009: Verrouillage
+router.put('/:id/fret-detaille', protect, excludeQualite, verifierCRVNonVerrouilleViaCharge, fretController.mettreAJourFretDetaille);
 
 /**
  * @route   POST /api/charges/:id/marchandises-dangereuses
@@ -106,16 +107,16 @@ router.put('/:id/fret-detaille', protect, excludeQualite, fretController.mettreA
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @body    { codeONU, classeONU, designationOfficielle, quantite, unite, groupeEmballage }
  */
-// 🔒 P0-1: QUALITE exclu
-router.post('/:id/marchandises-dangereuses', protect, excludeQualite, fretController.ajouterMarchandiseDangereuse);
+// 🔒 P0-1: QUALITE exclu | 🔒 Mission 009: Verrouillage
+router.post('/:id/marchandises-dangereuses', protect, excludeQualite, verifierCRVNonVerrouilleViaCharge, fretController.ajouterMarchandiseDangereuse);
 
 /**
  * @route   DELETE /api/charges/:id/marchandises-dangereuses/:marchandiseId
  * @desc    Retirer une marchandise dangereuse
  * @access  Private (Tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  */
-// 🔒 P0-1: QUALITE exclu
-router.delete('/:id/marchandises-dangereuses/:marchandiseId', protect, excludeQualite, fretController.retirerMarchandiseDangereuse);
+// 🔒 P0-1: QUALITE exclu | 🔒 Mission 009: Verrouillage
+router.delete('/:id/marchandises-dangereuses/:marchandiseId', protect, excludeQualite, verifierCRVNonVerrouilleViaCharge, fretController.retirerMarchandiseDangereuse);
 
 /**
  * @route   POST /api/charges/valider-marchandise-dangereuse

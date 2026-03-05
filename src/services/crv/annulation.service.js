@@ -1,5 +1,6 @@
 import CRV from '../../models/crv/CRV.js';
 import UserActivityLog from '../../models/security/UserActivityLog.js';
+import { isCRVImmutable } from '../documents/crv/crvArchivage.service.js';
 
 /**
  * EXTENSION 6 - Service Annulation (Statut CRV ANNULE)
@@ -36,6 +37,11 @@ export const annulerCRV = async (crvId, detailsAnnulation, userId) => {
     // Vérifier que le CRV n'est pas verrouillé (règle métier)
     if (crv.statut === 'VERROUILLE') {
       throw new Error('Impossible d\'annuler un CRV verrouillé. Déverrouillez-le d\'abord.');
+    }
+
+    // 🔒 Mission 009: Vérifier immutabilité (CRV archivé = JAMAIS modifiable)
+    if (isCRVImmutable(crv)) {
+      throw new Error('INTERDIT : CRV archivé et immutable — aucune annulation possible');
     }
 
     // Sauvegarder l'ancien statut
@@ -251,6 +257,11 @@ export const verifierPeutAnnuler = async (crvId) => {
 
     if (crv.statut === 'VERROUILLE') {
       return { peutAnnuler: false, raison: 'Le CRV est verrouillé. Déverrouillez-le d\'abord.' };
+    }
+
+    // 🔒 Mission 009: CRV archivé = immutable
+    if (isCRVImmutable(crv)) {
+      return { peutAnnuler: false, raison: 'Le CRV est archivé et immutable — aucune modification possible.' };
     }
 
     return { peutAnnuler: true, raison: null };

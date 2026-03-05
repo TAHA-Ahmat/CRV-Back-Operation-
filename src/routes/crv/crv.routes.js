@@ -56,6 +56,7 @@ import {
   verifierPhasesAutoriseesCreationCRV,
   validerCoherenceCharges
 } from '../../middlewares/businessRules.middleware.js';
+import { verifierCRVNonVerrouilleViaPhase } from '../../middlewares/verrouillage.middleware.js';
 
 const router = express.Router();
 
@@ -142,7 +143,8 @@ router.get('/:id', protect, obtenirCRV);
  * @access  Private (tous opérationnels: AGENT, CHEF, SUPERVISEUR, MANAGER)
  * @note    Refusé si CRV verrouillé (code: CRV_VERROUILLE)
  */
-router.delete('/:id', protect, excludeQualite, auditLog('SUPPRESSION'), supprimerCRV);
+// 🔒 Mission 009: Verrouillage — empêcher suppression CRV verrouillé
+router.delete('/:id', protect, excludeQualite, verifierCRVNonVerrouille, auditLog('SUPPRESSION'), supprimerCRV);
 
 // ============================
 //   TRANSITIONS DE STATUT CRV
@@ -313,7 +315,8 @@ router.delete('/:id/engins/:affectationId', protect, excludeQualite, verifierCRV
  * @body    { statut?, heureDebutReelle?, heureFinReelle?, motifNonRealisation?, detailMotif?, remarques? }
  * @note    Heures acceptées aux formats: "HH:mm", "HH:mm:ss", ou ISO string
  */
-router.put('/:crvId/phases/:phaseId', protect, excludeQualite, auditLog('MISE_A_JOUR'), mettreAJourPhaseCRV);
+// 🔒 Mission 009: Verrouillage — empêcher modification phase sur CRV verrouillé
+router.put('/:crvId/phases/:phaseId', protect, excludeQualite, verifierCRVNonVerrouilleViaPhase, auditLog('MISE_A_JOUR'), mettreAJourPhaseCRV);
 
 // ============================
 //   MISE À JOUR HORAIRES
