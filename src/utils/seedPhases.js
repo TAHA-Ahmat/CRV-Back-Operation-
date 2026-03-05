@@ -401,32 +401,84 @@ const phasesCommunes = [
   }
 ];
 
-export const seedPhases = async () => {
+// Toutes les phases regroupées (exporté pour les tests)
+export const toutesPhases = [...phasesArrivee, ...phasesDepart, ...phasesTurnAround, ...phasesCommunes];
+
+/**
+ * Seed des phases opérationnelles en base de données.
+ *
+ * Mode par défaut : UPSERT (idempotent, sans perte de données)
+ *   → Ajoute les phases manquantes, met à jour les existantes
+ *   → Ne supprime rien
+ *
+ * Mode force-reset : DESTRUCTIF (supprime tout puis recrée)
+ *   → CLI : node seedPhases.js --force-reset
+ *
+ * @param {boolean} forceReset - Si true, supprime toutes les phases avant insertion
+ * @returns {{ created: number, updated: number, total: number }}
+ */
+export const seedPhases = async (forceReset = false) => {
   try {
     await connectDB();
 
-    await Phase.deleteMany({});
-    console.log('🗑️  Phases existantes supprimées');
+    let created = 0;
+    let updated = 0;
 
-    const toutesPhases = [...phasesArrivee, ...phasesDepart, ...phasesTurnAround, ...phasesCommunes];
+    if (forceReset) {
+      console.log('[SEED] Mode FORCE RESET — suppression de toutes les phases');
+      await Phase.deleteMany({});
+      await Phase.insertMany(toutesPhases);
+      created = toutesPhases.length;
+      console.log(`[SEED] ${created} phases insérées (reset complet)`);
+    } else {
+      console.log('[SEED] Mode UPSERT — ajout/mise à jour sans suppression');
 
-    await Phase.insertMany(toutesPhases);
+      for (const phase of toutesPhases) {
+        const result = await Phase.findOneAndUpdate(
+          { code: phase.code, typeOperation: phase.typeOperation },
+          { $set: phase },
+          { upsert: true, new: true, rawResult: true }
+        );
 
-    console.log(`✅ ${toutesPhases.length} phases créées avec succès`);
+        if (result.lastErrorObject?.updatedExisting) {
+          updated++;
+        } else {
+          created++;
+        }
+      }
+
+      console.log(`[SEED] ${created} phases créées, ${updated} phases mises à jour`);
+    }
+
+    const total = await Phase.countDocuments();
+    console.log(`[SEED] Total en base : ${total} phases`);
     console.log(`   - Arrivée: ${phasesArrivee.length}`);
     console.log(`   - Départ: ${phasesDepart.length}`);
     console.log(`   - Turn-Around: ${phasesTurnAround.length}`);
     console.log(`   - Communes: ${phasesCommunes.length}`);
 
-    await mongoose.connection.close();
-    process.exit(0);
+    return { created, updated, total };
   } catch (error) {
-    console.error('❌ Erreur lors de l\'initialisation des phases:', error);
-    await mongoose.connection.close();
-    process.exit(1);
+    console.error('[SEED] Erreur lors de l\'initialisation des phases:', error);
+    throw error;
   }
 };
 
+// Point d'entrée CLI
 if (import.meta.url === `file://${process.argv[1]}`) {
-  seedPhases();
+  const forceReset = process.argv.includes('--force-reset');
+
+  if (forceReset) {
+    console.log('⚠️  Mode --force-reset activé : toutes les phases seront supprimées et recréées');
+  }
+
+  seedPhases(forceReset)
+    .then(() => {
+      mongoose.connection.close();
+      process.exit(0);
+    })
+    .catch(() => {
+      mongoose.connection.close();
+      process.exit(1);
+    });
 }
