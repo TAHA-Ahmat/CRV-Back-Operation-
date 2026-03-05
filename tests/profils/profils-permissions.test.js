@@ -56,6 +56,7 @@ const PROFILS = {
     email: 'agent@crv.td',
     fonction: 'AGENT_ESCALE',
     statut: 'ACTIF',
+    statutCompte: 'VALIDE',
     matricule: 'AGT-001'
   },
   CHEF_EQUIPE: {
@@ -65,6 +66,7 @@ const PROFILS = {
     email: 'chef@crv.td',
     fonction: 'CHEF_EQUIPE',
     statut: 'ACTIF',
+    statutCompte: 'VALIDE',
     matricule: 'CHF-001'
   },
   SUPERVISEUR: {
@@ -74,6 +76,7 @@ const PROFILS = {
     email: 'superviseur@crv.td',
     fonction: 'SUPERVISEUR',
     statut: 'ACTIF',
+    statutCompte: 'VALIDE',
     matricule: 'SUP-001'
   },
   MANAGER: {
@@ -83,6 +86,7 @@ const PROFILS = {
     email: 'manager@crv.td',
     fonction: 'MANAGER',
     statut: 'ACTIF',
+    statutCompte: 'VALIDE',
     matricule: 'MGR-001'
   },
   QUALITE: {
@@ -92,6 +96,7 @@ const PROFILS = {
     email: 'qualite@crv.td',
     fonction: 'QUALITE',
     statut: 'ACTIF',
+    statutCompte: 'VALIDE',
     matricule: 'QUA-001'
   },
   ADMIN: {
@@ -101,6 +106,7 @@ const PROFILS = {
     email: 'admin@crv.td',
     fonction: 'ADMIN',
     statut: 'ACTIF',
+    statutCompte: 'VALIDE',
     matricule: 'ADM-001'
   }
 };

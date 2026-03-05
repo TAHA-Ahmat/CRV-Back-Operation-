@@ -232,6 +232,7 @@ function mockAuthenticatedUser(overrides = {}) {
     email: 'test@crv.com',
     fonction: 'CHEF',
     statut: 'ACTIF',
+    statutCompte: 'VALIDE',
     ...overrides,
   };
   mockFindByIdPersonne.mockResolvedValue(user);

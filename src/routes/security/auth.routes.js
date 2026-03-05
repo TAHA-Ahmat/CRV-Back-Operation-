@@ -1,7 +1,7 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { login, register, getMe, changerMotDePasse } from '../../controllers/security/auth.controller.js';
-import { protect } from '../../middlewares/auth.middleware.js';
+import { login, register, getMe, changerMotDePasse, validerCompte } from '../../controllers/security/auth.controller.js';
+import { protect, authorize } from '../../middlewares/auth.middleware.js';
 import { validate } from '../../middlewares/validation.middleware.js';
 
 const router = express.Router();
@@ -12,14 +12,14 @@ router.post('/login', [
   validate
 ], login);
 
-// 🔒 PHASE 1 AJUSTÉE - Rôles actifs (opérationnels + QUALITE) | ADMIN gelé (technique uniquement)
+// 🔒 Mission 013 — Registration sécurisée (rôle forcé AGENT_ESCALE, statutCompte EN_ATTENTE)
 router.post('/register', [
   body('nom').notEmpty().withMessage('Nom requis'),
   body('prenom').notEmpty().withMessage('Prénom requis'),
   body('matricule').notEmpty().withMessage('Matricule requis'),
   body('email').isEmail().withMessage('Email invalide'),
   body('password').isLength({ min: 6 }).withMessage('Mot de passe minimum 6 caractères'),
-  body('fonction').isIn(['AGENT_ESCALE', 'CHEF_EQUIPE', 'SUPERVISEUR', 'MANAGER', 'QUALITE']).withMessage('Fonction invalide - rôles autorisés: AGENT_ESCALE, CHEF_EQUIPE, SUPERVISEUR, MANAGER, QUALITE'),
+  // fonction supprimée de la validation : forcée à AGENT_ESCALE côté controller
   validate
 ], register);
 
@@ -44,7 +44,7 @@ router.post('/connexion', [
   validate
 ], login);
 
-// Alias pour /inscription → /register
+// Alias pour /inscription → /register (Mission 013 : fonction supprimée, forcée côté controller)
 router.post('/inscription', [
   body('nom').notEmpty().withMessage('Nom requis'),
   body('prenom').notEmpty().withMessage('Prénom requis'),
@@ -52,9 +52,14 @@ router.post('/inscription', [
   body('email').isEmail().withMessage('Email invalide'),
   body('motDePasse').optional().isLength({ min: 6 }).withMessage('Mot de passe minimum 6 caractères'),
   body('password').optional().isLength({ min: 6 }).withMessage('Mot de passe minimum 6 caractères'),
-  body('fonction').isIn(['AGENT_ESCALE', 'CHEF_EQUIPE', 'SUPERVISEUR', 'MANAGER', 'QUALITE']).withMessage('Fonction invalide'),
   validate
 ], register);
+
+// 🔒 Mission 013 — Validation de compte par ADMIN
+router.post('/valider-compte', protect, authorize('ADMIN'), [
+  body('personnelId').notEmpty().withMessage('personnelId requis'),
+  validate
+], validerCompte);
 
 // Alias pour /deconnexion → /me (logout est géré côté client)
 router.post('/deconnexion', (req, res) => {

@@ -56,6 +56,17 @@ export const login = async (req, res, next) => {
       });
     }
 
+    // 🔒 Mission 013 — Vérification statutCompte
+    if (personne.statutCompte !== 'VALIDE') {
+      return res.status(403).json({
+        success: false,
+        message: personne.statutCompte === 'EN_ATTENTE'
+          ? 'Compte en attente de validation par un administrateur'
+          : 'Compte suspendu ou désactivé',
+        code: 'COMPTE_NON_VALIDE'
+      });
+    }
+
     // ✅ ALIGNÉ SUR MAGASIN : Générer token avec objet complet
     const token = generateToken(personne);
 
@@ -76,10 +87,14 @@ export const login = async (req, res, next) => {
   }
 };
 
+// 🔒 Mission 013 — Registration sécurisée
+// - Rôle forcé : AGENT_ESCALE (pas d'escalation de privilège)
+// - Statut : EN_ATTENTE (doit être validé par ADMIN)
+// - Pas de token JWT généré (compte non actif)
 export const register = async (req, res, next) => {
   try {
     // Support des deux formats: password (backend) et motDePasse (frontend)
-    const { nom, prenom, matricule, email, password, motDePasse, fonction, specialites } = req.body;
+    const { nom, prenom, matricule, email, password, motDePasse, specialites } = req.body;
     const pwd = password || motDePasse;
 
     const existingUser = await Personne.findOne({
@@ -99,23 +114,22 @@ export const register = async (req, res, next) => {
       matricule,
       email,
       password: pwd,
-      fonction,
-      specialites
+      fonction: 'AGENT_ESCALE', // 🔒 Rôle forcé — pas d'escalation
+      specialites,
+      statutCompte: 'EN_ATTENTE' // 🔒 Doit être validé par ADMIN
     });
-
-    // ✅ ALIGNÉ SUR MAGASIN : Générer token avec objet complet
-    const token = generateToken(personne);
 
     res.status(201).json({
       success: true,
-      token,
+      message: 'Compte créé avec succès. En attente de validation par un administrateur.',
       user: {
         id: personne._id,
         nom: personne.nom,
         prenom: personne.prenom,
         email: personne.email,
         fonction: personne.fonction,
-        matricule: personne.matricule
+        matricule: personne.matricule,
+        statutCompte: personne.statutCompte
       }
     });
   } catch (error) {
@@ -184,6 +198,58 @@ export const changerMotDePasse = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: 'Mot de passe modifié avec succès'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 🔒 Mission 013 — Validation de compte par ADMIN
+// Accessible uniquement par ADMIN via authorize('ADMIN')
+export const validerCompte = async (req, res, next) => {
+  try {
+    const { personnelId } = req.body;
+
+    if (!personnelId) {
+      return res.status(400).json({
+        success: false,
+        message: 'personnelId requis'
+      });
+    }
+
+    const personne = await Personne.findById(personnelId);
+
+    if (!personne) {
+      return res.status(404).json({
+        success: false,
+        message: 'Utilisateur non trouvé'
+      });
+    }
+
+    if (personne.statutCompte === 'VALIDE') {
+      return res.status(400).json({
+        success: false,
+        message: 'Ce compte est déjà validé'
+      });
+    }
+
+    personne.statutCompte = 'VALIDE';
+    personne.dateValidationCompte = new Date();
+    personne.valideParUserId = req.user._id;
+    await personne.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Compte de ${personne.prenom} ${personne.nom} validé avec succès`,
+      user: {
+        id: personne._id,
+        nom: personne.nom,
+        prenom: personne.prenom,
+        email: personne.email,
+        fonction: personne.fonction,
+        statutCompte: personne.statutCompte,
+        dateValidationCompte: personne.dateValidationCompte
+      }
     });
   } catch (error) {
     next(error);

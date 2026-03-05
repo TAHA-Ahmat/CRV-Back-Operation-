@@ -37,6 +37,15 @@ export const protect = async (req, res, next) => {
         });
       }
 
+      // 🔒 Mission 013 — Vérification statutCompte
+      if (req.user.statutCompte !== 'VALIDE') {
+        return res.status(403).json({
+          success: false,
+          message: 'Compte en attente de validation par un administrateur',
+          code: 'COMPTE_NON_VALIDE'
+        });
+      }
+
       next();
     } catch (err) {
       // ✅ ALIGNÉ SUR MAGASIN : Codes d'erreur spécifiques

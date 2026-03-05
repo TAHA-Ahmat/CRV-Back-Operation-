@@ -44,11 +44,12 @@ const personneSchema = new mongoose.Schema({
     enum: ['ACTIF', 'ABSENT', 'CONGE', 'INACTIF'],
     default: 'ACTIF'
   },
-  // 🔒 PHASE 1 - Workflow validation compte utilisateur
+  // 🔒 Workflow validation compte utilisateur — Mission 013
+  // Nouveau compte = EN_ATTENTE, doit être validé par ADMIN
   statutCompte: {
     type: String,
     enum: ['EN_ATTENTE', 'VALIDE', 'SUSPENDU', 'DESACTIVE'],
-    default: 'VALIDE', // PHASE 1: validation automatique (pas de workflow manuel encore)
+    default: 'EN_ATTENTE',
     required: true
   },
   // Date validation compte (si workflow manuel activé plus tard)
