@@ -3,7 +3,8 @@ import {
   validerCRVController,
   deverrouillerCRVController,
   obtenirValidation,
-  verrouillerCRVController
+  verrouillerCRVController,
+  rejeterCRVController
 } from '../../controllers/validation/validation.controller.js';
 import { protect, authorize, excludeQualite } from '../../middlewares/auth.middleware.js';
 import { auditLog } from '../../middlewares/auditLog.middleware.js';
@@ -54,6 +55,19 @@ router.post('/:id/deverrouiller',
   authorize('SUPERVISEUR', 'MANAGER'),
   auditLog('MISE_A_JOUR'),
   deverrouillerCRVController
+);
+
+/**
+ * @route   POST /api/validation/:id/rejeter
+ * @desc    Rejeter un CRV (TERMINE → EN_COURS) avec raison obligatoire
+ * @access  Private (SUPERVISEUR, MANAGER uniquement)
+ * @body    { raison: string } - Raison du rejet obligatoire
+ */
+router.post('/:id/rejeter',
+  protect,
+  authorize('SUPERVISEUR', 'MANAGER'),
+  auditLog('VALIDATION'),
+  rejeterCRVController
 );
 
 export default router;
