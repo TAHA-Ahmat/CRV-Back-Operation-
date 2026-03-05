@@ -4,9 +4,12 @@ import ChronologiePhase from '../models/phases/ChronologiePhase.js';
 import Phase from '../models/phases/Phase.js';
 
 /**
- * RÈGLE MÉTIER CRITIQUE : Vérifier que le CRV n'est pas verrouillé
- * Un CRV validé (statut VERROUILLE) est totalement immuable
+ * RÈGLE MÉTIER CRITIQUE : Vérifier que le CRV n'est pas figé
+ * Un CRV validé (VALIDE) ou verrouillé (VERROUILLE) est non modifiable.
+ * Seuls EN_COURS, BROUILLON et TERMINE restent éditables.
  */
+const STATUTS_NON_MODIFIABLES = ['VALIDE', 'VERROUILLE'];
+
 export const verifierCRVNonVerrouille = async (req, res, next) => {
   try {
     const crvId = req.params.id || req.body.crvId || req.crvId;
@@ -24,11 +27,11 @@ export const verifierCRVNonVerrouille = async (req, res, next) => {
       });
     }
 
-    if (crv.statut === 'VERROUILLE') {
+    if (STATUTS_NON_MODIFIABLES.includes(crv.statut)) {
       return res.status(403).json({
         success: false,
-        message: 'INTERDIT : CRV validé et verrouillé - aucune modification possible',
-        code: 'CRV_VERROUILLE'
+        message: `INTERDIT : CRV au statut ${crv.statut} - aucune modification possible`,
+        code: 'CRV_NON_MODIFIABLE'
       });
     }
 
