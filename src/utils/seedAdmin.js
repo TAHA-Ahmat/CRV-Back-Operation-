@@ -12,9 +12,9 @@ import { connectDB } from '../config/db.js';
 const adminData = {
   nom: 'Admin',
   prenom: 'Système',
-  matricule: 'ADM001',
-  email: 'admin@crv.com',
-  password: 'Admin123!', // ⚠️ À CHANGER après première connexion
+  matricule: process.env.ADMIN_MATRICULE || 'ADM001',
+  email: process.env.ADMIN_EMAIL || 'admin@crv.com',
+  password: process.env.ADMIN_PASSWORD,
   fonction: 'ADMIN',
   statut: 'ACTIF',
   statutCompte: 'VALIDE',
@@ -23,6 +23,12 @@ const adminData = {
 
 export const seedAdmin = async () => {
   try {
+    if (!adminData.password) {
+      console.error('❌ Variable d\'environnement ADMIN_PASSWORD requise.');
+      console.error('   Usage: ADMIN_PASSWORD=MonMotDePasse123! node src/utils/seedAdmin.js');
+      process.exit(1);
+    }
+
     await connectDB();
 
     // Vérifier si un admin existe déjà
@@ -62,9 +68,8 @@ export const seedAdmin = async () => {
     console.log('📋 Informations de connexion:');
     console.log('   ┌─────────────────────────────────────');
     console.log(`   │ Email:    ${adminData.email}`);
-    console.log(`   │ Password: ${adminData.password}`);
+    console.log(`   │ Password: (défini via ADMIN_PASSWORD)`);
     console.log('   └─────────────────────────────────────');
-    console.log('\n⚠️  IMPORTANT: Changez le mot de passe après la première connexion!\n');
     console.log('📌 Détails du compte:');
     console.log(`   - ID: ${admin._id}`);
     console.log(`   - Nom: ${admin.nom} ${admin.prenom}`);

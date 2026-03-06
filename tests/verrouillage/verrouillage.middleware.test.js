@@ -121,7 +121,7 @@ describe('verifierCRVNonVerrouilleViaCharge', () => {
     await verifierCRVNonVerrouilleViaCharge(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.body.code).toBe('CRV_VERROUILLE');
+    expect(res.body.code).toBe('CRV_NON_MODIFIABLE');
     expect(next).not.toHaveBeenCalled();
   });
 
@@ -156,7 +156,7 @@ describe('verifierCRVNonVerrouilleViaCharge', () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 
-  it('passe au next si CRV est VALIDE', async () => {
+  it('retourne 403 si CRV est VALIDE (Mission 019 — VALIDE non modifiable)', async () => {
     const req = createMockReq({ id: 'charge-789' });
     const res = createMockRes();
     const next = createMockNext();
@@ -166,7 +166,9 @@ describe('verifierCRVNonVerrouilleViaCharge', () => {
 
     await verifierCRVNonVerrouilleViaCharge(req, res, next);
 
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.body.code).toBe('CRV_NON_MODIFIABLE');
+    expect(next).not.toHaveBeenCalled();
   });
 
   it('propage les erreurs via next(error)', async () => {
@@ -216,7 +218,7 @@ describe('verifierCRVNonVerrouilleViaPhase', () => {
     await verifierCRVNonVerrouilleViaPhase(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.body.code).toBe('CRV_VERROUILLE');
+    expect(res.body.code).toBe('CRV_NON_MODIFIABLE');
   });
 
   it('Cas crvId — passe au next si CRV EN_COURS', async () => {
@@ -283,7 +285,7 @@ describe('verifierCRVNonVerrouilleViaPhase', () => {
     await verifierCRVNonVerrouilleViaPhase(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.body.code).toBe('CRV_VERROUILLE');
+    expect(res.body.code).toBe('CRV_NON_MODIFIABLE');
   });
 
   it('Cas phaseId — passe au next si CRV TERMINE', async () => {
@@ -343,7 +345,7 @@ describe('Scénarios terrain verrouillage', () => {
     await verifierCRVNonVerrouilleViaCharge(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.body.code).toBe('CRV_VERROUILLE');
+    expect(res.body.code).toBe('CRV_NON_MODIFIABLE');
     expect(next).not.toHaveBeenCalled();
   });
 
@@ -375,11 +377,11 @@ describe('Scénarios terrain verrouillage', () => {
     await verifierCRVNonVerrouilleViaPhase(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.body.code).toBe('CRV_VERROUILLE');
+    expect(res.body.code).toBe('CRV_NON_MODIFIABLE');
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('SCENARIO 4 : Agent démarre phase sur CRV VALIDE → OK (pas encore verrouillé)', async () => {
+  it('SCENARIO 4 : Agent démarre phase sur CRV VALIDE → BLOQUÉ (Mission 019)', async () => {
     const req = createMockReq({ id: 'phase-embarq' });
     const res = createMockRes();
     const next = createMockNext();
@@ -392,7 +394,9 @@ describe('Scénarios terrain verrouillage', () => {
 
     await verifierCRVNonVerrouilleViaPhase(req, res, next);
 
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.body.code).toBe('CRV_NON_MODIFIABLE');
+    expect(next).not.toHaveBeenCalled();
   });
 
   it('SCENARIO 5 : Agent ajoute passagers sur CRV BROUILLON → OK', async () => {

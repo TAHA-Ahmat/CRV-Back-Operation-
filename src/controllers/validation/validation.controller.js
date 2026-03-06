@@ -115,3 +115,72 @@ export const verrouillerCRVController = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Rejeter un CRV (TERMINE → EN_COURS)
+ * Renvoie le CRV à l'agent pour correction avec commentaire obligatoire
+ * Ne touche PAS validation.service.js (zone rouge) — logique inline
+ */
+export const rejeterCRVController = async (req, res, next) => {
+  try {
+    const { raison } = req.body;
+
+    if (!raison || raison.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Raison du rejet requise'
+      });
+    }
+
+    const crv = await CRV.findById(req.params.id);
+
+    if (!crv) {
+      return res.status(404).json({
+        success: false,
+        message: 'CRV non trouvé'
+      });
+    }
+
+    if (crv.statut !== 'TERMINE') {
+      return res.status(400).json({
+        success: false,
+        message: `Impossible de rejeter un CRV au statut ${crv.statut}. Seul un CRV TERMINE peut être rejeté.`
+      });
+    }
+
+    const ancienStatut = crv.statut;
+    crv.statut = 'EN_COURS';
+    crv.dernierRejet = {
+      date: new Date(),
+      par: req.user._id,
+      raison: raison.trim()
+    };
+    await crv.save();
+
+    console.log('[CRV][VALIDATION][REJET]', {
+      crvId: crv._id,
+      ancienStatut,
+      nouveauStatut: 'EN_COURS',
+      rejetePar: req.user._id,
+      raison: raison.trim()
+    });
+
+    // Supprimer validation existante si elle existe
+    await ValidationCRV.deleteOne({ crv: crv._id });
+
+    req.crvId = req.params.id;
+
+    const crvPopulated = await CRV.findById(crv._id)
+      .populate('vol')
+      .populate('creePar')
+      .populate('responsableVol');
+
+    res.status(200).json({
+      success: true,
+      message: 'CRV rejeté — renvoyé à l\'agent pour correction',
+      data: crvPopulated
+    });
+  } catch (error) {
+    next(error);
+  }
+};

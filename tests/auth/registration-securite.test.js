@@ -201,7 +201,7 @@ describe('Mission 013 — Registration Securite', () => {
       await register(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.body.message).toContain('déjà utilisé');
+      expect(res.body.message).toContain('Impossible de créer le compte');
     });
 
     it('force statutCompte EN_ATTENTE meme si VALIDE est fourni', async () => {

@@ -8,9 +8,9 @@ import ChargeOperationnelle from '../models/charges/ChargeOperationnelle.js';
  * Variantes du middleware verifierCRVNonVerrouille pour les routes
  * où req.params.id n'est PAS l'ID du CRV mais d'une sous-ressource.
  *
- * businessRules.middleware.js (zone rouge) ne peut pas être modifié.
- * Ces middlewares complémentaires couvrent les cas manquants.
+ * Règle métier : VALIDE et VERROUILLE sont non modifiables.
  */
+const STATUTS_NON_MODIFIABLES = ['VALIDE', 'VERROUILLE'];
 
 /**
  * Vérifie que le CRV lié à une CHARGE n'est pas verrouillé
@@ -38,11 +38,11 @@ export const verifierCRVNonVerrouilleViaCharge = async (req, res, next) => {
       });
     }
 
-    if (crv.statut === 'VERROUILLE') {
+    if (STATUTS_NON_MODIFIABLES.includes(crv.statut)) {
       return res.status(403).json({
         success: false,
-        message: 'INTERDIT : CRV validé et verrouillé - aucune modification de charge possible',
-        code: 'CRV_VERROUILLE'
+        message: `INTERDIT : CRV au statut ${crv.statut} - aucune modification de charge possible`,
+        code: 'CRV_NON_MODIFIABLE'
       });
     }
 
@@ -71,11 +71,11 @@ export const verifierCRVNonVerrouilleViaPhase = async (req, res, next) => {
           message: 'CRV non trouvé'
         });
       }
-      if (crv.statut === 'VERROUILLE') {
+      if (STATUTS_NON_MODIFIABLES.includes(crv.statut)) {
         return res.status(403).json({
           success: false,
-          message: 'INTERDIT : CRV validé et verrouillé - aucune modification de phase possible',
-          code: 'CRV_VERROUILLE'
+          message: `INTERDIT : CRV au statut ${crv.statut} - aucune modification de phase possible`,
+          code: 'CRV_NON_MODIFIABLE'
         });
       }
       req.crv = crv;
@@ -102,11 +102,11 @@ export const verifierCRVNonVerrouilleViaPhase = async (req, res, next) => {
       });
     }
 
-    if (crv.statut === 'VERROUILLE') {
+    if (STATUTS_NON_MODIFIABLES.includes(crv.statut)) {
       return res.status(403).json({
         success: false,
-        message: 'INTERDIT : CRV validé et verrouillé - aucune modification de phase possible',
-        code: 'CRV_VERROUILLE'
+        message: `INTERDIT : CRV au statut ${crv.statut} - aucune modification de phase possible`,
+        code: 'CRV_NON_MODIFIABLE'
       });
     }
 
