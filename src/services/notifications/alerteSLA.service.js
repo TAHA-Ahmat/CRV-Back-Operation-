@@ -1,6 +1,8 @@
 import CRV from '../../models/crv/CRV.js';
 import Phase from '../../models/phases/Phase.js';
 import { envoyerAlerteSLA, creerNotificationMultiple } from '../notifications/notification.service.js';
+import { eventBus } from './notificationEngine.js';
+import { EVENTS } from './eventRegistry.js';
 
 /**
  * EXTENSION 8 - Service Alertes SLA Proactives
@@ -267,6 +269,15 @@ export const surveillerTousCRV = async () => {
             });
 
             statistiques.alertesEnvoyees++;
+
+            // ── NOTIFICATION ENGINE ──────────────────────────
+            eventBus.emitAsync(EVENTS.SLA_CRV_DEPASSE, {
+              crvId: crv._id, numeroCRV: crv.numeroCRV,
+              niveau: etatSLA.niveau, priorite: etatSLA.priorite,
+              heuresRestantes: etatSLA.heuresRestantes,
+              pourcentageEcoule: etatSLA.pourcentageEcoule
+            });
+            // ─────────────────────────────────────────────────
           } catch (error) {
             console.error(`Erreur envoi alerte SLA pour CRV ${crv.numeroCRV}:`, error);
           }
@@ -335,6 +346,16 @@ export const surveillerToutesPhases = async () => {
             });
 
             statistiques.alertesEnvoyees++;
+
+            // ── NOTIFICATION ENGINE ──────────────────────────
+            eventBus.emitAsync(EVENTS.SLA_PHASE_DEPASSE, {
+              phaseId: phase._id, typePhase: phase.typePhase,
+              crvId: phase.crv?._id, numeroCRV: phase.crv?.numeroCRV,
+              niveau: etatSLA.niveau, priorite: etatSLA.priorite,
+              heuresRestantes: etatSLA.heuresRestantes,
+              pourcentageEcoule: etatSLA.pourcentageEcoule
+            });
+            // ─────────────────────────────────────────────────
           } catch (error) {
             console.error(`Erreur envoi alerte SLA pour Phase ${phase._id}:`, error);
           }

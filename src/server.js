@@ -1,10 +1,16 @@
 import app from './app.js';
 import { config } from './config/env.js';
 import { connectDB } from './config/db.js';
+import { initNotificationEngine } from './services/notifications/initNotificationEngine.js';
 
 const startServer = async () => {
   try {
     await connectDB();
+
+    // Initialiser le module de notification (seed + listeners) — non-bloquant
+    initNotificationEngine().catch(err => {
+      console.error('[Server] NotificationEngine init failed (non-fatal):', err.message);
+    });
 
     const server = app.listen(config.port, () => {
       console.log(`

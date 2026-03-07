@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import CRV from '../../models/crv/CRV.js';
 import Vol from '../../models/flights/Vol.js';
 import Horaire from '../../models/phases/Horaire.js';
@@ -8,6 +9,8 @@ import Observation from '../../models/crv/Observation.js';
 import ValidationCRV from '../../models/validation/ValidationCRV.js';
 import { genererNumeroCRV, calculerCompletude, detecterDoublonCRV, creerVolDepuisMouvement } from '../../services/crv/crv.service.js';
 import { initialiserPhasesVol } from '../../services/phases/phase.service.js';
+import { eventBus } from '../../services/notifications/notificationEngine.js';
+import { EVENTS } from '../../services/notifications/eventRegistry.js';
 
 // ============================================================================
 //   INSTRUMENTATION AUDIT - LOGS STRUCTURÉS
@@ -1052,6 +1055,16 @@ export const ajouterEvenement = async (req, res, next) => {
     });
 
     req.crvId = crv._id;
+
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    if (evenement.gravite === 'CRITIQUE') {
+      eventBus.emitAsync(EVENTS.CRV_INCIDENT_CRITIQUE, {
+        crvId: crv._id, numeroCRV: crv.numeroCRV,
+        evenementId: evenement._id, typeEvenement: evenement.typeEvenement,
+        gravite: evenement.gravite, userId: req.user?._id
+      });
+    }
+    // ─────────────────────────────────────────────────────────────
 
     res.status(201).json({
       success: true,
@@ -2258,59 +2271,25 @@ export const terminerCRV = async (req, res, next) => {
     timestamp
   });
 
-  try {
-    const crv = await CRV.findById(req.params.id);
+  // ============================================================
+  // MISSION 022 — TRANSACTION MONGODB
+  // Terminaison CRV + sync Vol atomiques.
+  // ============================================================
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-    console.log('[CRV][DECISION_CHECK][CRV_EXISTS]', {
-      crvId: req.params.id,
-      userId: req.user?._id || null,
-      role: req.user?.fonction || null,
-      input: { id: req.params.id },
-      decision: !!crv,
-      reason: crv ? `CRV trouvé - statut: ${crv.statut}` : 'CRV non trouvé',
-      output: crv ? { statut: crv.statut } : null,
-      timestamp: new Date().toISOString()
-    });
+  try {
+    const crv = await CRV.findById(req.params.id).session(session);
 
     if (!crv) {
-      console.warn('[CRV][API_REJECT][CRV_NOT_FOUND]', {
-        crvId: req.params.id,
-        userId: req.user?._id || null,
-        role: req.user?.fonction || null,
-        input: { id: req.params.id },
-        decision: false,
-        reason: 'CRV non trouvé',
-        output: null,
-        timestamp: new Date().toISOString()
-      });
-      return res.status(404).json({
-        success: false,
-        message: 'CRV non trouvé'
-      });
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ success: false, message: 'CRV non trouvé' });
     }
 
-    console.log('[CRV][DECISION_CHECK][STATUT_EN_COURS]', {
-      crvId: crv._id,
-      userId: req.user?._id || null,
-      role: req.user?.fonction || null,
-      input: { statutActuel: crv.statut, statutAttendu: 'EN_COURS' },
-      decision: crv.statut === 'EN_COURS',
-      reason: crv.statut === 'EN_COURS' ? 'Statut EN_COURS OK' : `Statut ${crv.statut} invalide`,
-      output: null,
-      timestamp: new Date().toISOString()
-    });
-
     if (crv.statut !== 'EN_COURS') {
-      console.warn('[CRV][API_REJECT][STATUT_INVALIDE_TERMINAISON]', {
-        crvId: crv._id,
-        userId: req.user?._id || null,
-        role: req.user?.fonction || null,
-        input: { statutActuel: crv.statut },
-        decision: false,
-        reason: `Statut ${crv.statut} invalide pour terminaison`,
-        output: { code: 'STATUT_INVALIDE_TERMINAISON' },
-        timestamp: new Date().toISOString()
-      });
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: `Impossible de terminer un CRV en statut ${crv.statut}. Le CRV doit être en statut EN_COURS.`,
@@ -2318,44 +2297,18 @@ export const terminerCRV = async (req, res, next) => {
       });
     }
 
-    // Recalculer la complétude avant vérification
     const completude = await calculerCompletude(crv._id);
-
-    // Vérifier les conditions de terminaison
     const COMPLETUDE_MINIMALE_TERMINAISON = 50;
     const anomalies = [];
-
-    console.log('[CRV][DECISION_CHECK][COMPLETUDE >= 50%]', {
-      crvId: crv._id,
-      userId: req.user?._id || null,
-      role: req.user?.fonction || null,
-      input: { completude, seuil: COMPLETUDE_MINIMALE_TERMINAISON },
-      decision: completude >= COMPLETUDE_MINIMALE_TERMINAISON,
-      reason: completude >= COMPLETUDE_MINIMALE_TERMINAISON ? 'Complétude suffisante' : 'Complétude insuffisante',
-      output: { completude },
-      timestamp: new Date().toISOString()
-    });
 
     if (completude < COMPLETUDE_MINIMALE_TERMINAISON) {
       anomalies.push(`Complétude insuffisante: ${completude}% (minimum ${COMPLETUDE_MINIMALE_TERMINAISON}% requis)`);
     }
 
-    // Vérifier que les phases critiques sont traitées
-    const phases = await ChronologiePhase.find({ crv: crv._id }).populate('phase');
+    const phases = await ChronologiePhase.find({ crv: crv._id }).populate('phase').session(session);
     const phasesNonTraitees = phases.filter(p =>
       p.statut === 'NON_COMMENCE' && p.phase && p.phase.obligatoire
     );
-
-    console.log('[CRV][DECISION_CHECK][PHASES_OBLIGATOIRES]', {
-      crvId: crv._id,
-      userId: req.user?._id || null,
-      role: req.user?.fonction || null,
-      input: { totalPhases: phases.length, phasesNonTraitees: phasesNonTraitees.length },
-      decision: phasesNonTraitees.length === 0,
-      reason: phasesNonTraitees.length === 0 ? 'Toutes phases obligatoires traitées' : `${phasesNonTraitees.length} phases non traitées`,
-      output: { phasesManquantes: phasesNonTraitees.map(p => p.phase?.libelle) },
-      timestamp: new Date().toISOString()
-    });
 
     if (phasesNonTraitees.length > 0) {
       const phasesNoms = phasesNonTraitees.map(p => p.phase.libelle).join(', ');
@@ -2363,53 +2316,35 @@ export const terminerCRV = async (req, res, next) => {
     }
 
     if (anomalies.length > 0) {
-      console.warn('[CRV][API_REJECT][CONDITIONS_TERMINAISON_NON_SATISFAITES]', {
-        crvId: crv._id,
-        userId: req.user?._id || null,
-        role: req.user?.fonction || null,
-        input: { completude },
-        decision: false,
-        reason: 'Conditions de terminaison non satisfaites',
-        output: { anomalies, code: 'CONDITIONS_TERMINAISON_NON_SATISFAITES' },
-        timestamp: new Date().toISOString()
-      });
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: 'Impossible de terminer le CRV',
         code: 'CONDITIONS_TERMINAISON_NON_SATISFAITES',
-        anomalies: anomalies,
-        completude: completude
+        anomalies, completude
       });
     }
 
     console.log('[CRV][STATUS_TRANSITION]', {
-      crvId: crv._id,
-      userId: req.user?._id || null,
-      role: req.user?.fonction || null,
-      input: null,
-      decision: true,
-      reason: 'Transition EN_COURS → TERMINE autorisée',
-      output: { from: 'EN_COURS', to: 'TERMINE' },
+      crvId: crv._id, from: 'EN_COURS', to: 'TERMINE',
       timestamp: new Date().toISOString()
     });
 
     crv.statut = 'TERMINE';
     crv.modifiePar = req.user._id;
-    await crv.save();
+    await crv.save({ session });
 
-    // EXTENSION 8 - Sync Vol.statut → TERMINE
-    const volTerminer = await Vol.findById(crv.vol);
+    // EXTENSION 8 - Sync Vol.statut → TERMINE (dans la même transaction)
+    const volTerminer = await Vol.findById(crv.vol).session(session);
     if (volTerminer) {
       volTerminer.statut = 'TERMINE';
-      await volTerminer.save();
-      console.log('[CRV][VOL_STATUS_SYNC]', {
-        crvId: crv._id, userId: req.user?._id || null, role: req.user?.fonction || null,
-        input: { crvStatut: 'TERMINE' }, decision: 'SYNC',
-        reason: 'Vol status synchronized with CRV',
-        output: { volId: volTerminer._id, volStatut: 'TERMINE' },
-        timestamp: new Date().toISOString()
-      });
+      await volTerminer.save({ session });
     }
+
+    // COMMIT — CRV + Vol mis à jour atomiquement
+    await session.commitTransaction();
+    session.endSession();
 
     const crvUpdated = await CRV.findById(crv._id)
       .populate('vol')
@@ -2418,33 +2353,36 @@ export const terminerCRV = async (req, res, next) => {
       .populate('responsableVol');
 
     console.log('[CRV][API_SUCCESS][TERMINER_CRV]', {
-      crvId: crv._id,
-      userId: req.user?._id || null,
-      role: req.user?.fonction || null,
-      input: null,
-      decision: true,
-      reason: 'CRV terminé avec succès',
-      output: { statut: crvUpdated.statut, completude },
+      crvId: crv._id, statut: 'TERMINE', completude,
       timestamp: new Date().toISOString()
     });
 
     req.crvId = crv._id;
 
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.CRV_TERMINE, {
+      crvId: crv._id, numeroCRV: crv.numeroCRV,
+      completude, userId: req.user?._id
+    });
+    if (completude >= 80) {
+      eventBus.emitAsync(EVENTS.CRV_PRET_VALIDATION, {
+        crvId: crv._id, numeroCRV: crv.numeroCRV,
+        completude, userId: req.user?._id
+      });
+    }
+    // ─────────────────────────────────────────────────────────────
+
     res.status(200).json({
       success: true,
       message: 'CRV terminé avec succès',
       data: crvUpdated,
-      completude: completude
+      completude
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error('[CRV][ERROR][TERMINER_CRV]', {
-      crvId: req.params.id,
-      userId: req.user?._id || null,
-      role: req.user?.fonction || null,
-      input: null,
-      decision: false,
-      reason: error.message,
-      output: { stack: error.stack },
+      crvId: req.params.id, error: error.message,
       timestamp: new Date().toISOString()
     });
     next(error);
@@ -2941,6 +2879,13 @@ export const supprimerCRV = async (req, res, next) => {
       output: { numeroCRV: crv.numeroCRV },
       timestamp: new Date().toISOString()
     });
+
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.CRV_SUPPRIME, {
+      crvId: crv._id, numeroCRV: crv.numeroCRV,
+      ancienStatut: crv.statut, userId: req.user?._id
+    });
+    // ─────────────────────────────────────────────────────────────
 
     res.status(200).json({
       success: true,

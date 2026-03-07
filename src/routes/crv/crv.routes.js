@@ -60,8 +60,19 @@ import { verifierCRVNonVerrouilleViaPhase } from '../../middlewares/verrouillage
 
 const router = express.Router();
 
-// 🔒 P0-1: QUALITE exclu (lecture seule)
-router.post('/', protect, excludeQualite, [
+// ============================================================
+// MISSION 022 — AUTORISATIONS HIÉRARCHIQUES
+// Rôles opérationnels : AGENT_ESCALE, CHEF_EQUIPE
+// Rôles supervision : SUPERVISEUR, MANAGER
+// Rôle qualité : QUALITE (lecture seule)
+// Rôle admin : ADMIN (pas d'accès opérationnel CRV)
+// ============================================================
+const ROLES_OPERATIONNELS = ['AGENT_ESCALE', 'CHEF_EQUIPE'];
+const ROLES_SUPERVISION = ['SUPERVISEUR', 'MANAGER'];
+const ROLES_TOUS_SAUF_QUALITE = [...ROLES_OPERATIONNELS, ...ROLES_SUPERVISION];
+
+// 🔒 Création CRV — Rôles opérationnels uniquement
+router.post('/', protect, authorize(...ROLES_TOUS_SAUF_QUALITE), [
   // PATH 1: Bulletin
   body('bulletinId').optional().isMongoId().withMessage('bulletinId invalide'),
   body('mouvementId').optional().isMongoId().withMessage('mouvementId invalide'),
@@ -160,17 +171,17 @@ router.get('/:id/transitions', protect, obtenirTransitionsPossibles);
 /**
  * @route   POST /api/crv/:id/demarrer
  * @desc    Démarrer un CRV (BROUILLON → EN_COURS)
- * @access  Private (QUALITE exclu)
+ * @access  Private (Rôles opérationnels + supervision)
  */
-router.post('/:id/demarrer', protect, excludeQualite, auditLog('MISE_A_JOUR'), demarrerCRV);
+router.post('/:id/demarrer', protect, authorize(...ROLES_TOUS_SAUF_QUALITE), auditLog('MISE_A_JOUR'), demarrerCRV);
 
 /**
  * @route   POST /api/crv/:id/terminer
  * @desc    Terminer un CRV (EN_COURS → TERMINE)
- * @access  Private (QUALITE exclu)
+ * @access  Private (Rôles opérationnels + supervision)
  * @note    Vérifie complétude minimale 50% et phases obligatoires
  */
-router.post('/:id/terminer', protect, excludeQualite, auditLog('MISE_A_JOUR'), terminerCRV);
+router.post('/:id/terminer', protect, authorize(...ROLES_TOUS_SAUF_QUALITE), auditLog('MISE_A_JOUR'), terminerCRV);
 
 // ============================
 //   CONFIRMATIONS EXPLICITES
@@ -316,7 +327,8 @@ router.delete('/:id/engins/:affectationId', protect, excludeQualite, verifierCRV
  * @note    Heures acceptées aux formats: "HH:mm", "HH:mm:ss", ou ISO string
  */
 // 🔒 Mission 009: Verrouillage — empêcher modification phase sur CRV verrouillé
-router.put('/:crvId/phases/:phaseId', protect, excludeQualite, verifierCRVNonVerrouilleViaPhase, auditLog('MISE_A_JOUR'), mettreAJourPhaseCRV);
+// 🔒 Mission 022: Autorisations hiérarchiques — rôles opérationnels + supervision
+router.put('/:crvId/phases/:phaseId', protect, authorize(...ROLES_TOUS_SAUF_QUALITE), verifierCRVNonVerrouilleViaPhase, auditLog('MISE_A_JOUR'), mettreAJourPhaseCRV);
 
 // ============================
 //   MISE À JOUR HORAIRES
@@ -335,8 +347,8 @@ router.put('/:id/horaire', protect, excludeQualite, verifierCRVNonVerrouille, au
 // ============================
 
 // Archiver un CRV spécifique
-// 🔒 P0-1: QUALITE exclu
-router.post('/:id/archive', protect, excludeQualite, archiverCRV);
+// 🔒 Mission 022: Autorisations hiérarchiques
+router.post('/:id/archive', protect, authorize(...ROLES_TOUS_SAUF_QUALITE), archiverCRV);
 
 // Vérifier si un CRV peut être archivé
 router.get('/:id/archive/status', protect, verifierArchivageCRV);
@@ -383,10 +395,10 @@ router.get('/:id/peut-annuler', protect, verifierPeutAnnuler);
 /**
  * @route   POST /api/crv/:id/annuler
  * @desc    Annuler un CRV
- * @access  Private (tous sauf QUALITE)
+ * @access  Private (SUPERVISEUR, MANAGER uniquement)
  * @body    { raisonAnnulation, commentaireAnnulation }
  */
-router.post('/:id/annuler', protect, excludeQualite, auditLog('MISE_A_JOUR'), annulerCRV);
+router.post('/:id/annuler', protect, authorize(...ROLES_SUPERVISION), auditLog('MISE_A_JOUR'), annulerCRV);
 
 /**
  * @route   POST /api/crv/:id/reactiver

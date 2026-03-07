@@ -2,8 +2,10 @@ import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
 import CRV from '../../models/crv/CRV.js';
 import Phase from '../../models/phases/Phase.js';
 import { demarrerPhase, terminerPhase } from '../../services/phases/phase.service.js';
-import { calculerCompletude } from '../../services/crv/crv.service.js';
+import { updateCompletude } from '../../services/crv/crv.service.js';
 import { creerHorodatageDeclaration } from '../../utils/horodatage.js';
+import { eventBus } from '../../services/notifications/notificationEngine.js';
+import { EVENTS } from '../../services/notifications/eventRegistry.js';
 
 /**
  * Obtenir une phase individuelle (ChronologiePhase)
@@ -161,7 +163,7 @@ export const terminerPhaseController = async (req, res, next) => {
     console.log(`   Nouveau statut: ${phaseUpdated.statut}`);
     console.log('→ Recalcul complétude CRV...');
 
-    await calculerCompletude(chronoPhase.crv);
+    await updateCompletude(chronoPhase.crv);
 
     console.log('✓ Complétude recalculée');
 
@@ -225,9 +227,16 @@ export const marquerPhaseNonRealisee = async (req, res, next) => {
     console.log('✓ Phase marquée NON_REALISE');
     console.log('→ Recalcul complétude CRV...');
 
-    await calculerCompletude(chronoPhase.crv);
+    await updateCompletude(chronoPhase.crv);
 
     console.log('✓ Complétude recalculée');
+
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.PHASE_NON_REALISEE, {
+      phaseId: chronoPhase._id, crvId: chronoPhase.crv,
+      motifNonRealisation, detailMotif, userId: req.user?._id
+    });
+    // ─────────────────────────────────────────────────────────────
 
     req.crvId = chronoPhase.crv;
 
@@ -493,8 +502,7 @@ export const mettreAJourPhaseCRV = async (req, res, next) => {
     await chronoPhase.save();
 
     // Recalculer la complétude du CRV
-    const { calculerCompletude } = await import('../services/crv/crv.service.js');
-    await calculerCompletude(crv._id);
+    await updateCompletude(crv._id);
 
     // Recharger avec populate
     const phaseUpdated = await ChronologiePhase.findById(chronoPhase._id).populate('phase');

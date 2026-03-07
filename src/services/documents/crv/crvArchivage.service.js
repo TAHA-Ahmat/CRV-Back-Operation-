@@ -4,10 +4,13 @@
 // Service d'archivage des CRV utilisant l'architecture
 // générique DocumentArchiver avec arborescence Drive
 
+import mongoose from 'mongoose';
 import { DOCUMENT_TYPES } from '../../../config/documents.config.js';
 import { archiveDocument, checkArchiveStatus } from '../base/DocumentArchiver.js';
 import { CrvGenerator } from './CrvGenerator.js';
 import CRV from '../../../models/crv/CRV.js';
+import { eventBus } from '../../notifications/notificationEngine.js';
+import { EVENTS } from '../../notifications/eventRegistry.js';
 
 // Instance du générateur
 const generator = new CrvGenerator();
@@ -34,121 +37,119 @@ const generator = new CrvGenerator();
 export async function archiverCRV(crvId, userId, options = {}) {
   console.log(`[CRV-ARCHIVE-UNIFIED] Début archivage CRV ${crvId}`);
 
-  // 1. Récupérer le CRV avec ses relations
-  const crv = await CRV.findById(crvId).populate('vol');
+  // ============================================================
+  // MISSION 022 — TRANSACTION MONGODB
+  // Lecture CRV + vérifications + mise à jour archivage atomiques.
+  // Le PDF + Drive upload sont hors transaction (opérations externes).
+  // Si le save DB échoue après Drive upload → fichier orphelin sur Drive
+  // (acceptable, nettoyable manuellement, pas de corruption DB).
+  // ============================================================
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  if (!crv) {
-    const error = new Error('CRV non trouvé');
-    error.status = 404;
-    throw error;
-  }
+  try {
+    // 1. Récupérer le CRV (dans la transaction — verrouillage lecture)
+    const crv = await CRV.findById(crvId).populate('vol').session(session);
 
-  // 2. Vérifier que le CRV peut être archivé
-  const canArchive = canArchiveCRV(crv);
-  if (!canArchive.canArchive) {
-    const error = new Error(canArchive.reason);
-    error.status = 400;
-    throw error;
-  }
+    if (!crv) {
+      const error = new Error('CRV non trouvé');
+      error.status = 404;
+      throw error;
+    }
 
-  // 2b. IDEMPOTENCE (P0#7) : si déjà archivé et pas de force, retourner l'existant
-  if (crv.archivage?.driveFileId && !options.force) {
-    console.log(`[CRV-ARCHIVE-UNIFIED] CRV ${crv.numeroCRV} déjà archivé (idempotent) — version ${crv.archivage.version}`);
-    return {
-      success: true,
-      idempotent: true,
-      crv: {
-        id: crv._id,
-        numeroCRV: crv.numeroCRV,
-        escale: crv.escale,
-        statut: crv.statut
-      },
-      archivage: {
-        fileId: crv.archivage.driveFileId,
-        webViewLink: crv.archivage.driveWebViewLink,
-        filename: crv.archivage.filename,
-        folderPath: crv.archivage.folderPath,
-        size: crv.archivage.size,
-        archivedAt: crv.archivage.archivedAt,
-        version: crv.archivage.version
-      }
+    // 2. Vérifier que le CRV peut être archivé
+    const canArchive = canArchiveCRV(crv);
+    if (!canArchive.canArchive) {
+      const error = new Error(canArchive.reason);
+      error.status = 400;
+      throw error;
+    }
+
+    // 2b. IDEMPOTENCE (P0#7) : si déjà archivé et pas de force, retourner l'existant
+    if (crv.archivage?.driveFileId && !options.force) {
+      await session.commitTransaction();
+      session.endSession();
+      console.log(`[CRV-ARCHIVE-UNIFIED] CRV ${crv.numeroCRV} déjà archivé (idempotent)`);
+      return {
+        success: true, idempotent: true,
+        crv: { id: crv._id, numeroCRV: crv.numeroCRV, escale: crv.escale, statut: crv.statut },
+        archivage: {
+          fileId: crv.archivage.driveFileId, webViewLink: crv.archivage.driveWebViewLink,
+          filename: crv.archivage.filename, folderPath: crv.archivage.folderPath,
+          size: crv.archivage.size, archivedAt: crv.archivage.archivedAt,
+          version: crv.archivage.version
+        }
+      };
+    }
+
+    // 3. Générer le PDF (hors DB)
+    console.log(`[CRV-ARCHIVE-UNIFIED] Génération PDF pour: ${crv.numeroCRV}`);
+    const buffer = await generator.generateBuffer(crvId);
+
+    // 4. Préparer les métadonnées pour Drive
+    const vol = crv.vol || {};
+    const metadata = {
+      numeroCRV: crv.numeroCRV, escale: crv.escale, statut: crv.statut,
+      numeroVol: vol.numeroVol || 'N/A',
+      compagnie: vol.compagnieAerienne || vol.codeIATA || 'AUTRE',
+      dateVol: vol.dateVol?.toISOString() || null, completude: crv.completude
     };
-  }
 
-  // 3. Générer le PDF
-  console.log(`[CRV-ARCHIVE-UNIFIED] Génération PDF pour: ${crv.numeroCRV}`);
-  const buffer = await generator.generateBuffer(crvId);
+    const entityForArchive = {
+      ...crv.toObject(), dateVol: vol.dateVol,
+      compagnie: { code: vol.codeIATA || 'AUTRE' },
+      codeCompagnie: vol.codeIATA || 'AUTRE',
+      numeroVol: vol.numeroVol || crv.numeroCRV
+    };
 
-  // 4. Préparer les métadonnées pour Drive
-  const vol = crv.vol || {};
-  const metadata = {
-    numeroCRV: crv.numeroCRV,
-    escale: crv.escale,
-    statut: crv.statut,
-    numeroVol: vol.numeroVol || 'N/A',
-    compagnie: vol.compagnieAerienne || vol.codeIATA || 'AUTRE',
-    dateVol: vol.dateVol?.toISOString() || null,
-    completude: crv.completude
-  };
+    // 5. Upload Drive (opération externe)
+    console.log(`[CRV-ARCHIVE-UNIFIED] Archivage vers Google Drive...`);
+    const archiveResult = await archiveDocument({
+      documentType: DOCUMENT_TYPES.CRV, buffer,
+      entity: entityForArchive, entityId: crvId, userId, metadata
+    });
 
-  // 5. Créer une entité enrichie pour le nommage/dossiers
-  // La config documents.config.js attend certains champs
-  const entityForArchive = {
-    ...crv.toObject(),
-    dateVol: vol.dateVol,
-    compagnie: { code: vol.codeIATA || 'AUTRE' },
-    codeCompagnie: vol.codeIATA || 'AUTRE',
-    numeroVol: vol.numeroVol || crv.numeroCRV
-  };
-
-  // 6. Archiver dans Drive (crée l'arborescence automatiquement)
-  console.log(`[CRV-ARCHIVE-UNIFIED] Archivage vers Google Drive...`);
-  const archiveResult = await archiveDocument({
-    documentType: DOCUMENT_TYPES.CRV,
-    buffer,
-    entity: entityForArchive,
-    entityId: crvId,
-    userId,
-    metadata
-  });
-
-  // 7. Mettre à jour le CRV avec les infos d'archivage
-  console.log(`[CRV-ARCHIVE-UNIFIED] Mise à jour CRV avec infos archivage`);
-
-  crv.archivage = {
-    driveFileId: archiveResult.fileId,
-    driveWebViewLink: archiveResult.webViewLink,
-    filename: archiveResult.filename,
-    folderPath: archiveResult.folderPath,
-    size: archiveResult.size,
-    archivedAt: new Date(),
-    archivedBy: userId,
-    version: (crv.archivage?.version || 0) + 1
-  };
-
-  await crv.save();
-
-  console.log(`[CRV-ARCHIVE-UNIFIED] ✅ Archivage terminé: ${archiveResult.filename}`);
-  console.log(`[CRV-ARCHIVE-UNIFIED] Dossier: ${archiveResult.folderPath}`);
-
-  return {
-    success: true,
-    crv: {
-      id: crv._id,
-      numeroCRV: crv.numeroCRV,
-      escale: crv.escale,
-      statut: crv.statut
-    },
-    archivage: {
-      fileId: archiveResult.fileId,
-      webViewLink: archiveResult.webViewLink,
+    // 6. Mise à jour CRV avec infos archivage (dans la transaction)
+    crv.archivage = {
+      driveFileId: archiveResult.fileId,
+      driveWebViewLink: archiveResult.webViewLink,
       filename: archiveResult.filename,
       folderPath: archiveResult.folderPath,
       size: archiveResult.size,
       archivedAt: new Date(),
-      version: crv.archivage.version
-    }
-  };
+      archivedBy: userId,
+      version: (crv.archivage?.version || 0) + 1
+    };
+
+    await crv.save({ session });
+
+    // COMMIT — archivage info persisté atomiquement
+    await session.commitTransaction();
+
+    console.log(`[CRV-ARCHIVE-UNIFIED] ✅ Archivage terminé: ${archiveResult.filename}`);
+
+    return {
+      success: true,
+      crv: { id: crv._id, numeroCRV: crv.numeroCRV, escale: crv.escale, statut: crv.statut },
+      archivage: {
+        fileId: archiveResult.fileId, webViewLink: archiveResult.webViewLink,
+        filename: archiveResult.filename, folderPath: archiveResult.folderPath,
+        size: archiveResult.size, archivedAt: new Date(), version: crv.archivage.version
+      }
+    };
+  } catch (error) {
+    await session.abortTransaction();
+
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.CRV_ARCHIVAGE_ECHOUE, {
+      crvId, userId, erreur: error.message
+    });
+    // ─────────────────────────────────────────────────────────────
+
+    throw error;
+  } finally {
+    session.endSession();
+  }
 }
 
 /**

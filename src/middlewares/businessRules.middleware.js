@@ -8,7 +8,8 @@ import Phase from '../models/phases/Phase.js';
  * Un CRV validé (VALIDE) ou verrouillé (VERROUILLE) est non modifiable.
  * Seuls EN_COURS, BROUILLON et TERMINE restent éditables.
  */
-const STATUTS_NON_MODIFIABLES = ['VALIDE', 'VERROUILLE'];
+// MISSION 022 — Ajout ANNULE aux statuts non modifiables + protection archivage
+const STATUTS_NON_MODIFIABLES = ['VALIDE', 'VERROUILLE', 'ANNULE'];
 
 export const verifierCRVNonVerrouille = async (req, res, next) => {
   try {
@@ -24,6 +25,15 @@ export const verifierCRVNonVerrouille = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         message: 'CRV non trouvé'
+      });
+    }
+
+    // MISSION 022 — Immutabilité archivage : un CRV archivé est IMMUABLE
+    if (crv.archivage?.archivedAt) {
+      return res.status(403).json({
+        success: false,
+        message: 'INTERDIT : CRV archivé — document immuable, aucune modification possible',
+        code: 'CRV_IMMUTABLE_ARCHIVE'
       });
     }
 

@@ -148,7 +148,15 @@ export const calculerCompletude = async (crvId) => {
 
     const completude = Math.round(score);
 
-    await CRV.findByIdAndUpdate(crvId, { completude });
+    // ============================================================
+    // FIX Bug #2 Mission 028 — NE PAS écrire ici.
+    // calculerCompletude est appelé dans terminerCRV et validerCRV
+    // au sein d'une transaction MongoDB. Le findByIdAndUpdate hors
+    // transaction modifie le document CRV, causant un Write Conflict
+    // quand la transaction tente son crv.save({ session }).
+    // La persistance est déléguée à updateCompletude() pour les
+    // appelants hors-transaction (phase.controller).
+    // ============================================================
 
     console.log('[CRV][SERVICE][COMPLETUDE_CALC_SUCCESS]', {
       crvId,
@@ -175,6 +183,23 @@ export const calculerCompletude = async (crvId) => {
     });
     return 0;
   }
+};
+
+// ============================================================
+// FIX Bug #2 Mission 028 — Wrapper pour persistance complétude
+// À utiliser UNIQUEMENT par les appelants hors-transaction
+// (ex: phase.controller.js après mise à jour d'une phase).
+// Les appelants dans une transaction (terminerCRV, validerCRV)
+// utilisent calculerCompletude() directement (read-only).
+// ============================================================
+export const updateCompletude = async (crvId) => {
+  const completude = await calculerCompletude(crvId);
+  try {
+    await CRV.findByIdAndUpdate(crvId, { completude });
+  } catch (err) {
+    console.error('[CRV][SERVICE] Erreur persistance complétude:', err.message);
+  }
+  return completude;
 };
 
 export const verifierConformiteSLA = async (crvId, compagnieAerienne) => {

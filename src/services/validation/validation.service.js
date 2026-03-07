@@ -1,8 +1,11 @@
+import mongoose from 'mongoose';
 import CRV from '../../models/crv/CRV.js';
 import ValidationCRV from '../../models/validation/ValidationCRV.js';
 import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
 import { calculerCompletude, verifierConformiteSLA } from '../crv/crv.service.js';
 import { archiverCRV, isCRVImmutable } from '../documents/crv/crvArchivage.service.js';
+import { eventBus } from '../notifications/notificationEngine.js';
+import { EVENTS } from '../notifications/eventRegistry.js';
 
 /**
  * FLUX DE VALIDATION CRV
@@ -24,84 +27,52 @@ export const validerCRV = async (crvId, userId, commentaires, verrouillageAutoma
   const timestamp = new Date().toISOString();
 
   console.log('[CRV][SERVICE][VALIDER_CRV_START]', {
-    crvId,
-    userId,
-    role: null,
-    input: { crvId, commentaires, verrouillageAutomatique },
-    decision: null,
-    reason: 'Début validation CRV',
-    output: null,
-    timestamp
+    crvId, userId, input: { crvId, commentaires, verrouillageAutomatique },
+    reason: 'Début validation CRV', timestamp
   });
 
+  // ============================================================
+  // MISSION 022 — TRANSACTION MONGODB
+  // Toutes les opérations DB de validation sont atomiques.
+  // Si une étape échoue → rollback complet.
+  // L'archivage Drive reste non-bloquant (mode dégradé si échec).
+  // ============================================================
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    const crv = await CRV.findById(crvId).populate('vol');
+    const crv = await CRV.findById(crvId).populate('vol').session(session);
 
     if (!crv) {
-      console.log('[CRV][SERVICE][VALIDER_CRV_ERROR]', {
-        crvId,
-        userId,
-        role: null,
-        input: { crvId },
-        decision: 'REJECT',
-        reason: 'CRV non trouvé',
-        output: null,
-        timestamp: new Date().toISOString()
-      });
       throw new Error('CRV non trouvé');
     }
 
-    // Vérifier que le CRV est dans un état permettant la validation
     if (crv.statut === 'VERROUILLE') {
-      console.log('[CRV][SERVICE][VALIDER_CRV_REJECT]', {
-        crvId,
-        userId,
-        role: null,
-        input: { crvId },
-        decision: 'REJECT',
-        reason: 'CRV déjà verrouillé',
-        output: { statutActuel: crv.statut },
-        timestamp: new Date().toISOString()
-      });
       throw new Error('Le CRV est déjà verrouillé');
     }
 
     if (crv.statut !== 'TERMINE' && crv.statut !== 'VALIDE') {
-      console.log('[CRV][SERVICE][VALIDER_CRV_REJECT]', {
-        crvId,
-        userId,
-        role: null,
-        input: { crvId },
-        decision: 'REJECT',
-        reason: `Statut ${crv.statut} non autorisé (TERMINE ou VALIDE requis)`,
-        output: { statutActuel: crv.statut },
-        timestamp: new Date().toISOString()
-      });
       throw new Error(`Le CRV doit être en statut TERMINE pour être validé (statut actuel: ${crv.statut})`);
     }
 
     const completude = await calculerCompletude(crvId);
     const anomalies = [];
 
-    // Vérification complétude minimale
     if (completude < 80) {
       anomalies.push(`Complétude insuffisante: ${completude}% (minimum 80% requis)`);
     }
 
-    // Vérification responsable vol
     if (!crv.responsableVol) {
       anomalies.push('Responsable du vol non défini');
     }
 
-    // Vérification phases traitées
-    const phases = await ChronologiePhase.find({ crv: crvId });
+    const phases = await ChronologiePhase.find({ crv: crvId }).session(session);
     const phasesNonTraitees = phases.filter(p => p.statut === 'NON_COMMENCE');
 
     if (phasesNonTraitees.length > 0) {
       anomalies.push(`${phasesNonTraitees.length} phase(s) non traitée(s)`);
     }
 
-    // Vérification SLA
     const slaCheck = await verifierConformiteSLA(crvId, crv.vol?.compagnieAerienne);
 
     let statutValidation = 'VALIDE';
@@ -109,28 +80,18 @@ export const validerCRV = async (crvId, userId, commentaires, verrouillageAutoma
 
     if (anomalies.length > 0) {
       statutValidation = 'EN_ATTENTE_CORRECTION';
-      statutCRV = crv.statut; // Ne pas changer le statut si anomalies
+      statutCRV = crv.statut;
 
       console.log('[CRV][SERVICE][VALIDER_CRV_ANOMALIES]', {
-        crvId,
-        userId,
-        role: null,
-        input: { crvId },
-        decision: 'ANOMALIES_DETECTEES',
-        reason: `${anomalies.length} anomalie(s) détectée(s)`,
-        output: { anomalies, statutValidation },
-        timestamp: new Date().toISOString()
+        crvId, anomalies, statutValidation, timestamp: new Date().toISOString()
       });
     }
 
-    // Supprimer l'ancienne validation s'il y en a une
-    const oldValidation = await ValidationCRV.findOne({ crv: crvId });
-    if (oldValidation) {
-      await ValidationCRV.deleteOne({ crv: crvId });
-    }
+    // Supprimer l'ancienne validation (dans la transaction)
+    await ValidationCRV.deleteMany({ crv: crvId }, { session });
 
-    // Créer la nouvelle validation
-    const validation = await ValidationCRV.create({
+    // Créer la nouvelle validation (dans la transaction)
+    const [validation] = await ValidationCRV.create([{
       crv: crvId,
       validePar: userId,
       statut: statutValidation,
@@ -141,40 +102,59 @@ export const validerCRV = async (crvId, userId, commentaires, verrouillageAutoma
       anomaliesDetectees: anomalies,
       verrouille: false,
       dateVerrouillage: null
-    });
+    }], { session });
+
+    // Mettre à jour le statut du CRV (dans la transaction)
+    let nouveauStatut = crv.statut;
+    if (statutValidation === 'VALIDE') {
+      if (verrouillageAutomatique) {
+        nouveauStatut = 'VERROUILLE';
+        await CRV.findByIdAndUpdate(crvId, {
+          statut: 'VERROUILLE',
+          verrouillePar: userId,
+          dateVerrouillage: new Date()
+        }, { session });
+
+        await ValidationCRV.findByIdAndUpdate(validation._id, {
+          verrouille: true,
+          dateVerrouillage: new Date()
+        }, { session });
+
+        console.log('[CRV][SERVICE][STATUS_TRANSITION]', {
+          crvId, from: crv.statut, to: 'VERROUILLE',
+          reason: 'Verrouillage automatique après validation',
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        nouveauStatut = 'VALIDE';
+        await CRV.findByIdAndUpdate(crvId, {
+          statut: 'VALIDE'
+        }, { session });
+
+        console.log('[CRV][SERVICE][STATUS_TRANSITION]', {
+          crvId, from: crv.statut, to: 'VALIDE',
+          reason: 'Validation OK - verrouillage manuel requis',
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+
+    // COMMIT — toutes les opérations DB sont validées atomiquement
+    await session.commitTransaction();
 
     // ============================================================
-    // ARCHIVAGE — Tentative d'archivage Drive avant transition.
-    // Si Drive échoue, la validation CONTINUE (mode dégradé).
-    // L'archivage sera réessayé ultérieurement.
+    // ARCHIVAGE DRIVE — APRÈS le commit (non-bloquant)
+    // Si Drive échoue, la validation est déjà sauvegardée.
     // Révision Mission 006 : Drive ne doit pas bloquer l'exploitation.
     // ============================================================
     if (statutValidation === 'VALIDE') {
-      console.log('[CRV][SERVICE][ARCHIVAGE_AVANT_TRANSITION]', {
-        crvId,
-        userId,
-        reason: 'Tentative archivage avant transition VALIDE/VERROUILLE',
-        timestamp: new Date().toISOString()
-      });
-
       try {
         await archiverCRV(crvId, userId);
-
-        console.log('[CRV][SERVICE][ARCHIVAGE_OK]', {
-          crvId,
-          userId,
-          reason: 'Archivage réussi — transition autorisée',
-          timestamp: new Date().toISOString()
-        });
+        console.log('[CRV][SERVICE][ARCHIVAGE_OK]', { crvId, timestamp: new Date().toISOString() });
       } catch (archiveError) {
         console.error('[CRV][SERVICE][ARCHIVAGE_ECHEC_NON_BLOQUANT]', {
-          crvId,
-          userId,
-          reason: 'Archivage échoué — validation continue en mode dégradé',
-          error: archiveError.message,
-          timestamp: new Date().toISOString()
+          crvId, error: archiveError.message, timestamp: new Date().toISOString()
         });
-
         await CRV.findByIdAndUpdate(crvId, {
           'archivage.statut': 'EN_ATTENTE',
           'archivage.erreur': archiveError.message,
@@ -183,83 +163,35 @@ export const validerCRV = async (crvId, userId, commentaires, verrouillageAutoma
       }
     }
 
-    // Mettre à jour le statut du CRV
-    let nouveauStatut = crv.statut;
-    if (statutValidation === 'VALIDE') {
-      // Si verrouillage automatique est activé, passer directement à VERROUILLE
-      if (verrouillageAutomatique) {
-        nouveauStatut = 'VERROUILLE';
-        await CRV.findByIdAndUpdate(crvId, {
-          statut: 'VERROUILLE',
-          verrouillePar: userId,
-          dateVerrouillage: new Date()
-        });
-
-        await ValidationCRV.findByIdAndUpdate(validation._id, {
-          verrouille: true,
-          dateVerrouillage: new Date()
-        });
-
-        console.log('[CRV][SERVICE][STATUS_TRANSITION]', {
-          crvId,
-          userId,
-          role: null,
-          input: { statutPrecedent: crv.statut },
-          decision: 'TRANSITION',
-          reason: 'Verrouillage automatique après validation',
-          output: { nouveauStatut: 'VERROUILLE' },
-          timestamp: new Date().toISOString()
-        });
-      } else {
-        // Sinon passer à VALIDE (verrouillage manuel requis)
-        nouveauStatut = 'VALIDE';
-        await CRV.findByIdAndUpdate(crvId, {
-          statut: 'VALIDE'
-        });
-
-        console.log('[CRV][SERVICE][STATUS_TRANSITION]', {
-          crvId,
-          userId,
-          role: null,
-          input: { statutPrecedent: crv.statut },
-          decision: 'TRANSITION',
-          reason: 'Validation OK - verrouillage manuel requis',
-          output: { nouveauStatut: 'VALIDE' },
-          timestamp: new Date().toISOString()
-        });
-      }
-    }
-
     console.log('[CRV][SERVICE][VALIDER_CRV_SUCCESS]', {
-      crvId,
-      userId,
-      role: null,
-      input: { crvId, commentaires, verrouillageAutomatique },
-      decision: statutValidation === 'VALIDE' ? 'VALIDE' : 'EN_ATTENTE_CORRECTION',
-      reason: anomalies.length > 0 ? `${anomalies.length} anomalie(s)` : 'Validation réussie',
-      output: {
-        validationId: validation._id,
-        statutValidation,
-        nouveauStatut,
-        completude,
-        conformiteSLA: slaCheck.conformite
-      },
+      crvId, statutValidation, nouveauStatut, completude,
       timestamp: new Date().toISOString()
     });
+
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    if (statutValidation === 'VALIDE') {
+      eventBus.emitAsync(EVENTS.CRV_VALIDE, {
+        crvId, userId, numeroCRV: crv.numeroCRV,
+        nouveauStatut, completude, verrouillageAutomatique
+      });
+    } else if (statutValidation === 'EN_ATTENTE_CORRECTION') {
+      eventBus.emitAsync(EVENTS.CRV_REJETE, {
+        crvId, userId, numeroCRV: crv.numeroCRV,
+        completude, commentaires
+      });
+    }
+    // ─────────────────────────────────────────────────────────────
 
     return validation;
   } catch (error) {
+    // ROLLBACK — aucune modification DB n'est persistée
+    await session.abortTransaction();
     console.log('[CRV][SERVICE][VALIDER_CRV_ERROR]', {
-      crvId,
-      userId,
-      role: null,
-      input: { crvId },
-      decision: 'ERROR',
-      reason: error.message,
-      output: null,
-      timestamp: new Date().toISOString()
+      crvId, error: error.message, timestamp: new Date().toISOString()
     });
     throw error;
+  } finally {
+    session.endSession();
   }
 };
 
@@ -348,6 +280,12 @@ export const verrouillerCRV = async (crvId, userId) => {
       timestamp: new Date().toISOString()
     });
 
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.CRV_VERROUILLE, {
+      crvId, userId, numeroCRV: crv.numeroCRV
+    });
+    // ─────────────────────────────────────────────────────────────
+
     return true;
   } catch (error) {
     console.log('[CRV][SERVICE][VERROUILLER_CRV_ERROR]', {
@@ -433,8 +371,10 @@ export const deverrouillerCRV = async (crvId, userId, raison) => {
       throw err;
     }
 
+    // MISSION 022 — Correction : déverrouillage ramène à VALIDE (pas EN_COURS)
+    // Doctrine machine à états : VERROUILLE → VALIDE (si non archivé)
     await CRV.findByIdAndUpdate(crvId, {
-      statut: 'EN_COURS',
+      statut: 'VALIDE',
       verrouillePar: null,
       dateVerrouillage: null
     });
@@ -442,20 +382,15 @@ export const deverrouillerCRV = async (crvId, userId, raison) => {
     await ValidationCRV.findOneAndUpdate(
       { crv: crvId },
       {
-        statut: 'INVALIDE',
+        statut: 'VALIDE',
         verrouille: false,
         commentaires: `Déverrouillé par ${userId} - Raison: ${raison}`
       }
     );
 
     console.log('[CRV][SERVICE][STATUS_TRANSITION]', {
-      crvId,
-      userId,
-      role: null,
-      input: { statutPrecedent: 'VERROUILLE', raison },
-      decision: 'TRANSITION',
-      reason: 'Déverrouillage manuel',
-      output: { nouveauStatut: 'EN_COURS' },
+      crvId, userId, from: 'VERROUILLE', to: 'VALIDE',
+      reason: 'Déverrouillage manuel — retour à VALIDE',
       timestamp: new Date().toISOString()
     });
 
@@ -469,6 +404,12 @@ export const deverrouillerCRV = async (crvId, userId, raison) => {
       output: { success: true },
       timestamp: new Date().toISOString()
     });
+
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.CRV_DEVERROUILLE, {
+      crvId, userId, numeroCRV: crv.numeroCRV, raison
+    });
+    // ─────────────────────────────────────────────────────────────
 
     return true;
   } catch (error) {

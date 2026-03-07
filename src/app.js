@@ -30,8 +30,14 @@ import validationRoutes from './routes/validation/validation.routes.js';
 // Routes - MVS 8: Notifications
 import notificationRoutes from './routes/notifications/notification.routes.js';
 import alerteSLARoutes from './routes/notifications/alerteSLA.routes.js';
+// Routes - MVS 10: Notification Rules (Admin)
+import notificationRulesRoutes from './routes/notifications/notificationRules.routes.js';
+// Routes - MVS 11: Notification Recipients (Admin)
+import notificationRecipientsRoutes from './routes/notifications/notificationRecipients.routes.js';
 // Routes - MVS 9: Referentials
 import avionRoutes from './routes/referentials/avion.routes.js';
+// Routes - MVS 12: OPS Control Center (temps réel)
+import opsRoutes from './routes/ops.routes.js';
 
 const app = express();
 
@@ -90,6 +96,12 @@ app.use('/api/engins', enginRoutes);
 app.use('/api/notifications', notificationRoutes);
 // EXTENSION 8 - Service alertes SLA proactives (NON-RÉGRESSION: endpoint nouveau /api/sla/*)
 app.use('/api/sla', alerteSLARoutes);
+// EXTENSION 10 - Admin notification rules (NON-RÉGRESSION: endpoint nouveau /api/notification-rules/*)
+app.use('/api/notification-rules', notificationRulesRoutes);
+// EXTENSION 11 - Admin notification recipients (NON-RÉGRESSION: endpoint nouveau /api/notification-recipients/*)
+app.use('/api/notification-recipients', notificationRecipientsRoutes);
+// EXTENSION 12 - OPS Control Center temps réel (NON-RÉGRESSION: endpoint nouveau /api/ops/*)
+app.use('/api/ops', opsRoutes);
 
 // ✅ ALIGNÉ SUR MAGASIN : Audit finalize middleware (fin de chaque requête)
 app.use(auditFinalizeMiddleware);

@@ -1,5 +1,7 @@
 import ChargeOperationnelle from '../../models/charges/ChargeOperationnelle.js';
 import UserActivityLog from '../../models/security/UserActivityLog.js';
+import { eventBus } from '../notifications/notificationEngine.js';
+import { EVENTS } from '../notifications/eventRegistry.js';
 
 /**
  * EXTENSION 5 - Service Fret (Fret détaillé)
@@ -166,6 +168,14 @@ export const ajouterMarchandiseDangereuse = async (chargeId, marchandise, userId
 
     await charge.save();
 
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.MARCHANDISE_DANGEREUSE_AJOUTEE, {
+      chargeId, crvId: charge.crv, codeONU: marchandise.codeONU,
+      classeONU: marchandise.classeONU,
+      designationOfficielle: marchandise.designationOfficielle, userId
+    });
+    // ─────────────────────────────────────────────────────────────
+
     // Log de l'activité
     await UserActivityLog.create({
       user: userId,
@@ -217,6 +227,12 @@ export const retirerMarchandiseDangereuse = async (chargeId, marchandiseId, user
     }
 
     await charge.save();
+
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.MARCHANDISE_DANGEREUSE_RETIREE, {
+      chargeId, crvId: charge.crv, marchandiseId, userId
+    });
+    // ─────────────────────────────────────────────────────────────
 
     // Log de l'activité
     await UserActivityLog.create({

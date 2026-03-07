@@ -1,6 +1,8 @@
 import CRV from '../../models/crv/CRV.js';
 import UserActivityLog from '../../models/security/UserActivityLog.js';
 import { isCRVImmutable } from '../documents/crv/crvArchivage.service.js';
+import { eventBus } from '../notifications/notificationEngine.js';
+import { EVENTS } from '../notifications/eventRegistry.js';
 
 /**
  * EXTENSION 6 - Service Annulation (Statut CRV ANNULE)
@@ -59,6 +61,13 @@ export const annulerCRV = async (crvId, detailsAnnulation, userId) => {
 
     await crv.save();
 
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.CRV_ANNULE, {
+      crvId, numeroCRV: crv.numeroCRV, userId,
+      ancienStatut, raisonAnnulation: detailsAnnulation.raisonAnnulation
+    });
+    // ─────────────────────────────────────────────────────────────
+
     // Log de l'activité
     await UserActivityLog.create({
       user: userId,
@@ -115,6 +124,13 @@ export const reactiverCRV = async (crvId, userId) => {
     };
 
     await crv.save();
+
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.CRV_REACTIVE, {
+      crvId, numeroCRV: crv.numeroCRV, userId,
+      nouveauStatut: ancienStatutAnnule
+    });
+    // ─────────────────────────────────────────────────────────────
 
     // Log de l'activité
     await UserActivityLog.create({

@@ -4,6 +4,8 @@ import VolProgramme from '../../models/flights/VolProgramme.js';
 import Vol from '../../models/flights/Vol.js';
 import UserActivityLog from '../../models/security/UserActivityLog.js';
 import '../../models/security/Personne.js';
+import { eventBus } from '../notifications/notificationEngine.js';
+import { EVENTS } from '../notifications/eventRegistry.js';
 
 /**
  * SERVICE BULLETIN DE MOUVEMENT
@@ -437,6 +439,14 @@ export const ajouterVolHorsProgramme = async (bulletinId, volData, userId) => {
     bulletin.modifiePar = userId;
     await bulletin.save();
 
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.VOL_HORS_PROGRAMME, {
+      bulletinId, numeroBulletin: bulletin.numeroBulletin,
+      numeroVol: volData.numeroVol, typeHorsProgramme: mouvement.typeHorsProgramme,
+      raisonHorsProgramme: mouvement.raisonHorsProgramme, userId
+    });
+    // ─────────────────────────────────────────────────────────────
+
     // Log
     await UserActivityLog.create({
       user: userId,
@@ -662,6 +672,13 @@ export const publierBulletin = async (bulletinId, userId) => {
     bulletin.publier(userId);
     bulletin.modifiePar = userId;
     await bulletin.save();
+
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.BULLETIN_PUBLIE, {
+      bulletinId, numeroBulletin: bulletin.numeroBulletin,
+      escale: bulletin.escale, datePublication: bulletin.datePublication, userId
+    });
+    // ─────────────────────────────────────────────────────────────
 
     // Log
     await UserActivityLog.create({

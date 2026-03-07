@@ -2,6 +2,8 @@ import ProgrammeVol from '../../models/flights/ProgrammeVol.js';
 import VolProgramme from '../../models/flights/VolProgramme.js';
 import UserActivityLog from '../../models/security/UserActivityLog.js';
 import '../../models/security/Personne.js';
+import { eventBus } from '../notifications/notificationEngine.js';
+import { EVENTS } from '../notifications/eventRegistry.js';
 
 /**
  * SERVICE PROGRAMME VOL (Conteneur)
@@ -233,6 +235,12 @@ export const supprimerProgramme = async (programmeId, userId) => {
     // Supprimer le programme
     await ProgrammeVol.findByIdAndDelete(programmeId);
 
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.PROGRAMME_SUPPRIME, {
+      programmeId, nomProgramme, nombreVols, userId
+    });
+    // ─────────────────────────────────────────────────────────────
+
     // Log
     await UserActivityLog.create({
       user: userId,
@@ -357,6 +365,12 @@ export const activerProgramme = async (programmeId, userId) => {
 
     await programme.save();
 
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.PROGRAMME_ACTIVE, {
+      programmeId, nomProgramme: programme.nom, userId
+    });
+    // ─────────────────────────────────────────────────────────────
+
     // Log
     await UserActivityLog.create({
       user: userId,
@@ -406,6 +420,12 @@ export const suspendreProgramme = async (programmeId, userId, raison = null) => 
     }
 
     await programme.save();
+
+    // ── NOTIFICATION ENGINE ──────────────────────────────────────
+    eventBus.emitAsync(EVENTS.PROGRAMME_SUSPENDU, {
+      programmeId, nomProgramme: programme.nom, raison, userId
+    });
+    // ─────────────────────────────────────────────────────────────
 
     // Log
     await UserActivityLog.create({
