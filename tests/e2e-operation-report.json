@@ -1,0 +1,578 @@
+{
+  "date": "2026-03-10T23:41:14.216Z",
+  "programme": {
+    "id": "69b0a43597243159a260de4a",
+    "nom": "E2E_TEST_MARS_2026",
+    "statut": "ACTIF",
+    "nombreVols": 23
+  },
+  "bulletin": {
+    "id": "69b0ac1c97243159a260eaba",
+    "titre": "Bulletin E2E Test 2026-03-10",
+    "statut": "BROUILLON"
+  },
+  "crvs": {
+    "ARRIVEE": {
+      "id": "69b0ac2297243159a260eb0c",
+      "numero": "CRV260311-0010",
+      "statut": "VERROUILLE",
+      "type": "ARRIVEE",
+      "phases": {
+        "total": 10,
+        "traitees": 10,
+        "details": [
+          {
+            "nom": "Briefing equipes",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Arrivee avion",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Ouverture soutes",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Dechargement bagages/fret",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Livraison bagages",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Debarquement passagers",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Mise en condition cabine",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Debriefing cloture",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Controle securite",
+            "statut": "NON_REALISE"
+          },
+          {
+            "nom": "Verification surete",
+            "statut": "NON_REALISE"
+          }
+        ]
+      },
+      "charges": [
+        "PASSAGERS_DEBARQUEMENT",
+        "BAGAGES",
+        "FRET"
+      ],
+      "evenement": true,
+      "observation": "absence_confirmee",
+      "completude": 100,
+      "pdf": "partial",
+      "canArchive": true,
+      "statutFinal": "VERROUILLE"
+    },
+    "DEPART": {
+      "id": "69b0ac2797243159a260eb3c",
+      "numero": "CRV260311-0011",
+      "statut": "VERROUILLE",
+      "type": "DEPART",
+      "phases": {
+        "total": 9,
+        "traitees": 9,
+        "details": [
+          {
+            "nom": "Briefing equipes",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Preparation avion",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Chargement bagages/fret",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Embarquement passagers",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Fermeture soutes",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Repoussage avion",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Debriefing cloture",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Controle securite",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Verification surete",
+            "statut": "NON_REALISE"
+          }
+        ]
+      },
+      "charges": [
+        "PASSAGERS_EMBARQUEMENT",
+        "BAGAGES",
+        "FRET"
+      ],
+      "evenement": "absence_confirmee",
+      "observation": "absence_confirmee",
+      "completude": 100,
+      "pdf": "partial",
+      "canArchive": true,
+      "statutFinal": "VERROUILLE"
+    },
+    "TURN_AROUND": {
+      "id": "69b0ac2c97243159a260eb6a",
+      "numero": "CRV260311-0012",
+      "statut": "VERROUILLE",
+      "type": "TURN_AROUND",
+      "phases": {
+        "total": 20,
+        "traitees": 20,
+        "details": [
+          {
+            "nom": "Chargement bagages/fret",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Verification surete",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Controle securite",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Catering",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Avitaillement carburant",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Coordination demi-tour",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Debriefing cloture",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Repoussage avion",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Fermeture soutes",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Embarquement passagers",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Briefing equipes",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Preparation avion",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Briefing equipes",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Debriefing cloture",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Mise en condition cabine",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Debarquement passagers",
+            "statut": "TERMINE"
+          },
+          {
+            "nom": "Livraison bagages",
+            "statut": "NON_REALISE"
+          },
+          {
+            "nom": "Dechargement bagages/fret",
+            "statut": "NON_REALISE"
+          },
+          {
+            "nom": "Ouverture soutes",
+            "statut": "NON_REALISE"
+          },
+          {
+            "nom": "Arrivee avion",
+            "statut": "NON_REALISE"
+          }
+        ]
+      },
+      "charges": [
+        "PASSAGERS_DEBARQUEMENT",
+        "PASSAGERS_EMBARQUEMENT",
+        "BAGAGES",
+        "FRET"
+      ],
+      "evenement": "absence_confirmee",
+      "observation": true,
+      "completude": 100,
+      "pdf": "partial",
+      "canArchive": true,
+      "statutFinal": "VERROUILLE"
+    }
+  },
+  "etapes": [
+    {
+      "num": 1,
+      "label": "LOGIN — Authentification superviseur",
+      "result": "Login OK — userId: 69a72cc044579001349b1b01",
+      "status": "OK"
+    },
+    {
+      "num": 2,
+      "label": "ÉTAPE 1 — Vérifier le programme de vol E2E_TEST_MARS_2026",
+      "result": "Programme: E2E_TEST_MARS_2026 — Statut: ACTIF — 23 vols",
+      "status": "OK"
+    },
+    {
+      "num": 3,
+      "label": "ÉTAPE 1b — Vérifier les vols sélectionnés",
+      "result": "3 vols identifiés (ARR, DEP, TURN)",
+      "status": "OK"
+    },
+    {
+      "num": 4,
+      "label": "ÉTAPE 2a — Valider le programme (BROUILLON → VALIDE)",
+      "result": "Programme déjà ACTIF — skip validation",
+      "status": "OK"
+    },
+    {
+      "num": 5,
+      "label": "ÉTAPE 2b — Activer le programme (VALIDE → ACTIF)",
+      "result": "Programme déjà ACTIF",
+      "status": "OK"
+    },
+    {
+      "num": 6,
+      "label": "ÉTAPE 3a — Créer le bulletin de mouvement",
+      "result": "Bulletin créé: 69b0ac1c97243159a260eaba — Statut: BROUILLON",
+      "status": "OK"
+    },
+    {
+      "num": 7,
+      "label": "ÉTAPE 3b — Ajouter mouvement ARRIVÉE (KP064)",
+      "result": "Mouvement ARRIVÉE ajouté: 69b0ac1c97243159a260eaba",
+      "status": "OK"
+    },
+    {
+      "num": 8,
+      "label": "ÉTAPE 3c — Ajouter mouvement DÉPART (KP033)",
+      "result": "Mouvement DÉPART ajouté: 69b0ac1c97243159a260eaba",
+      "status": "OK"
+    },
+    {
+      "num": 9,
+      "label": "ÉTAPE 3d — Ajouter mouvement TURN-AROUND (TK635)",
+      "result": "Mouvement TURN-AROUND ajouté: 69b0ac1c97243159a260eaba",
+      "status": "OK"
+    },
+    {
+      "num": 10,
+      "label": "ÉTAPE 3e — Publier le bulletin",
+      "result": "Bulletin publié — Statut: PUBLIE",
+      "status": "OK"
+    },
+    {
+      "num": 11,
+      "label": "ÉTAPE 3f — Créer les vols opérationnels à partir du bulletin",
+      "result": "? vols opérationnels créés",
+      "status": "OK"
+    },
+    {
+      "num": 12,
+      "label": "ÉTAPE 4 — Créer CRV ARRIVEE (KP064)",
+      "result": "CRV créé: CRV260311-0010 (ARRIVEE) — ID: 69b0ac2297243159a260eb0c — Statut: BROUILLON",
+      "status": "OK"
+    },
+    {
+      "num": 13,
+      "label": "ÉTAPE 4 — Créer CRV DEPART (KP033)",
+      "result": "CRV créé: CRV260311-0011 (DEPART) — ID: 69b0ac2797243159a260eb3c — Statut: BROUILLON",
+      "status": "OK"
+    },
+    {
+      "num": 14,
+      "label": "ÉTAPE 4 — Créer CRV TURN_AROUND (TK635)",
+      "result": "CRV créé: CRV260311-0012 (TURN_AROUND) — ID: 69b0ac2c97243159a260eb6a — Statut: BROUILLON",
+      "status": "OK"
+    },
+    {
+      "num": 15,
+      "label": "ÉTAPE 5 — Démarrer CRV ARRIVEE (BROUILLON → EN_COURS)",
+      "result": "CRV ARRIVEE démarré — Statut: EN_COURS",
+      "status": "OK"
+    },
+    {
+      "num": 16,
+      "label": "ÉTAPE 5 — Démarrer CRV DEPART (BROUILLON → EN_COURS)",
+      "result": "CRV DEPART démarré — Statut: EN_COURS",
+      "status": "OK"
+    },
+    {
+      "num": 17,
+      "label": "ÉTAPE 5 — Démarrer CRV TURN_AROUND (BROUILLON → EN_COURS)",
+      "result": "CRV TURN_AROUND démarré — Statut: EN_COURS",
+      "status": "OK"
+    },
+    {
+      "num": 18,
+      "label": "ÉTAPE 6 — Traiter les phases du CRV ARRIVEE",
+      "result": "10/10 phases traitées",
+      "status": "OK"
+    },
+    {
+      "num": 19,
+      "label": "ÉTAPE 6 — Traiter les phases du CRV DEPART",
+      "result": "9/9 phases traitées",
+      "status": "OK"
+    },
+    {
+      "num": 20,
+      "label": "ÉTAPE 6 — Traiter les phases du CRV TURN_AROUND",
+      "result": "20/20 phases traitées",
+      "status": "OK"
+    },
+    {
+      "num": 21,
+      "label": "ÉTAPE 7 — Ajouter charges au CRV ARRIVEE",
+      "result": "3 charges ajoutées",
+      "status": "OK"
+    },
+    {
+      "num": 22,
+      "label": "ÉTAPE 7 — Ajouter charges au CRV DEPART",
+      "result": "3 charges ajoutées",
+      "status": "OK"
+    },
+    {
+      "num": 23,
+      "label": "ÉTAPE 7 — Ajouter charges au CRV TURN_AROUND",
+      "result": "4 charges ajoutées",
+      "status": "OK"
+    },
+    {
+      "num": 24,
+      "label": "ÉTAPE 8a — Ajouter événement au CRV ARRIVEE",
+      "result": "Événement RETARD ajouté",
+      "status": "OK"
+    },
+    {
+      "num": 25,
+      "label": "ÉTAPE 8b — Ajouter observation au CRV ARRIVEE",
+      "result": "Absence d'observation confirmée",
+      "status": "OK"
+    },
+    {
+      "num": 26,
+      "label": "ÉTAPE 8a — Ajouter événement au CRV DEPART",
+      "result": "Absence d'événement confirmée",
+      "status": "OK"
+    },
+    {
+      "num": 27,
+      "label": "ÉTAPE 8b — Ajouter observation au CRV DEPART",
+      "result": "Absence d'observation confirmée",
+      "status": "OK"
+    },
+    {
+      "num": 28,
+      "label": "ÉTAPE 8a — Ajouter événement au CRV TURN_AROUND",
+      "result": "Absence d'événement confirmée",
+      "status": "OK"
+    },
+    {
+      "num": 29,
+      "label": "ÉTAPE 8b — Ajouter observation au CRV TURN_AROUND",
+      "result": "Observation ajoutée",
+      "status": "OK"
+    },
+    {
+      "num": 30,
+      "label": "ÉTAPE 8c — Ajouter personnel au CRV ARRIVEE",
+      "result": "Personnel ajouté",
+      "status": "OK"
+    },
+    {
+      "num": 31,
+      "label": "ÉTAPE 8c — Ajouter personnel au CRV DEPART",
+      "result": "Personnel ajouté",
+      "status": "OK"
+    },
+    {
+      "num": 32,
+      "label": "ÉTAPE 8c — Ajouter personnel au CRV TURN_AROUND",
+      "result": "Personnel ajouté",
+      "status": "OK"
+    },
+    {
+      "num": 33,
+      "label": "ÉTAPE 8d — Assigner responsableVol au CRV ARRIVEE",
+      "result": "responsableVol assigné",
+      "status": "OK"
+    },
+    {
+      "num": 34,
+      "label": "ÉTAPE 8d — Assigner responsableVol au CRV DEPART",
+      "result": "responsableVol assigné",
+      "status": "OK"
+    },
+    {
+      "num": 35,
+      "label": "ÉTAPE 8d — Assigner responsableVol au CRV TURN_AROUND",
+      "result": "responsableVol assigné",
+      "status": "OK"
+    },
+    {
+      "num": 36,
+      "label": "ÉTAPE 9 — Vérifier complétude du CRV ARRIVEE",
+      "result": "Complétude: 100% ✅ (≥ 80% — prêt pour validation)",
+      "status": "OK"
+    },
+    {
+      "num": 37,
+      "label": "ÉTAPE 9 — Vérifier complétude du CRV DEPART",
+      "result": "Complétude: 100% ✅ (≥ 80% — prêt pour validation)",
+      "status": "OK"
+    },
+    {
+      "num": 38,
+      "label": "ÉTAPE 9 — Vérifier complétude du CRV TURN_AROUND",
+      "result": "Complétude: 100% ✅ (≥ 80% — prêt pour validation)",
+      "status": "OK"
+    },
+    {
+      "num": 39,
+      "label": "ÉTAPE 10 — Terminer CRV ARRIVEE (EN_COURS → TERMINE)",
+      "result": "CRV ARRIVEE terminé — Statut: TERMINE",
+      "status": "OK"
+    },
+    {
+      "num": 40,
+      "label": "ÉTAPE 10 — Terminer CRV DEPART (EN_COURS → TERMINE)",
+      "result": "CRV DEPART terminé — Statut: TERMINE",
+      "status": "OK"
+    },
+    {
+      "num": 41,
+      "label": "ÉTAPE 10 — Terminer CRV TURN_AROUND (EN_COURS → TERMINE)",
+      "result": "CRV TURN_AROUND terminé — Statut: TERMINE",
+      "status": "OK"
+    },
+    {
+      "num": 42,
+      "label": "ÉTAPE 11a — Valider CRV ARRIVEE (TERMINE → VALIDE)",
+      "result": "CRV ARRIVEE validé — Statut final: VALIDE",
+      "status": "OK"
+    },
+    {
+      "num": 43,
+      "label": "ÉTAPE 11b — Verrouiller CRV ARRIVEE (VALIDE → VERROUILLE)",
+      "result": "CRV ARRIVEE verrouillé",
+      "status": "OK"
+    },
+    {
+      "num": 44,
+      "label": "ÉTAPE 11a — Valider CRV DEPART (TERMINE → VALIDE)",
+      "result": "CRV DEPART validé — Statut final: VALIDE",
+      "status": "OK"
+    },
+    {
+      "num": 45,
+      "label": "ÉTAPE 11b — Verrouiller CRV DEPART (VALIDE → VERROUILLE)",
+      "result": "CRV DEPART verrouillé",
+      "status": "OK"
+    },
+    {
+      "num": 46,
+      "label": "ÉTAPE 11a — Valider CRV TURN_AROUND (TERMINE → VALIDE)",
+      "result": "CRV TURN_AROUND validé — Statut final: VALIDE",
+      "status": "OK"
+    },
+    {
+      "num": 47,
+      "label": "ÉTAPE 11b — Verrouiller CRV TURN_AROUND (VALIDE → VERROUILLE)",
+      "result": "CRV TURN_AROUND verrouillé",
+      "status": "OK"
+    },
+    {
+      "num": 48,
+      "label": "ÉTAPE 12a — Export PDF du CRV ARRIVEE",
+      "result": null,
+      "status": null
+    },
+    {
+      "num": 49,
+      "label": "ÉTAPE 12b — Vérifier éligibilité archivage du CRV ARRIVEE",
+      "result": "Éligibilité archivage: OUI ✅ — ",
+      "status": "OK"
+    },
+    {
+      "num": 50,
+      "label": "ÉTAPE 12a — Export PDF du CRV DEPART",
+      "result": null,
+      "status": null
+    },
+    {
+      "num": 51,
+      "label": "ÉTAPE 12b — Vérifier éligibilité archivage du CRV DEPART",
+      "result": "Éligibilité archivage: OUI ✅ — ",
+      "status": "OK"
+    },
+    {
+      "num": 52,
+      "label": "ÉTAPE 12a — Export PDF du CRV TURN_AROUND",
+      "result": null,
+      "status": null
+    },
+    {
+      "num": 53,
+      "label": "ÉTAPE 12b — Vérifier éligibilité archivage du CRV TURN_AROUND",
+      "result": "Éligibilité archivage: OUI ✅ — ",
+      "status": "OK"
+    },
+    {
+      "num": 54,
+      "label": "VÉRIFICATION FINALE — État de tous les CRV",
+      "result": null,
+      "status": null
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "totalSteps": 54,
+    "okSteps": 50,
+    "failSteps": 0,
+    "crvCreated": 3,
+    "crvVerrouille": 3,
+    "errors": 0,
+    "verdict": "✅ TEST E2E COMPLET — SUCCÈS"
+  }
+}

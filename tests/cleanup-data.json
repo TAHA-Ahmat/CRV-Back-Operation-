@@ -1,0 +1,47 @@
+{
+  "date": "2026-03-10T23:27:11.595Z",
+  "before": {
+    "crvs": 3,
+    "phases": 20,
+    "chargeoperationnelles": 10,
+    "observations": 1
+  },
+  "after": {
+    "crvs": 0,
+    "phases": 0,
+    "chargeoperationnelles": 0,
+    "observations": 0
+  },
+  "backups": [
+    "C:\\Users\\ahmat\\code\\CRV\\Operation\\Back\\backups\\backup_crvs_2026-03-10T23-27-17.json"
+  ],
+  "deletions": {
+    "crvs": 3
+  },
+  "otherCollections": {
+    "users": {
+      "before": 0,
+      "after": 0
+    },
+    "notifications": {
+      "before": 2452,
+      "after": 2452
+    }
+  },
+  "orphansCleanup": {
+    "phases": {
+      "before": 20,
+      "deleted": 20
+    },
+    "chargeoperationnelles": {
+      "before": 10,
+      "deleted": 10
+    },
+    "observations": {
+      "before": 1,
+      "deleted": 1
+    }
+  },
+  "database": "test",
+  "integrityOK": true
+}

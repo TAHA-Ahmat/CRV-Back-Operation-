@@ -1,0 +1,5114 @@
+{
+  "date": "2026-03-10T12:29:50.319Z",
+  "summary": {
+    "total": 48,
+    "passed": 47,
+    "failed": 1,
+    "rate": "98%"
+  },
+  "results": [
+    {
+      "description": "Login SUPERVISEUR",
+      "method": "POST",
+      "path": "/auth/login",
+      "request": {
+        "email": "superviseur@crv.test",
+        "password": "Test1234!"
+      },
+      "status": 200,
+      "expectedStatus": 200,
+      "success": true,
+      "response": {
+        "success": true,
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTcyY2MwNDQ1NzkwMDEzNDliMWIwMSIsIm5vbSI6Ik1BUlRJTiIsImVtYWlsIjoic3VwZXJ2aXNldXJAY3J2LnRlc3QiLCJyb2xlIjoiU1VQRVJWSVNFVVIiLCJpYXQiOjE3NzMxNDU3MDgsImV4cCI6MTc3MzE1NjUwOH0.iOQI_2CYa1aQ861lTE_2rEpxxk4HkkhELKMcf7j9I-Y",
+        "user": {
+          "id": "69a72cc044579001349b1b01",
+          "nom": "MARTIN",
+          "prenom": "Pierre",
+          "email": "superviseur@crv.test",
+          "fonction": "SUPERVISEUR",
+          "matricule": "SUP-001"
+        }
+      },
+      "duration": 327
+    },
+    {
+      "description": "Login ADMIN",
+      "method": "POST",
+      "path": "/auth/login",
+      "request": {
+        "email": "admin@crv.test",
+        "password": "Test1234!"
+      },
+      "status": 200,
+      "expectedStatus": 200,
+      "success": true,
+      "response": {
+        "success": true,
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTcyY2MwNDQ1NzkwMDEzNDliMWIwMyIsIm5vbSI6IkFETUlOIiwiZW1haWwiOiJhZG1pbkBjcnYudGVzdCIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3MzE0NTcwOSwiZXhwIjoxNzczMTU2NTA5fQ.nbWDMB_x-XntRm9XXxti-vztAm410lhAuMUT5gCp8jY",
+        "user": {
+          "id": "69a72cc044579001349b1b03",
+          "nom": "ADMIN",
+          "prenom": "System",
+          "email": "admin@crv.test",
+          "fonction": "ADMIN",
+          "matricule": "ADM-001"
+        }
+      },
+      "duration": 253
+    },
+    {
+      "description": "Login AGENT_ESCALE",
+      "method": "POST",
+      "path": "/auth/login",
+      "request": {
+        "email": "agent@crv.test",
+        "password": "Test1234!"
+      },
+      "status": 200,
+      "expectedStatus": 200,
+      "success": true,
+      "response": {
+        "success": true,
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTcyY2JmNDQ1NzkwMDEzNDliMWFmZCIsIm5vbSI6IlRBSEEiLCJlbWFpbCI6ImFnZW50QGNydi50ZXN0Iiwicm9sZSI6IkFHRU5UX0VTQ0FMRSIsImlhdCI6MTc3MzE0NTcwOSwiZXhwIjoxNzczMTU2NTA5fQ.4HS1y2sq0Y2YQVhHhqP9jesMRaSiDjG-ew1EMe2E5WY",
+        "user": {
+          "id": "69a72cbf44579001349b1afd",
+          "nom": "TAHA",
+          "prenom": "Ahmat",
+          "email": "agent@crv.test",
+          "fonction": "AGENT_ESCALE",
+          "matricule": "AGT-001"
+        }
+      },
+      "duration": 253
+    },
+    {
+      "description": "Creer CRV test (mode legacy)",
+      "method": "POST",
+      "path": "/crv",
+      "request": {
+        "type": "arrivee",
+        "escale": "NDJ"
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "archivage": {
+            "driveFileId": null,
+            "driveWebViewLink": null,
+            "filename": null,
+            "folderPath": null,
+            "size": null,
+            "archivedAt": null,
+            "archivedBy": null,
+            "version": 1
+          },
+          "annulation": {
+            "dateAnnulation": null,
+            "annulePar": null,
+            "raisonAnnulation": null,
+            "commentaireAnnulation": null,
+            "ancienStatut": null
+          },
+          "_id": "69b00e6ea56cde3d74d0706b",
+          "numeroCRV": "CRV260310-0010",
+          "vol": {
+            "_id": "69b00e6da56cde3d74d07066",
+            "numeroVol": "VOL0188",
+            "typeOperation": "ARRIVEE",
+            "compagnieAerienne": "Air France",
+            "codeIATA": "AF",
+            "dateVol": "2026-03-10T12:28:29.772Z",
+            "statut": "PROGRAMME",
+            "posteStationnement": null,
+            "horsProgramme": false,
+            "programmeVolReference": null,
+            "raisonHorsProgramme": null,
+            "typeVolHorsProgramme": null,
+            "bulletinMouvementReference": null,
+            "createdAt": "2026-03-10T12:28:29.773Z",
+            "updatedAt": "2026-03-10T12:28:29.773Z",
+            "__v": 0
+          },
+          "escale": "NDJ",
+          "horaire": {
+            "_id": "69b00e6da56cde3d74d07068",
+            "vol": "69b00e6da56cde3d74d07066",
+            "createdAt": "2026-03-10T12:28:29.966Z",
+            "updatedAt": "2026-03-10T12:28:29.966Z",
+            "__v": 0
+          },
+          "statut": "BROUILLON",
+          "creePar": {
+            "_id": "69a72cc044579001349b1b01",
+            "nom": "MARTIN",
+            "prenom": "Pierre",
+            "matricule": "SUP-001",
+            "email": "superviseur@crv.test",
+            "fonction": "SUPERVISEUR",
+            "specialites": [],
+            "statut": "ACTIF",
+            "statutCompte": "VALIDE",
+            "dateValidationCompte": null,
+            "valideParUserId": null,
+            "createdAt": "2026-03-03T18:47:28.257Z",
+            "updatedAt": "2026-03-07T10:23:18.242Z",
+            "__v": 0
+          },
+          "responsableVol": null,
+          "completude": 30,
+          "bulletinMouvementReference": null,
+          "crvDoublon": false,
+          "dateCreation": "2026-03-10T12:28:30.338Z",
+          "derniereModification": "2026-03-10T12:28:30.339Z",
+          "personnelAffecte": [],
+          "materielUtilise": [],
+          "createdAt": "2026-03-10T12:28:30.338Z",
+          "updatedAt": "2026-03-10T12:28:33.969Z",
+          "__v": 0
+        }
+      },
+      "duration": 5101
+    },
+    {
+      "description": "Demarrer CRV (BROUILLON -> EN_COURS)",
+      "method": "POST",
+      "path": "/crv/69b00e6ea56cde3d74d0706b/demarrer",
+      "request": {},
+      "status": 200,
+      "expectedStatus": 200,
+      "success": true,
+      "response": {
+        "success": true,
+        "message": "CRV démarré avec succès",
+        "data": {
+          "archivage": {
+            "driveFileId": null,
+            "driveWebViewLink": null,
+            "filename": null,
+            "folderPath": null,
+            "size": null,
+            "archivedAt": null,
+            "archivedBy": null,
+            "version": 1
+          },
+          "annulation": {
+            "dateAnnulation": null,
+            "annulePar": null,
+            "raisonAnnulation": null,
+            "commentaireAnnulation": null,
+            "ancienStatut": null
+          },
+          "_id": "69b00e6ea56cde3d74d0706b",
+          "numeroCRV": "CRV260310-0010",
+          "vol": {
+            "_id": "69b00e6da56cde3d74d07066",
+            "numeroVol": "VOL0188",
+            "typeOperation": "ARRIVEE",
+            "compagnieAerienne": "Air France",
+            "codeIATA": "AF",
+            "dateVol": "2026-03-10T12:28:29.772Z",
+            "statut": "EN_COURS",
+            "posteStationnement": null,
+            "horsProgramme": false,
+            "programmeVolReference": null,
+            "raisonHorsProgramme": null,
+            "typeVolHorsProgramme": null,
+            "bulletinMouvementReference": null,
+            "createdAt": "2026-03-10T12:28:29.773Z",
+            "updatedAt": "2026-03-10T12:28:35.249Z",
+            "__v": 0
+          },
+          "escale": "NDJ",
+          "horaire": {
+            "_id": "69b00e6da56cde3d74d07068",
+            "vol": "69b00e6da56cde3d74d07066",
+            "createdAt": "2026-03-10T12:28:29.966Z",
+            "updatedAt": "2026-03-10T12:28:29.966Z",
+            "__v": 0
+          },
+          "statut": "EN_COURS",
+          "creePar": {
+            "_id": "69a72cc044579001349b1b01",
+            "nom": "MARTIN",
+            "prenom": "Pierre",
+            "matricule": "SUP-001",
+            "email": "superviseur@crv.test",
+            "fonction": "SUPERVISEUR",
+            "specialites": [],
+            "statut": "ACTIF",
+            "statutCompte": "VALIDE",
+            "dateValidationCompte": null,
+            "valideParUserId": null,
+            "createdAt": "2026-03-03T18:47:28.257Z",
+            "updatedAt": "2026-03-07T10:23:18.242Z",
+            "__v": 0
+          },
+          "responsableVol": null,
+          "completude": 30,
+          "bulletinMouvementReference": null,
+          "crvDoublon": false,
+          "dateCreation": "2026-03-10T12:28:30.338Z",
+          "derniereModification": "2026-03-10T12:28:34.890Z",
+          "personnelAffecte": [],
+          "materielUtilise": [],
+          "createdAt": "2026-03-10T12:28:30.338Z",
+          "updatedAt": "2026-03-10T12:28:34.890Z",
+          "__v": 0,
+          "modifiePar": "69a72cc044579001349b1b01"
+        }
+      },
+      "duration": 1759
+    },
+    {
+      "description": "POST personnel avec role (pas fonction) — middleware mappe",
+      "method": "POST",
+      "path": "/crv/69b00e6ea56cde3d74d0706b/personnel",
+      "request": {
+        "nom": "DUPONT",
+        "prenom": "Jean",
+        "role": "AGENT_TRAFIC"
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "message": "Personne ajoutée au personnel affecté",
+        "data": {
+          "personne": {
+            "nom": "DUPONT",
+            "prenom": "Jean",
+            "fonction": "AGENT_TRAFIC",
+            "_id": "69b00e74a56cde3d74d070a0"
+          },
+          "personnelAffecte": [
+            {
+              "nom": "DUPONT",
+              "prenom": "Jean",
+              "fonction": "AGENT_TRAFIC",
+              "_id": "69b00e74a56cde3d74d070a0"
+            }
+          ],
+          "nbPersonnes": 1
+        }
+      },
+      "duration": 935
+    },
+    {
+      "description": "Personnel: role mappe en fonction (201 = mapping OK)",
+      "method": "CHECK",
+      "path": "N/A",
+      "status": "PASS",
+      "expectedStatus": "PASS",
+      "success": true,
+      "response": {},
+      "duration": 0
+    },
+    {
+      "description": "POST personnel avec fonction directe — OK",
+      "method": "POST",
+      "path": "/crv/69b00e6ea56cde3d74d0706b/personnel",
+      "request": {
+        "nom": "MARTIN",
+        "prenom": "Sophie",
+        "fonction": "SUPERVISEUR"
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "message": "Personne ajoutée au personnel affecté",
+        "data": {
+          "personne": {
+            "nom": "MARTIN",
+            "prenom": "Sophie",
+            "fonction": "SUPERVISEUR",
+            "_id": "69b00e75a56cde3d74d070a9"
+          },
+          "personnelAffecte": [
+            {
+              "nom": "DUPONT",
+              "prenom": "Jean",
+              "fonction": "AGENT_TRAFIC",
+              "_id": "69b00e74a56cde3d74d070a0"
+            },
+            {
+              "nom": "MARTIN",
+              "prenom": "Sophie",
+              "fonction": "SUPERVISEUR",
+              "_id": "69b00e75a56cde3d74d070a9"
+            }
+          ],
+          "nbPersonnes": 2
+        }
+      },
+      "duration": 900
+    },
+    {
+      "description": "Lister phases CRV existant",
+      "method": "GET",
+      "path": "/phases?crvId=69af9a74332db80c9fe56ca2",
+      "request": null,
+      "status": 200,
+      "expectedStatus": null,
+      "success": true,
+      "response": {
+        "success": true,
+        "count": 12,
+        "data": [
+          {
+            "_id": "69af9a74332db80c9fe56ca5",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d0fc",
+              "code": "ARR_BRIEFING",
+              "libelle": "Briefing équipes",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BRIEFING",
+              "macroPhase": "DEBUT",
+              "ordre": 1,
+              "dureeStandardMinutes": 10,
+              "obligatoire": true,
+              "description": "Briefing avec les équipes KI, KU, KF, manutentionnaires et chauffeurs avant arrivée avion",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.456Z",
+              "updatedAt": "2026-01-11T14:35:51.456Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:40.551Z",
+            "updatedAt": "2026-03-10T04:13:40.551Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a74332db80c9fe56ca7",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d0fd",
+              "code": "ARR_ARRIVEE_AVION",
+              "libelle": "Arrivée avion",
+              "typeOperation": "ARRIVEE",
+              "categorie": "PISTE",
+              "macroPhase": "DEBUT",
+              "ordre": 2,
+              "dureeStandardMinutes": 15,
+              "obligatoire": true,
+              "description": "Arrivée de l'avion : atterrissage, roulage vers parking et calage/sécurisation",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:40.731Z",
+            "updatedAt": "2026-03-10T04:13:40.731Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a74332db80c9fe56ca9",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d0fe",
+              "code": "ARR_OUVERTURE_SOUTES",
+              "libelle": "Ouverture des soutes",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BAGAGE",
+              "macroPhase": "REALISATION",
+              "ordre": 3,
+              "dureeStandardMinutes": 5,
+              "obligatoire": true,
+              "description": "Ouverture des soutes de l'avion pour préparer le déchargement",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:40.925Z",
+            "updatedAt": "2026-03-10T04:13:40.925Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cab",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d0ff",
+              "code": "ARR_DECHARGEMENT",
+              "libelle": "Déchargement",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BAGAGE",
+              "macroPhase": "REALISATION",
+              "ordre": 4,
+              "dureeStandardMinutes": 25,
+              "obligatoire": true,
+              "description": "Déchargement des bagages et fret des soutes vers les chariots",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.084Z",
+            "updatedAt": "2026-03-10T04:13:41.084Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cad",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d100",
+              "code": "ARR_LIVRAISON_BAGAGES",
+              "libelle": "Livraison bagages",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BAGAGE",
+              "macroPhase": "REALISATION",
+              "ordre": 5,
+              "dureeStandardMinutes": 15,
+              "obligatoire": true,
+              "description": "Acheminement des bagages des chariots vers le carrousel en zone publique",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.254Z",
+            "updatedAt": "2026-03-10T04:13:41.254Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56caf",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d101",
+              "code": "ARR_DEBARQUEMENT_PAX",
+              "libelle": "Débarquement passagers",
+              "typeOperation": "ARRIVEE",
+              "categorie": "PASSAGERS",
+              "macroPhase": "REALISATION",
+              "ordre": 6,
+              "dureeStandardMinutes": 20,
+              "obligatoire": true,
+              "description": "Débarquement de tous les passagers de l'avion",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.422Z",
+            "updatedAt": "2026-03-10T04:13:41.422Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cb1",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d102",
+              "code": "ARR_MISE_CONDITION_CABINE",
+              "libelle": "Mise en condition cabine",
+              "typeOperation": "ARRIVEE",
+              "categorie": "NETTOYAGE",
+              "macroPhase": "FIN",
+              "ordre": 7,
+              "dureeStandardMinutes": 30,
+              "obligatoire": false,
+              "description": "Chargement prestation hôtelière et nettoyage cabine (facultatif selon rotation)",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.592Z",
+            "updatedAt": "2026-03-10T04:13:41.592Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cb3",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d103",
+              "code": "ARR_DEBRIEFING",
+              "libelle": "Débriefing clôture",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BRIEFING",
+              "macroPhase": "FIN",
+              "ordre": 8,
+              "dureeStandardMinutes": 10,
+              "obligatoire": false,
+              "description": "Débriefing de clôture avec les équipes (facultatif)",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.752Z",
+            "updatedAt": "2026-03-10T04:13:41.752Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cb5",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d11a",
+              "code": "COM_CONTROLE_SECU",
+              "libelle": "Contrôle sécurité",
+              "typeOperation": "COMMUN",
+              "categorie": "SECURITE",
+              "macroPhase": "REALISATION",
+              "ordre": 100,
+              "dureeStandardMinutes": 10,
+              "obligatoire": true,
+              "description": "Contrôles de sécurité réglementaires",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.460Z",
+              "updatedAt": "2026-01-11T14:35:51.460Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.918Z",
+            "updatedAt": "2026-03-10T04:13:41.918Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a76332db80c9fe56cb7",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d11b",
+              "code": "COM_CATERING",
+              "libelle": "Catering (approvisionnement repas)",
+              "typeOperation": "COMMUN",
+              "categorie": "TECHNIQUE",
+              "macroPhase": "REALISATION",
+              "ordre": 101,
+              "dureeStandardMinutes": 20,
+              "obligatoire": false,
+              "description": "Approvisionnement en repas et boissons pour le vol",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.460Z",
+              "updatedAt": "2026-01-11T14:35:51.460Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:42.094Z",
+            "updatedAt": "2026-03-10T04:13:42.094Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a76332db80c9fe56cb9",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d11c",
+              "code": "COM_MAINTENANCE_LEGERE",
+              "libelle": "Maintenance légère",
+              "typeOperation": "COMMUN",
+              "categorie": "TECHNIQUE",
+              "macroPhase": "REALISATION",
+              "ordre": 102,
+              "dureeStandardMinutes": 30,
+              "obligatoire": false,
+              "description": "Interventions techniques légères (vérifications, petites réparations)",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.460Z",
+              "updatedAt": "2026-01-11T14:35:51.460Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:42.272Z",
+            "updatedAt": "2026-03-10T04:13:42.272Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a76332db80c9fe56cbb",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d11d",
+              "code": "COM_REMISE_DOCUMENTS",
+              "libelle": "Remise documents de vol",
+              "typeOperation": "COMMUN",
+              "categorie": "TECHNIQUE",
+              "macroPhase": "FIN",
+              "ordre": 103,
+              "dureeStandardMinutes": 5,
+              "obligatoire": true,
+              "description": "Remise du dossier de vol au commandant de bord (loadsheet, manifest, documents)",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.460Z",
+              "updatedAt": "2026-01-11T14:35:51.460Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:42.439Z",
+            "updatedAt": "2026-03-10T04:13:42.439Z",
+            "__v": 0
+          }
+        ]
+      },
+      "duration": 881
+    },
+    {
+      "description": "Mettre heureDebut 14:00 et EN_COURS",
+      "method": "PUT",
+      "path": "/crv/69af9a74332db80c9fe56ca2/phases/69af9a74332db80c9fe56ca5",
+      "request": {
+        "heureDebutReelle": "14:00",
+        "statut": "EN_COURS"
+      },
+      "status": 200,
+      "expectedStatus": null,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "_id": "69af9a74332db80c9fe56ca5",
+          "crv": "69af9a74332db80c9fe56ca2",
+          "phase": {
+            "_id": "6963b5479e4f0ae17895d0fc",
+            "code": "ARR_BRIEFING",
+            "libelle": "Briefing équipes",
+            "typeOperation": "ARRIVEE",
+            "categorie": "BRIEFING",
+            "macroPhase": "DEBUT",
+            "ordre": 1,
+            "dureeStandardMinutes": 10,
+            "obligatoire": true,
+            "description": "Briefing avec les équipes KI, KU, KF, manutentionnaires et chauffeurs avant arrivée avion",
+            "prerequis": [],
+            "actif": true,
+            "__v": 0,
+            "createdAt": "2026-01-11T14:35:51.456Z",
+            "updatedAt": "2026-01-11T14:35:51.456Z"
+          },
+          "statut": "EN_COURS",
+          "createdAt": "2026-03-10T04:13:40.551Z",
+          "updatedAt": "2026-03-10T12:28:39.879Z",
+          "__v": 0,
+          "heureDebutReelle": "2026-03-10T13:00:00.000Z",
+          "horodatageDebut": {
+            "timestampSysteme": "2026-03-10T12:28:39.877Z",
+            "heureDeclaree": "2026-03-10T13:00:00.000Z",
+            "source": "DECLARATION",
+            "ecartSaisieMinutes": 31,
+            "saisieTardive": false,
+            "agent": "69a72cc044579001349b1b01",
+            "timezoneAeroport": "UTC"
+          }
+        }
+      },
+      "duration": 2911
+    },
+    {
+      "description": "heureFin 13:00 < heureDebut 14:00 — DOIT ETRE REFUSE",
+      "method": "PUT",
+      "path": "/crv/69af9a74332db80c9fe56ca2/phases/69af9a74332db80c9fe56ca5",
+      "request": {
+        "heureFinReelle": "13:00"
+      },
+      "status": 400,
+      "expectedStatus": 400,
+      "success": true,
+      "response": {
+        "success": false,
+        "message": "L'heure de fin ne peut pas être antérieure à l'heure de début.",
+        "code": "HEURE_FIN_AVANT_DEBUT"
+      },
+      "duration": 900
+    },
+    {
+      "description": "heureFin 15:00 > heureDebut — OK",
+      "method": "PUT",
+      "path": "/crv/69af9a74332db80c9fe56ca2/phases/69af9a74332db80c9fe56ca5",
+      "request": {
+        "heureFinReelle": "15:00",
+        "statut": "TERMINE"
+      },
+      "status": 200,
+      "expectedStatus": 200,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "_id": "69af9a74332db80c9fe56ca5",
+          "crv": "69af9a74332db80c9fe56ca2",
+          "phase": {
+            "_id": "6963b5479e4f0ae17895d0fc",
+            "code": "ARR_BRIEFING",
+            "libelle": "Briefing équipes",
+            "typeOperation": "ARRIVEE",
+            "categorie": "BRIEFING",
+            "macroPhase": "DEBUT",
+            "ordre": 1,
+            "dureeStandardMinutes": 10,
+            "obligatoire": true,
+            "description": "Briefing avec les équipes KI, KU, KF, manutentionnaires et chauffeurs avant arrivée avion",
+            "prerequis": [],
+            "actif": true,
+            "__v": 0,
+            "createdAt": "2026-01-11T14:35:51.456Z",
+            "updatedAt": "2026-01-11T14:35:51.456Z"
+          },
+          "statut": "TERMINE",
+          "createdAt": "2026-03-10T04:13:40.551Z",
+          "updatedAt": "2026-03-10T12:28:43.693Z",
+          "__v": 0,
+          "heureDebutReelle": "2026-03-10T13:00:00.000Z",
+          "horodatageDebut": {
+            "timestampSysteme": "2026-03-10T12:28:39.877Z",
+            "heureDeclaree": "2026-03-10T13:00:00.000Z",
+            "source": "DECLARATION",
+            "ecartSaisieMinutes": 31,
+            "saisieTardive": false,
+            "agent": "69a72cc044579001349b1b01",
+            "timezoneAeroport": "UTC"
+          },
+          "dureeReelleMinutes": 60,
+          "heureFinReelle": "2026-03-10T14:00:00.000Z",
+          "horodatageFin": {
+            "timestampSysteme": "2026-03-10T12:28:43.692Z",
+            "heureDeclaree": "2026-03-10T14:00:00.000Z",
+            "source": "DECLARATION",
+            "ecartSaisieMinutes": 91,
+            "saisieTardive": true,
+            "agent": "69a72cc044579001349b1b01",
+            "timezoneAeroport": "UTC"
+          }
+        }
+      },
+      "duration": 2820
+    },
+    {
+      "description": "Lister phases",
+      "method": "GET",
+      "path": "/phases?crvId=69af9a74332db80c9fe56ca2",
+      "request": null,
+      "status": 200,
+      "expectedStatus": null,
+      "success": true,
+      "response": {
+        "success": true,
+        "count": 12,
+        "data": [
+          {
+            "_id": "69af9a74332db80c9fe56ca5",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d0fc",
+              "code": "ARR_BRIEFING",
+              "libelle": "Briefing équipes",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BRIEFING",
+              "macroPhase": "DEBUT",
+              "ordre": 1,
+              "dureeStandardMinutes": 10,
+              "obligatoire": true,
+              "description": "Briefing avec les équipes KI, KU, KF, manutentionnaires et chauffeurs avant arrivée avion",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.456Z",
+              "updatedAt": "2026-01-11T14:35:51.456Z"
+            },
+            "statut": "TERMINE",
+            "createdAt": "2026-03-10T04:13:40.551Z",
+            "updatedAt": "2026-03-10T12:28:43.693Z",
+            "__v": 0,
+            "heureDebutReelle": "2026-03-10T13:00:00.000Z",
+            "horodatageDebut": {
+              "timestampSysteme": "2026-03-10T12:28:39.877Z",
+              "heureDeclaree": "2026-03-10T13:00:00.000Z",
+              "source": "DECLARATION",
+              "ecartSaisieMinutes": 31,
+              "saisieTardive": false,
+              "agent": "69a72cc044579001349b1b01",
+              "timezoneAeroport": "UTC"
+            },
+            "dureeReelleMinutes": 60,
+            "heureFinReelle": "2026-03-10T14:00:00.000Z",
+            "horodatageFin": {
+              "timestampSysteme": "2026-03-10T12:28:43.692Z",
+              "heureDeclaree": "2026-03-10T14:00:00.000Z",
+              "source": "DECLARATION",
+              "ecartSaisieMinutes": 91,
+              "saisieTardive": true,
+              "agent": "69a72cc044579001349b1b01",
+              "timezoneAeroport": "UTC"
+            }
+          },
+          {
+            "_id": "69af9a74332db80c9fe56ca7",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d0fd",
+              "code": "ARR_ARRIVEE_AVION",
+              "libelle": "Arrivée avion",
+              "typeOperation": "ARRIVEE",
+              "categorie": "PISTE",
+              "macroPhase": "DEBUT",
+              "ordre": 2,
+              "dureeStandardMinutes": 15,
+              "obligatoire": true,
+              "description": "Arrivée de l'avion : atterrissage, roulage vers parking et calage/sécurisation",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:40.731Z",
+            "updatedAt": "2026-03-10T04:13:40.731Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a74332db80c9fe56ca9",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d0fe",
+              "code": "ARR_OUVERTURE_SOUTES",
+              "libelle": "Ouverture des soutes",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BAGAGE",
+              "macroPhase": "REALISATION",
+              "ordre": 3,
+              "dureeStandardMinutes": 5,
+              "obligatoire": true,
+              "description": "Ouverture des soutes de l'avion pour préparer le déchargement",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:40.925Z",
+            "updatedAt": "2026-03-10T04:13:40.925Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cab",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d0ff",
+              "code": "ARR_DECHARGEMENT",
+              "libelle": "Déchargement",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BAGAGE",
+              "macroPhase": "REALISATION",
+              "ordre": 4,
+              "dureeStandardMinutes": 25,
+              "obligatoire": true,
+              "description": "Déchargement des bagages et fret des soutes vers les chariots",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.084Z",
+            "updatedAt": "2026-03-10T04:13:41.084Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cad",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d100",
+              "code": "ARR_LIVRAISON_BAGAGES",
+              "libelle": "Livraison bagages",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BAGAGE",
+              "macroPhase": "REALISATION",
+              "ordre": 5,
+              "dureeStandardMinutes": 15,
+              "obligatoire": true,
+              "description": "Acheminement des bagages des chariots vers le carrousel en zone publique",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.254Z",
+            "updatedAt": "2026-03-10T04:13:41.254Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56caf",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d101",
+              "code": "ARR_DEBARQUEMENT_PAX",
+              "libelle": "Débarquement passagers",
+              "typeOperation": "ARRIVEE",
+              "categorie": "PASSAGERS",
+              "macroPhase": "REALISATION",
+              "ordre": 6,
+              "dureeStandardMinutes": 20,
+              "obligatoire": true,
+              "description": "Débarquement de tous les passagers de l'avion",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.422Z",
+            "updatedAt": "2026-03-10T04:13:41.422Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cb1",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d102",
+              "code": "ARR_MISE_CONDITION_CABINE",
+              "libelle": "Mise en condition cabine",
+              "typeOperation": "ARRIVEE",
+              "categorie": "NETTOYAGE",
+              "macroPhase": "FIN",
+              "ordre": 7,
+              "dureeStandardMinutes": 30,
+              "obligatoire": false,
+              "description": "Chargement prestation hôtelière et nettoyage cabine (facultatif selon rotation)",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.592Z",
+            "updatedAt": "2026-03-10T04:13:41.592Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cb3",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d103",
+              "code": "ARR_DEBRIEFING",
+              "libelle": "Débriefing clôture",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BRIEFING",
+              "macroPhase": "FIN",
+              "ordre": 8,
+              "dureeStandardMinutes": 10,
+              "obligatoire": false,
+              "description": "Débriefing de clôture avec les équipes (facultatif)",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.752Z",
+            "updatedAt": "2026-03-10T04:13:41.752Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cb5",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d11a",
+              "code": "COM_CONTROLE_SECU",
+              "libelle": "Contrôle sécurité",
+              "typeOperation": "COMMUN",
+              "categorie": "SECURITE",
+              "macroPhase": "REALISATION",
+              "ordre": 100,
+              "dureeStandardMinutes": 10,
+              "obligatoire": true,
+              "description": "Contrôles de sécurité réglementaires",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.460Z",
+              "updatedAt": "2026-01-11T14:35:51.460Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.918Z",
+            "updatedAt": "2026-03-10T04:13:41.918Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a76332db80c9fe56cb7",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d11b",
+              "code": "COM_CATERING",
+              "libelle": "Catering (approvisionnement repas)",
+              "typeOperation": "COMMUN",
+              "categorie": "TECHNIQUE",
+              "macroPhase": "REALISATION",
+              "ordre": 101,
+              "dureeStandardMinutes": 20,
+              "obligatoire": false,
+              "description": "Approvisionnement en repas et boissons pour le vol",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.460Z",
+              "updatedAt": "2026-01-11T14:35:51.460Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:42.094Z",
+            "updatedAt": "2026-03-10T04:13:42.094Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a76332db80c9fe56cb9",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d11c",
+              "code": "COM_MAINTENANCE_LEGERE",
+              "libelle": "Maintenance légère",
+              "typeOperation": "COMMUN",
+              "categorie": "TECHNIQUE",
+              "macroPhase": "REALISATION",
+              "ordre": 102,
+              "dureeStandardMinutes": 30,
+              "obligatoire": false,
+              "description": "Interventions techniques légères (vérifications, petites réparations)",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.460Z",
+              "updatedAt": "2026-01-11T14:35:51.460Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:42.272Z",
+            "updatedAt": "2026-03-10T04:13:42.272Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a76332db80c9fe56cbb",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d11d",
+              "code": "COM_REMISE_DOCUMENTS",
+              "libelle": "Remise documents de vol",
+              "typeOperation": "COMMUN",
+              "categorie": "TECHNIQUE",
+              "macroPhase": "FIN",
+              "ordre": 103,
+              "dureeStandardMinutes": 5,
+              "obligatoire": true,
+              "description": "Remise du dossier de vol au commandant de bord (loadsheet, manifest, documents)",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.460Z",
+              "updatedAt": "2026-01-11T14:35:51.460Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:42.439Z",
+            "updatedAt": "2026-03-10T04:13:42.439Z",
+            "__v": 0
+          }
+        ]
+      },
+      "duration": 722
+    },
+    {
+      "description": "Phase -> EN_COURS",
+      "method": "PUT",
+      "path": "/crv/69af9a74332db80c9fe56ca2/phases/69af9a74332db80c9fe56ca7",
+      "request": {
+        "statut": "EN_COURS",
+        "heureDebutReelle": "10:00"
+      },
+      "status": 200,
+      "expectedStatus": 200,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "_id": "69af9a74332db80c9fe56ca7",
+          "crv": "69af9a74332db80c9fe56ca2",
+          "phase": {
+            "_id": "6963b5479e4f0ae17895d0fd",
+            "code": "ARR_ARRIVEE_AVION",
+            "libelle": "Arrivée avion",
+            "typeOperation": "ARRIVEE",
+            "categorie": "PISTE",
+            "macroPhase": "DEBUT",
+            "ordre": 2,
+            "dureeStandardMinutes": 15,
+            "obligatoire": true,
+            "description": "Arrivée de l'avion : atterrissage, roulage vers parking et calage/sécurisation",
+            "prerequis": [],
+            "actif": true,
+            "__v": 0,
+            "createdAt": "2026-01-11T14:35:51.458Z",
+            "updatedAt": "2026-01-11T14:35:51.458Z"
+          },
+          "statut": "EN_COURS",
+          "createdAt": "2026-03-10T04:13:40.731Z",
+          "updatedAt": "2026-03-10T12:28:47.240Z",
+          "__v": 0,
+          "heureDebutReelle": "2026-03-10T09:00:00.000Z",
+          "horodatageDebut": {
+            "timestampSysteme": "2026-03-10T12:28:47.239Z",
+            "heureDeclaree": "2026-03-10T09:00:00.000Z",
+            "source": "DECLARATION",
+            "ecartSaisieMinutes": 209,
+            "saisieTardive": true,
+            "agent": "69a72cc044579001349b1b01",
+            "timezoneAeroport": "UTC"
+          }
+        }
+      },
+      "duration": 2883
+    },
+    {
+      "description": "Phase -> TERMINE",
+      "method": "PUT",
+      "path": "/crv/69af9a74332db80c9fe56ca2/phases/69af9a74332db80c9fe56ca7",
+      "request": {
+        "statut": "TERMINE",
+        "heureFinReelle": "11:00"
+      },
+      "status": 200,
+      "expectedStatus": 200,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "_id": "69af9a74332db80c9fe56ca7",
+          "crv": "69af9a74332db80c9fe56ca2",
+          "phase": {
+            "_id": "6963b5479e4f0ae17895d0fd",
+            "code": "ARR_ARRIVEE_AVION",
+            "libelle": "Arrivée avion",
+            "typeOperation": "ARRIVEE",
+            "categorie": "PISTE",
+            "macroPhase": "DEBUT",
+            "ordre": 2,
+            "dureeStandardMinutes": 15,
+            "obligatoire": true,
+            "description": "Arrivée de l'avion : atterrissage, roulage vers parking et calage/sécurisation",
+            "prerequis": [],
+            "actif": true,
+            "__v": 0,
+            "createdAt": "2026-01-11T14:35:51.458Z",
+            "updatedAt": "2026-01-11T14:35:51.458Z"
+          },
+          "statut": "TERMINE",
+          "createdAt": "2026-03-10T04:13:40.731Z",
+          "updatedAt": "2026-03-10T12:28:50.115Z",
+          "__v": 0,
+          "heureDebutReelle": "2026-03-10T09:00:00.000Z",
+          "horodatageDebut": {
+            "timestampSysteme": "2026-03-10T12:28:47.239Z",
+            "heureDeclaree": "2026-03-10T09:00:00.000Z",
+            "source": "DECLARATION",
+            "ecartSaisieMinutes": 209,
+            "saisieTardive": true,
+            "agent": "69a72cc044579001349b1b01",
+            "timezoneAeroport": "UTC"
+          },
+          "dureeReelleMinutes": 60,
+          "heureFinReelle": "2026-03-10T10:00:00.000Z",
+          "horodatageFin": {
+            "timestampSysteme": "2026-03-10T12:28:50.114Z",
+            "heureDeclaree": "2026-03-10T10:00:00.000Z",
+            "source": "DECLARATION",
+            "ecartSaisieMinutes": 149,
+            "saisieTardive": true,
+            "agent": "69a72cc044579001349b1b01",
+            "timezoneAeroport": "UTC"
+          }
+        }
+      },
+      "duration": 2882
+    },
+    {
+      "description": "TERMINE -> NON_COMMENCE — DOIT ETRE REFUSE 400",
+      "method": "PUT",
+      "path": "/crv/69af9a74332db80c9fe56ca2/phases/69af9a74332db80c9fe56ca7",
+      "request": {
+        "statut": "NON_COMMENCE"
+      },
+      "status": 400,
+      "expectedStatus": 400,
+      "success": true,
+      "response": {
+        "success": false,
+        "message": "Transition de statut interdite: TERMINE → NON_COMMENCE",
+        "code": "TRANSITION_PHASE_INTERDITE",
+        "details": {
+          "statutActuel": "TERMINE",
+          "statutDemande": "NON_COMMENCE",
+          "transitionsPermises": [
+            "EN_COURS"
+          ]
+        }
+      },
+      "duration": 893
+    },
+    {
+      "description": "TERMINE -> EN_COURS (correction autorisee)",
+      "method": "PUT",
+      "path": "/crv/69af9a74332db80c9fe56ca2/phases/69af9a74332db80c9fe56ca7",
+      "request": {
+        "statut": "EN_COURS"
+      },
+      "status": 200,
+      "expectedStatus": 200,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "_id": "69af9a74332db80c9fe56ca7",
+          "crv": "69af9a74332db80c9fe56ca2",
+          "phase": {
+            "_id": "6963b5479e4f0ae17895d0fd",
+            "code": "ARR_ARRIVEE_AVION",
+            "libelle": "Arrivée avion",
+            "typeOperation": "ARRIVEE",
+            "categorie": "PISTE",
+            "macroPhase": "DEBUT",
+            "ordre": 2,
+            "dureeStandardMinutes": 15,
+            "obligatoire": true,
+            "description": "Arrivée de l'avion : atterrissage, roulage vers parking et calage/sécurisation",
+            "prerequis": [],
+            "actif": true,
+            "__v": 0,
+            "createdAt": "2026-01-11T14:35:51.458Z",
+            "updatedAt": "2026-01-11T14:35:51.458Z"
+          },
+          "statut": "EN_COURS",
+          "createdAt": "2026-03-10T04:13:40.731Z",
+          "updatedAt": "2026-03-10T12:28:53.886Z",
+          "__v": 0,
+          "heureDebutReelle": "2026-03-10T09:00:00.000Z",
+          "horodatageDebut": {
+            "timestampSysteme": "2026-03-10T12:28:47.239Z",
+            "heureDeclaree": "2026-03-10T09:00:00.000Z",
+            "source": "DECLARATION",
+            "ecartSaisieMinutes": 209,
+            "saisieTardive": true,
+            "agent": "69a72cc044579001349b1b01",
+            "timezoneAeroport": "UTC"
+          },
+          "dureeReelleMinutes": 60,
+          "heureFinReelle": "2026-03-10T10:00:00.000Z",
+          "horodatageFin": {
+            "timestampSysteme": "2026-03-10T12:28:50.114Z",
+            "heureDeclaree": "2026-03-10T10:00:00.000Z",
+            "source": "DECLARATION",
+            "ecartSaisieMinutes": 149,
+            "saisieTardive": true,
+            "agent": "69a72cc044579001349b1b01",
+            "timezoneAeroport": "UTC"
+          }
+        }
+      },
+      "duration": 2851
+    },
+    {
+      "description": "Lister phases",
+      "method": "GET",
+      "path": "/phases?crvId=69af9a74332db80c9fe56ca2",
+      "request": null,
+      "status": 200,
+      "expectedStatus": null,
+      "success": true,
+      "response": {
+        "success": true,
+        "count": 12,
+        "data": [
+          {
+            "_id": "69af9a74332db80c9fe56ca5",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d0fc",
+              "code": "ARR_BRIEFING",
+              "libelle": "Briefing équipes",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BRIEFING",
+              "macroPhase": "DEBUT",
+              "ordre": 1,
+              "dureeStandardMinutes": 10,
+              "obligatoire": true,
+              "description": "Briefing avec les équipes KI, KU, KF, manutentionnaires et chauffeurs avant arrivée avion",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.456Z",
+              "updatedAt": "2026-01-11T14:35:51.456Z"
+            },
+            "statut": "TERMINE",
+            "createdAt": "2026-03-10T04:13:40.551Z",
+            "updatedAt": "2026-03-10T12:28:43.693Z",
+            "__v": 0,
+            "heureDebutReelle": "2026-03-10T13:00:00.000Z",
+            "horodatageDebut": {
+              "timestampSysteme": "2026-03-10T12:28:39.877Z",
+              "heureDeclaree": "2026-03-10T13:00:00.000Z",
+              "source": "DECLARATION",
+              "ecartSaisieMinutes": 31,
+              "saisieTardive": false,
+              "agent": "69a72cc044579001349b1b01",
+              "timezoneAeroport": "UTC"
+            },
+            "dureeReelleMinutes": 60,
+            "heureFinReelle": "2026-03-10T14:00:00.000Z",
+            "horodatageFin": {
+              "timestampSysteme": "2026-03-10T12:28:43.692Z",
+              "heureDeclaree": "2026-03-10T14:00:00.000Z",
+              "source": "DECLARATION",
+              "ecartSaisieMinutes": 91,
+              "saisieTardive": true,
+              "agent": "69a72cc044579001349b1b01",
+              "timezoneAeroport": "UTC"
+            }
+          },
+          {
+            "_id": "69af9a74332db80c9fe56ca7",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d0fd",
+              "code": "ARR_ARRIVEE_AVION",
+              "libelle": "Arrivée avion",
+              "typeOperation": "ARRIVEE",
+              "categorie": "PISTE",
+              "macroPhase": "DEBUT",
+              "ordre": 2,
+              "dureeStandardMinutes": 15,
+              "obligatoire": true,
+              "description": "Arrivée de l'avion : atterrissage, roulage vers parking et calage/sécurisation",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "EN_COURS",
+            "createdAt": "2026-03-10T04:13:40.731Z",
+            "updatedAt": "2026-03-10T12:28:53.886Z",
+            "__v": 0,
+            "heureDebutReelle": "2026-03-10T09:00:00.000Z",
+            "horodatageDebut": {
+              "timestampSysteme": "2026-03-10T12:28:47.239Z",
+              "heureDeclaree": "2026-03-10T09:00:00.000Z",
+              "source": "DECLARATION",
+              "ecartSaisieMinutes": 209,
+              "saisieTardive": true,
+              "agent": "69a72cc044579001349b1b01",
+              "timezoneAeroport": "UTC"
+            },
+            "dureeReelleMinutes": 60,
+            "heureFinReelle": "2026-03-10T10:00:00.000Z",
+            "horodatageFin": {
+              "timestampSysteme": "2026-03-10T12:28:50.114Z",
+              "heureDeclaree": "2026-03-10T10:00:00.000Z",
+              "source": "DECLARATION",
+              "ecartSaisieMinutes": 149,
+              "saisieTardive": true,
+              "agent": "69a72cc044579001349b1b01",
+              "timezoneAeroport": "UTC"
+            }
+          },
+          {
+            "_id": "69af9a74332db80c9fe56ca9",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d0fe",
+              "code": "ARR_OUVERTURE_SOUTES",
+              "libelle": "Ouverture des soutes",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BAGAGE",
+              "macroPhase": "REALISATION",
+              "ordre": 3,
+              "dureeStandardMinutes": 5,
+              "obligatoire": true,
+              "description": "Ouverture des soutes de l'avion pour préparer le déchargement",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:40.925Z",
+            "updatedAt": "2026-03-10T04:13:40.925Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cab",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d0ff",
+              "code": "ARR_DECHARGEMENT",
+              "libelle": "Déchargement",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BAGAGE",
+              "macroPhase": "REALISATION",
+              "ordre": 4,
+              "dureeStandardMinutes": 25,
+              "obligatoire": true,
+              "description": "Déchargement des bagages et fret des soutes vers les chariots",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.084Z",
+            "updatedAt": "2026-03-10T04:13:41.084Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cad",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d100",
+              "code": "ARR_LIVRAISON_BAGAGES",
+              "libelle": "Livraison bagages",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BAGAGE",
+              "macroPhase": "REALISATION",
+              "ordre": 5,
+              "dureeStandardMinutes": 15,
+              "obligatoire": true,
+              "description": "Acheminement des bagages des chariots vers le carrousel en zone publique",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.254Z",
+            "updatedAt": "2026-03-10T04:13:41.254Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56caf",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d101",
+              "code": "ARR_DEBARQUEMENT_PAX",
+              "libelle": "Débarquement passagers",
+              "typeOperation": "ARRIVEE",
+              "categorie": "PASSAGERS",
+              "macroPhase": "REALISATION",
+              "ordre": 6,
+              "dureeStandardMinutes": 20,
+              "obligatoire": true,
+              "description": "Débarquement de tous les passagers de l'avion",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.422Z",
+            "updatedAt": "2026-03-10T04:13:41.422Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cb1",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d102",
+              "code": "ARR_MISE_CONDITION_CABINE",
+              "libelle": "Mise en condition cabine",
+              "typeOperation": "ARRIVEE",
+              "categorie": "NETTOYAGE",
+              "macroPhase": "FIN",
+              "ordre": 7,
+              "dureeStandardMinutes": 30,
+              "obligatoire": false,
+              "description": "Chargement prestation hôtelière et nettoyage cabine (facultatif selon rotation)",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.592Z",
+            "updatedAt": "2026-03-10T04:13:41.592Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cb3",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d103",
+              "code": "ARR_DEBRIEFING",
+              "libelle": "Débriefing clôture",
+              "typeOperation": "ARRIVEE",
+              "categorie": "BRIEFING",
+              "macroPhase": "FIN",
+              "ordre": 8,
+              "dureeStandardMinutes": 10,
+              "obligatoire": false,
+              "description": "Débriefing de clôture avec les équipes (facultatif)",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.458Z",
+              "updatedAt": "2026-01-11T14:35:51.458Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.752Z",
+            "updatedAt": "2026-03-10T04:13:41.752Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a75332db80c9fe56cb5",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d11a",
+              "code": "COM_CONTROLE_SECU",
+              "libelle": "Contrôle sécurité",
+              "typeOperation": "COMMUN",
+              "categorie": "SECURITE",
+              "macroPhase": "REALISATION",
+              "ordre": 100,
+              "dureeStandardMinutes": 10,
+              "obligatoire": true,
+              "description": "Contrôles de sécurité réglementaires",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.460Z",
+              "updatedAt": "2026-01-11T14:35:51.460Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:41.918Z",
+            "updatedAt": "2026-03-10T04:13:41.918Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a76332db80c9fe56cb7",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d11b",
+              "code": "COM_CATERING",
+              "libelle": "Catering (approvisionnement repas)",
+              "typeOperation": "COMMUN",
+              "categorie": "TECHNIQUE",
+              "macroPhase": "REALISATION",
+              "ordre": 101,
+              "dureeStandardMinutes": 20,
+              "obligatoire": false,
+              "description": "Approvisionnement en repas et boissons pour le vol",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.460Z",
+              "updatedAt": "2026-01-11T14:35:51.460Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:42.094Z",
+            "updatedAt": "2026-03-10T04:13:42.094Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a76332db80c9fe56cb9",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d11c",
+              "code": "COM_MAINTENANCE_LEGERE",
+              "libelle": "Maintenance légère",
+              "typeOperation": "COMMUN",
+              "categorie": "TECHNIQUE",
+              "macroPhase": "REALISATION",
+              "ordre": 102,
+              "dureeStandardMinutes": 30,
+              "obligatoire": false,
+              "description": "Interventions techniques légères (vérifications, petites réparations)",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.460Z",
+              "updatedAt": "2026-01-11T14:35:51.460Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:42.272Z",
+            "updatedAt": "2026-03-10T04:13:42.272Z",
+            "__v": 0
+          },
+          {
+            "_id": "69af9a76332db80c9fe56cbb",
+            "crv": "69af9a74332db80c9fe56ca2",
+            "phase": {
+              "_id": "6963b5479e4f0ae17895d11d",
+              "code": "COM_REMISE_DOCUMENTS",
+              "libelle": "Remise documents de vol",
+              "typeOperation": "COMMUN",
+              "categorie": "TECHNIQUE",
+              "macroPhase": "FIN",
+              "ordre": 103,
+              "dureeStandardMinutes": 5,
+              "obligatoire": true,
+              "description": "Remise du dossier de vol au commandant de bord (loadsheet, manifest, documents)",
+              "prerequis": [],
+              "actif": true,
+              "__v": 0,
+              "createdAt": "2026-01-11T14:35:51.460Z",
+              "updatedAt": "2026-01-11T14:35:51.460Z"
+            },
+            "statut": "NON_COMMENCE",
+            "createdAt": "2026-03-10T04:13:42.439Z",
+            "updatedAt": "2026-03-10T04:13:42.439Z",
+            "__v": 0
+          }
+        ]
+      },
+      "duration": 725
+    },
+    {
+      "description": "Statut BOGUS — DOIT ETRE REFUSE 400",
+      "method": "PUT",
+      "path": "/crv/69af9a74332db80c9fe56ca2/phases/69af9a74332db80c9fe56ca5",
+      "request": {
+        "statut": "BOGUS_VALUE_123"
+      },
+      "status": 400,
+      "expectedStatus": 400,
+      "success": true,
+      "response": {
+        "success": false,
+        "message": "Statut de phase invalide: BOGUS_VALUE_123",
+        "code": "STATUT_PHASE_INVALIDE",
+        "statutsAutorises": [
+          "NON_COMMENCE",
+          "EN_COURS",
+          "TERMINE",
+          "NON_REALISE"
+        ]
+      },
+      "duration": 1375
+    },
+    {
+      "description": "Charge PASSAGERS DEBARQUEMENT — premiere fois",
+      "method": "POST",
+      "path": "/crv/69b00e6ea56cde3d74d0706b/charges",
+      "request": {
+        "typeCharge": "PASSAGERS",
+        "sensOperation": "DEBARQUEMENT",
+        "passagersAdultes": 50,
+        "passagersEnfants": 5,
+        "passagersPMR": 2,
+        "passagersTransit": 10,
+        "passagersBebes": 1
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "crv": "69b00e6ea56cde3d74d0706b",
+          "typeCharge": "PASSAGERS",
+          "sensOperation": "DEBARQUEMENT",
+          "passagersAdultes": 50,
+          "passagersEnfants": 5,
+          "passagersPMR": 2,
+          "passagersTransit": 10,
+          "passagersBebes": 1,
+          "categoriesPassagersDetaillees": {
+            "bebes": 0,
+            "enfants": 0,
+            "adolescents": 0,
+            "adultes": 0,
+            "seniors": 0,
+            "pmrFauteuilRoulant": 0,
+            "pmrMarcheAssistee": 0,
+            "pmrNonVoyant": 0,
+            "pmrSourd": 0,
+            "transitLocal": 0,
+            "transitInternational": 0,
+            "vip": 0,
+            "equipage": 0,
+            "deportes": 0
+          },
+          "classePassagers": {
+            "premiere": 0,
+            "affaires": 0,
+            "economique": 0
+          },
+          "besoinsMedicaux": {
+            "oxygeneBord": 0,
+            "brancardier": 0,
+            "accompagnementMedical": 0
+          },
+          "mineurs": {
+            "mineurNonAccompagne": 0,
+            "bebeNonAccompagne": 0
+          },
+          "remarquesPassagers": null,
+          "utiliseCategoriesDetaillees": false,
+          "nombreBagagesSoute": null,
+          "poidsBagagesSouteKg": null,
+          "nombreBagagesCabine": null,
+          "nombreFret": null,
+          "poidsFretKg": null,
+          "fretDetaille": {
+            "categoriesFret": {
+              "denreesPerissables": {
+                "nombre": 0,
+                "poidsKg": 0,
+                "temperature": null,
+                "chaineduFroid": false
+              },
+              "animauxVivants": {
+                "nombre": 0,
+                "espece": null,
+                "certificatVeterinaire": false
+              },
+              "vehicules": {
+                "nombre": 0,
+                "type": null
+              },
+              "equipements": {
+                "nombre": 0,
+                "type": null
+              },
+              "valeurDeclaree": {
+                "montant": 0,
+                "devise": "XOF"
+              },
+              "postal": 0,
+              "courrierExpress": 0,
+              "marchandiseGenerale": 0
+            },
+            "marchandisesDangereuses": {
+              "responsable": {
+                "nom": null,
+                "telephone": null
+              },
+              "present": false,
+              "declarationDGR": false,
+              "details": []
+            },
+            "logistique": {
+              "surdimensionne": {
+                "longueurCm": null,
+                "largeurCm": null,
+                "hauteurCm": null
+              },
+              "nombreColis": 0,
+              "volumeM3": 0,
+              "nombrePalettes": 0,
+              "typePalettes": null,
+              "nombreConteneurs": 0,
+              "typeConteneurs": null,
+              "dimensionsSpeciales": false
+            },
+            "douanes": {
+              "valeurDeclaree": 0,
+              "devise": "XOF",
+              "paysOrigine": null,
+              "paysDestination": null,
+              "numeroBL": null,
+              "numeroAWB": null,
+              "declarationDouane": false
+            },
+            "conditionsTransport": {
+              "temperatureControlee": false,
+              "temperatureMin": null,
+              "temperatureMax": null,
+              "humiditeControlee": false,
+              "fragile": false,
+              "protegeeLumiere": false,
+              "instructionsSpeciales": null
+            },
+            "remarquesFret": null,
+            "utiliseFretDetaille": false
+          },
+          "_id": "69b00e8aa56cde3d74d0712a",
+          "createdAt": "2026-03-10T12:28:58.807Z",
+          "updatedAt": "2026-03-10T12:28:58.807Z",
+          "__v": 0
+        }
+      },
+      "duration": 3420
+    },
+    {
+      "description": "Doublon PASSAGERS DEBARQUEMENT — DOIT ETRE 409",
+      "method": "POST",
+      "path": "/crv/69b00e6ea56cde3d74d0706b/charges",
+      "request": {
+        "typeCharge": "PASSAGERS",
+        "sensOperation": "DEBARQUEMENT",
+        "passagersAdultes": 30,
+        "passagersEnfants": 2,
+        "passagersPMR": 0,
+        "passagersTransit": 0,
+        "passagersBebes": 0
+      },
+      "status": 409,
+      "expectedStatus": 409,
+      "success": true,
+      "response": {
+        "success": false,
+        "message": "Doublon interdit: une charge PASSAGERS DEBARQUEMENT existe deja pour ce CRV",
+        "code": "CHARGE_DOUBLON",
+        "details": {
+          "typeCharge": "PASSAGERS",
+          "sensOperation": "DEBARQUEMENT",
+          "chargeExistanteId": "69b00e8aa56cde3d74d0712a"
+        }
+      },
+      "duration": 557
+    },
+    {
+      "description": "Charge BAGAGES — type different OK",
+      "method": "POST",
+      "path": "/crv/69b00e6ea56cde3d74d0706b/charges",
+      "request": {
+        "typeCharge": "BAGAGES",
+        "sensOperation": "DEBARQUEMENT",
+        "nombreBagagesSoute": 100,
+        "poidsBagagesSouteKg": 2000
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "crv": "69b00e6ea56cde3d74d0706b",
+          "typeCharge": "BAGAGES",
+          "sensOperation": "DEBARQUEMENT",
+          "passagersAdultes": null,
+          "passagersEnfants": null,
+          "passagersPMR": null,
+          "passagersTransit": null,
+          "passagersBebes": null,
+          "categoriesPassagersDetaillees": {
+            "bebes": 0,
+            "enfants": 0,
+            "adolescents": 0,
+            "adultes": 0,
+            "seniors": 0,
+            "pmrFauteuilRoulant": 0,
+            "pmrMarcheAssistee": 0,
+            "pmrNonVoyant": 0,
+            "pmrSourd": 0,
+            "transitLocal": 0,
+            "transitInternational": 0,
+            "vip": 0,
+            "equipage": 0,
+            "deportes": 0
+          },
+          "classePassagers": {
+            "premiere": 0,
+            "affaires": 0,
+            "economique": 0
+          },
+          "besoinsMedicaux": {
+            "oxygeneBord": 0,
+            "brancardier": 0,
+            "accompagnementMedical": 0
+          },
+          "mineurs": {
+            "mineurNonAccompagne": 0,
+            "bebeNonAccompagne": 0
+          },
+          "remarquesPassagers": null,
+          "utiliseCategoriesDetaillees": false,
+          "nombreBagagesSoute": 100,
+          "poidsBagagesSouteKg": 2000,
+          "nombreBagagesCabine": null,
+          "nombreFret": null,
+          "poidsFretKg": null,
+          "fretDetaille": {
+            "categoriesFret": {
+              "denreesPerissables": {
+                "nombre": 0,
+                "poidsKg": 0,
+                "temperature": null,
+                "chaineduFroid": false
+              },
+              "animauxVivants": {
+                "nombre": 0,
+                "espece": null,
+                "certificatVeterinaire": false
+              },
+              "vehicules": {
+                "nombre": 0,
+                "type": null
+              },
+              "equipements": {
+                "nombre": 0,
+                "type": null
+              },
+              "valeurDeclaree": {
+                "montant": 0,
+                "devise": "XOF"
+              },
+              "postal": 0,
+              "courrierExpress": 0,
+              "marchandiseGenerale": 0
+            },
+            "marchandisesDangereuses": {
+              "responsable": {
+                "nom": null,
+                "telephone": null
+              },
+              "present": false,
+              "declarationDGR": false,
+              "details": []
+            },
+            "logistique": {
+              "surdimensionne": {
+                "longueurCm": null,
+                "largeurCm": null,
+                "hauteurCm": null
+              },
+              "nombreColis": 0,
+              "volumeM3": 0,
+              "nombrePalettes": 0,
+              "typePalettes": null,
+              "nombreConteneurs": 0,
+              "typeConteneurs": null,
+              "dimensionsSpeciales": false
+            },
+            "douanes": {
+              "valeurDeclaree": 0,
+              "devise": "XOF",
+              "paysOrigine": null,
+              "paysDestination": null,
+              "numeroBL": null,
+              "numeroAWB": null,
+              "declarationDouane": false
+            },
+            "conditionsTransport": {
+              "temperatureControlee": false,
+              "temperatureMin": null,
+              "temperatureMax": null,
+              "humiditeControlee": false,
+              "fragile": false,
+              "protegeeLumiere": false,
+              "instructionsSpeciales": null
+            },
+            "remarquesFret": null,
+            "utiliseFretDetaille": false
+          },
+          "_id": "69b00e8ea56cde3d74d07147",
+          "createdAt": "2026-03-10T12:29:02.717Z",
+          "updatedAt": "2026-03-10T12:29:02.717Z",
+          "__v": 0
+        }
+      },
+      "duration": 3635
+    },
+    {
+      "description": "Passagers 999999 — DOIT ETRE REFUSE 400",
+      "method": "POST",
+      "path": "/crv/69b00e6ea56cde3d74d0706b/charges",
+      "request": {
+        "typeCharge": "PASSAGERS",
+        "sensOperation": "EMBARQUEMENT",
+        "passagersAdultes": 999999,
+        "passagersEnfants": 0,
+        "passagersPMR": 0,
+        "passagersTransit": 0,
+        "passagersBebes": 0
+      },
+      "status": 400,
+      "expectedStatus": 400,
+      "success": true,
+      "response": {
+        "success": false,
+        "message": "Valeur passagersAdultes (999999) depasse le maximum autorise (1000)",
+        "code": "VALEUR_CHARGE_EXCESSIVE",
+        "details": {
+          "champ": "passagersAdultes",
+          "valeur": 999999,
+          "maximum": 1000
+        }
+      },
+      "duration": 1067
+    },
+    {
+      "description": "Fret 999999 kg — DOIT ETRE REFUSE 400",
+      "method": "POST",
+      "path": "/crv/69b00e6ea56cde3d74d0706b/charges",
+      "request": {
+        "typeCharge": "FRET",
+        "sensOperation": "EMBARQUEMENT",
+        "nombreFret": 5,
+        "poidsFretKg": 999999,
+        "typeFret": "GENERAL"
+      },
+      "status": 400,
+      "expectedStatus": 400,
+      "success": true,
+      "response": {
+        "success": false,
+        "message": "Poids fret (999999kg) depasse le maximum autorise (200000kg)",
+        "code": "VALEUR_CHARGE_EXCESSIVE"
+      },
+      "duration": 572
+    },
+    {
+      "description": "Fret 5000 kg — dans limites OK",
+      "method": "POST",
+      "path": "/crv/69b00e6ea56cde3d74d0706b/charges",
+      "request": {
+        "typeCharge": "FRET",
+        "sensOperation": "DEBARQUEMENT",
+        "nombreFret": 5,
+        "poidsFretKg": 5000,
+        "typeFret": "GENERAL"
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "crv": "69b00e6ea56cde3d74d0706b",
+          "typeCharge": "FRET",
+          "sensOperation": "DEBARQUEMENT",
+          "passagersAdultes": null,
+          "passagersEnfants": null,
+          "passagersPMR": null,
+          "passagersTransit": null,
+          "passagersBebes": null,
+          "categoriesPassagersDetaillees": {
+            "bebes": 0,
+            "enfants": 0,
+            "adolescents": 0,
+            "adultes": 0,
+            "seniors": 0,
+            "pmrFauteuilRoulant": 0,
+            "pmrMarcheAssistee": 0,
+            "pmrNonVoyant": 0,
+            "pmrSourd": 0,
+            "transitLocal": 0,
+            "transitInternational": 0,
+            "vip": 0,
+            "equipage": 0,
+            "deportes": 0
+          },
+          "classePassagers": {
+            "premiere": 0,
+            "affaires": 0,
+            "economique": 0
+          },
+          "besoinsMedicaux": {
+            "oxygeneBord": 0,
+            "brancardier": 0,
+            "accompagnementMedical": 0
+          },
+          "mineurs": {
+            "mineurNonAccompagne": 0,
+            "bebeNonAccompagne": 0
+          },
+          "remarquesPassagers": null,
+          "utiliseCategoriesDetaillees": false,
+          "nombreBagagesSoute": null,
+          "poidsBagagesSouteKg": null,
+          "nombreBagagesCabine": null,
+          "nombreFret": 5,
+          "poidsFretKg": 5000,
+          "typeFret": "GENERAL",
+          "fretDetaille": {
+            "categoriesFret": {
+              "denreesPerissables": {
+                "nombre": 0,
+                "poidsKg": 0,
+                "temperature": null,
+                "chaineduFroid": false
+              },
+              "animauxVivants": {
+                "nombre": 0,
+                "espece": null,
+                "certificatVeterinaire": false
+              },
+              "vehicules": {
+                "nombre": 0,
+                "type": null
+              },
+              "equipements": {
+                "nombre": 0,
+                "type": null
+              },
+              "valeurDeclaree": {
+                "montant": 0,
+                "devise": "XOF"
+              },
+              "postal": 0,
+              "courrierExpress": 0,
+              "marchandiseGenerale": 0
+            },
+            "marchandisesDangereuses": {
+              "responsable": {
+                "nom": null,
+                "telephone": null
+              },
+              "present": false,
+              "declarationDGR": false,
+              "details": []
+            },
+            "logistique": {
+              "surdimensionne": {
+                "longueurCm": null,
+                "largeurCm": null,
+                "hauteurCm": null
+              },
+              "nombreColis": 0,
+              "volumeM3": 0,
+              "nombrePalettes": 0,
+              "typePalettes": null,
+              "nombreConteneurs": 0,
+              "typeConteneurs": null,
+              "dimensionsSpeciales": false
+            },
+            "douanes": {
+              "valeurDeclaree": 0,
+              "devise": "XOF",
+              "paysOrigine": null,
+              "paysDestination": null,
+              "numeroBL": null,
+              "numeroAWB": null,
+              "declarationDouane": false
+            },
+            "conditionsTransport": {
+              "temperatureControlee": false,
+              "temperatureMin": null,
+              "temperatureMax": null,
+              "humiditeControlee": false,
+              "fragile": false,
+              "protegeeLumiere": false,
+              "instructionsSpeciales": null
+            },
+            "remarquesFret": null,
+            "utiliseFretDetaille": false
+          },
+          "_id": "69b00e94a56cde3d74d07169",
+          "createdAt": "2026-03-10T12:29:08.060Z",
+          "updatedAt": "2026-03-10T12:29:08.060Z",
+          "__v": 0
+        }
+      },
+      "duration": 3462
+    },
+    {
+      "description": "Evenement avec script XSS — doit etre escape",
+      "method": "POST",
+      "path": "/crv/69b00e6ea56cde3d74d0706b/evenements",
+      "request": {
+        "typeEvenement": "INCIDENT_TECHNIQUE",
+        "gravite": "MINEURE",
+        "description": "<script>alert(\"xss\")</script>Test injection",
+        "dateHeureDebut": "2026-03-10T12:29:10.669Z"
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "crv": "69b00e6ea56cde3d74d0706b",
+          "typeEvenement": "INCIDENT_TECHNIQUE",
+          "gravite": "MINEURE",
+          "dateHeureDebut": "2026-03-10T12:29:10.669Z",
+          "description": "&lt;script&gt;alert(&quot;xss&quot;)&lt;&#x2F;script&gt;Test injection",
+          "impactPhases": [],
+          "declarePar": "69a72cc044579001349b1b01",
+          "statut": "OUVERT",
+          "_id": "69b00e97a56cde3d74d07180",
+          "createdAt": "2026-03-10T12:29:11.215Z",
+          "updatedAt": "2026-03-10T12:29:11.215Z",
+          "__v": 0
+        }
+      },
+      "duration": 2451
+    },
+    {
+      "description": "XSS: <script> escape dans description",
+      "method": "CHECK",
+      "path": "N/A",
+      "status": "PASS",
+      "expectedStatus": "PASS",
+      "success": true,
+      "response": {},
+      "duration": 0
+    },
+    {
+      "description": "Observation avec XSS img tag — doit etre escape",
+      "method": "POST",
+      "path": "/crv/69b00e6ea56cde3d74d0706b/observations",
+      "request": {
+        "categorie": "GENERALE",
+        "contenu": "<img onerror=\"alert(1)\" src=x>Test XSS img"
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "crv": "69b00e6ea56cde3d74d0706b",
+          "auteur": "69a72cc044579001349b1b01",
+          "categorie": "GENERALE",
+          "contenu": "&lt;img onerror=&quot;alert(1)&quot; src=x&gt;Test XSS img",
+          "visibilite": "INTERNE",
+          "_id": "69b00e99a56cde3d74d07197",
+          "dateHeure": "2026-03-10T12:29:13.640Z",
+          "createdAt": "2026-03-10T12:29:13.641Z",
+          "updatedAt": "2026-03-10T12:29:13.641Z",
+          "__v": 0
+        }
+      },
+      "duration": 2209
+    },
+    {
+      "description": "XSS: <img> escape dans observation",
+      "method": "CHECK",
+      "path": "N/A",
+      "status": "PASS",
+      "expectedStatus": "PASS",
+      "success": true,
+      "response": {},
+      "duration": 0
+    },
+    {
+      "description": "Valider CRV TERMINE existant",
+      "method": "POST",
+      "path": "/validation/69aec5dfdd9349c3a26ae735/valider",
+      "request": {},
+      "status": 200,
+      "expectedStatus": null,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "_id": "69b00ea0a56cde3d74d071b7",
+          "crv": {
+            "archivage": {
+              "driveFileId": null,
+              "driveWebViewLink": null,
+              "filename": null,
+              "folderPath": null,
+              "size": null,
+              "archivedAt": null,
+              "archivedBy": null,
+              "version": 1
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69aec5dfdd9349c3a26ae735",
+            "numeroCRV": "CRV260309-0006",
+            "vol": "69aec5dfdd9349c3a26ae72f",
+            "escale": "NDJ",
+            "horaire": "69aec5dfdd9349c3a26ae732",
+            "statut": "TERMINE",
+            "creePar": "69a72cbf44579001349b1afd",
+            "responsableVol": null,
+            "completude": 95,
+            "bulletinMouvementReference": "69aec3b6dd9349c3a26ae3d7",
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T13:06:39.743Z",
+            "derniereModification": "2026-03-09T14:11:21.466Z",
+            "personnelAffecte": [
+              {
+                "nom": "TAHA",
+                "prenom": "Ahmat",
+                "fonction": "CHEF_ESCALE",
+                "matricule": "",
+                "telephone": "+33689639237",
+                "remarques": "",
+                "_id": "69aec634dd9349c3a26ae7b0"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T13:06:39.743Z",
+            "updatedAt": "2026-03-09T14:11:23.112Z",
+            "__v": 1,
+            "modifiePar": "69a72cc044579001349b1b01"
+          },
+          "validePar": {
+            "_id": "69a72cc044579001349b1b01",
+            "nom": "MARTIN",
+            "prenom": "Pierre",
+            "matricule": "SUP-001",
+            "email": "superviseur@crv.test",
+            "fonction": "SUPERVISEUR",
+            "specialites": [],
+            "statut": "ACTIF",
+            "statutCompte": "VALIDE",
+            "dateValidationCompte": null,
+            "valideParUserId": null,
+            "createdAt": "2026-03-03T18:47:28.257Z",
+            "updatedAt": "2026-03-07T10:23:18.242Z",
+            "__v": 0
+          },
+          "statut": "EN_ATTENTE_CORRECTION",
+          "scoreCompletude": 95,
+          "conformiteSLA": true,
+          "ecartsSLA": [],
+          "anomaliesDetectees": [
+            "Responsable du vol non défini"
+          ],
+          "verrouille": false,
+          "dateVerrouillage": null,
+          "dateValidation": "2026-03-10T12:29:20.840Z",
+          "createdAt": "2026-03-10T12:29:20.840Z",
+          "updatedAt": "2026-03-10T12:29:20.840Z",
+          "__v": 0
+        }
+      },
+      "duration": 6707
+    },
+    {
+      "description": "BUG15: validation ne verrouille PAS auto (pas VERROUILLE)",
+      "method": "CHECK",
+      "path": "N/A",
+      "status": "PASS",
+      "expectedStatus": "PASS",
+      "success": true,
+      "response": {},
+      "duration": 0
+    },
+    {
+      "description": "ADMIN GET /crv — DOIT ETRE 403",
+      "method": "GET",
+      "path": "/crv",
+      "request": null,
+      "status": 403,
+      "expectedStatus": 403,
+      "success": true,
+      "response": {
+        "success": false,
+        "message": "Acces refuse: ADMIN n'a pas d'acces operationnel aux CRV (doctrine MADMIT)",
+        "code": "ADMIN_NO_CRV_ACCESS"
+      },
+      "duration": 184
+    },
+    {
+      "description": "ADMIN GET /crv/:id — DOIT ETRE 403",
+      "method": "GET",
+      "path": "/crv/69b00e6ea56cde3d74d0706b",
+      "request": null,
+      "status": 403,
+      "expectedStatus": 403,
+      "success": true,
+      "response": {
+        "success": false,
+        "message": "Acces refuse: ADMIN n'a pas d'acces operationnel aux CRV (doctrine MADMIT)",
+        "code": "ADMIN_NO_CRV_ACCESS"
+      },
+      "duration": 195
+    },
+    {
+      "description": "ADMIN GET /crv/search — DOIT ETRE 403",
+      "method": "GET",
+      "path": "/crv/search?escale=NDJ",
+      "request": null,
+      "status": 403,
+      "expectedStatus": 403,
+      "success": true,
+      "response": {
+        "success": false,
+        "message": "Acces refuse: ADMIN n'a pas d'acces operationnel aux CRV (doctrine MADMIT)",
+        "code": "ADMIN_NO_CRV_ACCESS"
+      },
+      "duration": 172
+    },
+    {
+      "description": "SUPERVISEUR GET /crv — OK 200",
+      "method": "GET",
+      "path": "/crv",
+      "request": null,
+      "status": 200,
+      "expectedStatus": 200,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": [
+          {
+            "archivage": {
+              "driveFileId": null,
+              "driveWebViewLink": null,
+              "filename": null,
+              "folderPath": null,
+              "size": null,
+              "archivedAt": null,
+              "archivedBy": null,
+              "version": 1
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69b00e6ea56cde3d74d0706b",
+            "numeroCRV": "CRV260310-0010",
+            "vol": {
+              "_id": "69b00e6da56cde3d74d07066",
+              "numeroVol": "VOL0188",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "Air France",
+              "codeIATA": "AF",
+              "dateVol": "2026-03-10T12:28:29.772Z",
+              "statut": "EN_COURS",
+              "posteStationnement": null,
+              "horsProgramme": false,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": null,
+              "typeVolHorsProgramme": null,
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-10T12:28:29.773Z",
+              "updatedAt": "2026-03-10T12:28:35.249Z",
+              "__v": 0
+            },
+            "escale": "NDJ",
+            "horaire": "69b00e6da56cde3d74d07068",
+            "statut": "EN_COURS",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": null,
+            "completude": 60,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-10T12:28:30.338Z",
+            "derniereModification": "2026-03-10T12:28:37.746Z",
+            "personnelAffecte": [
+              {
+                "nom": "DUPONT",
+                "prenom": "Jean",
+                "fonction": "AGENT_TRAFIC",
+                "_id": "69b00e74a56cde3d74d070a0"
+              },
+              {
+                "nom": "MARTIN",
+                "prenom": "Sophie",
+                "fonction": "SUPERVISEUR",
+                "_id": "69b00e75a56cde3d74d070a9"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-10T12:28:30.338Z",
+            "updatedAt": "2026-03-10T12:29:14.992Z",
+            "__v": 2,
+            "modifiePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": null,
+              "driveWebViewLink": null,
+              "filename": null,
+              "folderPath": null,
+              "size": null,
+              "archivedAt": null,
+              "archivedBy": null,
+              "version": 1
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69b00da6a56cde3d74d06f8a",
+            "numeroCRV": "CRV260310-0009",
+            "vol": {
+              "_id": "69b00da5a56cde3d74d06f85",
+              "numeroVol": "VOL0187",
+              "typeOperation": "TURN_AROUND",
+              "compagnieAerienne": "Air France",
+              "codeIATA": "AF",
+              "dateVol": "2026-03-10T12:25:09.792Z",
+              "statut": "EN_COURS",
+              "posteStationnement": null,
+              "horsProgramme": false,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": null,
+              "typeVolHorsProgramme": null,
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-10T12:25:09.792Z",
+              "updatedAt": "2026-03-10T12:25:21.061Z",
+              "__v": 0
+            },
+            "escale": "NDJ",
+            "horaire": "69b00da6a56cde3d74d06f87",
+            "statut": "EN_COURS",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": null,
+            "completude": 55,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-10T12:25:10.653Z",
+            "derniereModification": "2026-03-10T12:25:33.688Z",
+            "personnelAffecte": [
+              {
+                "nom": "E2E_TEST",
+                "prenom": "Worker",
+                "fonction": "AGENT_PISTE",
+                "_id": "69b00db2a56cde3d74d06feb"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-10T12:25:10.653Z",
+            "updatedAt": "2026-03-10T12:25:34.951Z",
+            "__v": 1,
+            "modifiePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": null,
+              "driveWebViewLink": null,
+              "filename": null,
+              "folderPath": null,
+              "size": null,
+              "archivedAt": null,
+              "archivedBy": null,
+              "version": 1
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69b00d77a56cde3d74d06e5c",
+            "numeroCRV": "CRV260310-0008",
+            "vol": {
+              "_id": "69b00d77a56cde3d74d06e57",
+              "numeroVol": "VOL0186",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "Air France",
+              "codeIATA": "AF",
+              "dateVol": "2026-03-10T12:24:23.155Z",
+              "statut": "EN_COURS",
+              "posteStationnement": null,
+              "horsProgramme": false,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": null,
+              "typeVolHorsProgramme": null,
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-10T12:24:23.156Z",
+              "updatedAt": "2026-03-10T12:24:30.258Z",
+              "__v": 0
+            },
+            "escale": "NDJ",
+            "horaire": "69b00d77a56cde3d74d06e59",
+            "statut": "EN_COURS",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": null,
+            "completude": 60,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-10T12:24:23.772Z",
+            "derniereModification": "2026-03-10T12:24:32.847Z",
+            "personnelAffecte": [
+              {
+                "nom": "DUPONT",
+                "prenom": "Jean",
+                "fonction": "AGENT_TRAFIC",
+                "_id": "69b00d7fa56cde3d74d06e91"
+              },
+              {
+                "nom": "MARTIN",
+                "prenom": "Sophie",
+                "fonction": "SUPERVISEUR",
+                "_id": "69b00d80a56cde3d74d06e9a"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-10T12:24:23.772Z",
+            "updatedAt": "2026-03-10T12:24:51.146Z",
+            "__v": 2,
+            "modifiePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": null,
+              "driveWebViewLink": null,
+              "filename": null,
+              "folderPath": null,
+              "size": null,
+              "archivedAt": null,
+              "archivedBy": null,
+              "version": 1
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69b00c97a56cde3d74d06deb",
+            "numeroCRV": "CRV260310-0007",
+            "vol": {
+              "_id": "69b00c96a56cde3d74d06de6",
+              "numeroVol": "VOL0185",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "Air France",
+              "codeIATA": "AF",
+              "dateVol": "2026-03-10T12:20:38.757Z",
+              "statut": "EN_COURS",
+              "posteStationnement": null,
+              "horsProgramme": false,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": null,
+              "typeVolHorsProgramme": null,
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-10T12:20:38.762Z",
+              "updatedAt": "2026-03-10T12:21:25.319Z",
+              "__v": 0
+            },
+            "escale": "NDJ",
+            "horaire": "69b00c97a56cde3d74d06de8",
+            "statut": "EN_COURS",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": null,
+            "completude": 50,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-10T12:20:39.637Z",
+            "derniereModification": "2026-03-10T12:21:24.977Z",
+            "personnelAffecte": [],
+            "materielUtilise": [],
+            "createdAt": "2026-03-10T12:20:39.638Z",
+            "updatedAt": "2026-03-10T12:21:29.222Z",
+            "__v": 0,
+            "modifiePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": "1lHVl15Lh2yjrMb7Rcdl1XotSzAppuE50",
+              "driveWebViewLink": "https://drive.google.com/file/d/1lHVl15Lh2yjrMb7Rcdl1XotSzAppuE50/view?usp=drivesdk",
+              "filename": "CRV_AF500_2026-03-12.pdf",
+              "folderPath": "CRV/2026/03-Mars/AF",
+              "size": 28300,
+              "archivedAt": "2026-03-10T04:42:57.348Z",
+              "archivedBy": "69a72cc044579001349b1b01",
+              "version": 2
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69af9b11332db80c9fe56d44",
+            "numeroCRV": "CRV260310-0006",
+            "vol": {
+              "_id": "69af9b10332db80c9fe56d3e",
+              "numeroVol": "AF500",
+              "typeOperation": "TURN_AROUND",
+              "compagnieAerienne": "AF",
+              "codeIATA": "AF",
+              "aeroportOrigine": "CDG",
+              "aeroportDestination": "DLA",
+              "dateVol": "2026-03-12T00:00:00.000Z",
+              "statut": "TERMINE",
+              "posteStationnement": null,
+              "horsProgramme": false,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": null,
+              "typeVolHorsProgramme": null,
+              "bulletinMouvementReference": "69af705a9b16e3c69842498f",
+              "createdAt": "2026-03-10T04:16:16.819Z",
+              "updatedAt": "2026-03-10T04:41:29.321Z",
+              "__v": 0
+            },
+            "escale": "NDJ",
+            "horaire": "69af9b11332db80c9fe56d41",
+            "statut": "VERROUILLE",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "completude": 100,
+            "bulletinMouvementReference": "69af705a9b16e3c69842498f",
+            "crvDoublon": false,
+            "dateCreation": "2026-03-10T04:16:17.540Z",
+            "derniereModification": "2026-03-10T04:42:57.350Z",
+            "personnelAffecte": [],
+            "materielUtilise": [],
+            "createdAt": "2026-03-10T04:16:17.540Z",
+            "updatedAt": "2026-03-10T04:42:57.350Z",
+            "__v": 0,
+            "modifiePar": "69a72cc044579001349b1b01",
+            "dateVerrouillage": "2026-03-10T04:42:48.677Z",
+            "verrouillePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": null,
+              "driveWebViewLink": null,
+              "filename": null,
+              "folderPath": null,
+              "size": null,
+              "archivedAt": null,
+              "archivedBy": null,
+              "version": 1
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69af9ad9332db80c9fe56cf7",
+            "numeroCRV": "CRV260310-0005",
+            "vol": {
+              "_id": "69af9ad8332db80c9fe56cf1",
+              "numeroVol": "ET201",
+              "typeOperation": "DEPART",
+              "compagnieAerienne": "ET",
+              "codeIATA": "ET",
+              "aeroportOrigine": "NDJ",
+              "aeroportDestination": "DLA",
+              "dateVol": "2026-03-11T00:00:00.000Z",
+              "statut": "EN_COURS",
+              "posteStationnement": null,
+              "horsProgramme": false,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": null,
+              "typeVolHorsProgramme": null,
+              "bulletinMouvementReference": "69af705a9b16e3c69842498f",
+              "createdAt": "2026-03-10T04:15:20.816Z",
+              "updatedAt": "2026-03-10T04:15:26.295Z",
+              "__v": 0
+            },
+            "escale": "NDJ",
+            "horaire": "69af9ad9332db80c9fe56cf4",
+            "statut": "EN_COURS",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": null,
+            "completude": 30,
+            "bulletinMouvementReference": "69af705a9b16e3c69842498f",
+            "crvDoublon": false,
+            "dateCreation": "2026-03-10T04:15:21.485Z",
+            "derniereModification": "2026-03-10T04:15:25.969Z",
+            "personnelAffecte": [],
+            "materielUtilise": [],
+            "createdAt": "2026-03-10T04:15:21.485Z",
+            "updatedAt": "2026-03-10T04:15:25.969Z",
+            "__v": 0,
+            "modifiePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": null,
+              "driveWebViewLink": null,
+              "filename": null,
+              "folderPath": null,
+              "size": null,
+              "archivedAt": null,
+              "archivedBy": null,
+              "version": 1
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69af9a74332db80c9fe56ca2",
+            "numeroCRV": "CRV260310-0004",
+            "vol": {
+              "_id": "69af9a73332db80c9fe56c9c",
+              "numeroVol": "ET100",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "ET",
+              "codeIATA": "ET",
+              "aeroportOrigine": "ADD",
+              "aeroportDestination": "NDJ",
+              "dateVol": "2026-03-11T00:00:00.000Z",
+              "statut": "EN_COURS",
+              "posteStationnement": null,
+              "horsProgramme": false,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": null,
+              "typeVolHorsProgramme": null,
+              "bulletinMouvementReference": "69af705a9b16e3c69842498f",
+              "createdAt": "2026-03-10T04:13:39.489Z",
+              "updatedAt": "2026-03-10T04:13:45.235Z",
+              "__v": 0
+            },
+            "escale": "NDJ",
+            "horaire": "69af9a73332db80c9fe56c9f",
+            "statut": "EN_COURS",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": null,
+            "completude": 33,
+            "bulletinMouvementReference": "69af705a9b16e3c69842498f",
+            "crvDoublon": false,
+            "dateCreation": "2026-03-10T04:13:40.193Z",
+            "derniereModification": "2026-03-10T04:43:47.579Z",
+            "personnelAffecte": [],
+            "materielUtilise": [],
+            "createdAt": "2026-03-10T04:13:40.194Z",
+            "updatedAt": "2026-03-10T12:28:55.138Z",
+            "__v": 0,
+            "modifiePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": "1RfjBHiQKG1ZdedBu0QAAXQYRp4LKIwnN",
+              "driveWebViewLink": "https://drive.google.com/file/d/1RfjBHiQKG1ZdedBu0QAAXQYRp4LKIwnN/view?usp=drivesdk",
+              "filename": "CRV_TS55123A_2026-03-09.pdf",
+              "folderPath": "CRV/2026/03-Mars/TS",
+              "size": 29552,
+              "archivedAt": "2026-03-09T22:12:35.495Z",
+              "archivedBy": "69a72cc044579001349b1b01",
+              "version": 2
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69af450c9b16e3c698423fa6",
+            "numeroCRV": "CRV260309-0046",
+            "vol": {
+              "_id": "69af450b9b16e3c698423fa1",
+              "numeroVol": "TS55123A",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "TEST AIRLINES",
+              "codeIATA": "TS",
+              "aeroportOrigine": "CDG",
+              "aeroportDestination": null,
+              "dateVol": "2026-03-09T00:00:00.000Z",
+              "statut": "TERMINE",
+              "avion": null,
+              "posteStationnement": null,
+              "horsProgramme": true,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": "Vol test certification",
+              "typeVolHorsProgramme": "COMMERCIAL",
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-09T22:09:15.490Z",
+              "updatedAt": "2026-03-09T22:12:22.522Z",
+              "__v": 0
+            },
+            "escale": "DKR",
+            "horaire": "69af450b9b16e3c698423fa3",
+            "statut": "VERROUILLE",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "completude": 100,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T22:09:16.051Z",
+            "derniereModification": "2026-03-09T22:12:35.496Z",
+            "personnelAffecte": [
+              {
+                "nom": "MARTIN",
+                "prenom": "Paul",
+                "fonction": "CHEF_ESCALE",
+                "matricule": "CE-002",
+                "_id": "69af453d9b16e3c698424267"
+              },
+              {
+                "nom": "DURAND",
+                "prenom": "Marie",
+                "fonction": "AGENT_TRAFIC",
+                "_id": "69af453d9b16e3c698424268"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T22:09:16.051Z",
+            "updatedAt": "2026-03-09T22:12:35.496Z",
+            "__v": 13,
+            "modifiePar": "69a72cc044579001349b1b01",
+            "dateVerrouillage": "2026-03-09T22:12:27.363Z",
+            "verrouillePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": "18LROTElHrx3wcSXKwVF900fM3Tyt1ouD",
+              "driveWebViewLink": "https://drive.google.com/file/d/18LROTElHrx3wcSXKwVF900fM3Tyt1ouD/view?usp=drivesdk",
+              "filename": "CRV_TS58537A_2026-03-09.pdf",
+              "folderPath": "CRV/2026/03-Mars/TS",
+              "size": 29655,
+              "archivedAt": "2026-03-09T22:07:36.108Z",
+              "archivedBy": "69a72cc044579001349b1b01",
+              "version": 2
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69af43e39b16e3c69842367b",
+            "numeroCRV": "CRV260309-0042",
+            "vol": {
+              "_id": "69af43e39b16e3c698423676",
+              "numeroVol": "TS58537A",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "TEST AIRLINES",
+              "codeIATA": "TS",
+              "aeroportOrigine": "CDG",
+              "aeroportDestination": null,
+              "dateVol": "2026-03-09T00:00:00.000Z",
+              "statut": "TERMINE",
+              "avion": null,
+              "posteStationnement": null,
+              "horsProgramme": true,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": "Vol test certification",
+              "typeVolHorsProgramme": "COMMERCIAL",
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-09T22:04:19.221Z",
+              "updatedAt": "2026-03-09T22:07:21.896Z",
+              "__v": 0
+            },
+            "escale": "DKR",
+            "horaire": "69af43e39b16e3c698423678",
+            "statut": "VERROUILLE",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "completude": 100,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T22:04:19.788Z",
+            "derniereModification": "2026-03-09T22:07:36.109Z",
+            "personnelAffecte": [
+              {
+                "nom": "MARTIN",
+                "prenom": "Paul",
+                "fonction": "CHEF_ESCALE",
+                "matricule": "CE-002",
+                "_id": "69af44109b16e3c698423938"
+              },
+              {
+                "nom": "DURAND",
+                "prenom": "Marie",
+                "fonction": "AGENT_TRAFIC",
+                "_id": "69af44109b16e3c698423939"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T22:04:19.789Z",
+            "updatedAt": "2026-03-09T22:07:36.109Z",
+            "__v": 13,
+            "modifiePar": "69a72cc044579001349b1b01",
+            "dateVerrouillage": "2026-03-09T22:07:26.756Z",
+            "verrouillePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": "1dyBC8VBjuLedUPI0p30XmwU1xhYNr_QF",
+              "driveWebViewLink": "https://drive.google.com/file/d/1dyBC8VBjuLedUPI0p30XmwU1xhYNr_QF/view?usp=drivesdk",
+              "filename": "CRV_TS65600A_2026-03-09.pdf",
+              "folderPath": "CRV/2026/03-Mars/TS",
+              "size": 29571,
+              "archivedAt": "2026-03-09T21:57:40.251Z",
+              "archivedBy": "69a72cc044579001349b1b01",
+              "version": 2
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69af41929b16e3c698422d54",
+            "numeroCRV": "CRV260309-0038",
+            "vol": {
+              "_id": "69af41919b16e3c698422d4f",
+              "numeroVol": "TS65600A",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "TEST AIRLINES",
+              "codeIATA": "TS",
+              "aeroportOrigine": "CDG",
+              "aeroportDestination": null,
+              "dateVol": "2026-03-09T00:00:00.000Z",
+              "statut": "TERMINE",
+              "avion": null,
+              "posteStationnement": null,
+              "horsProgramme": true,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": "Vol test certification",
+              "typeVolHorsProgramme": "COMMERCIAL",
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-09T21:54:25.936Z",
+              "updatedAt": "2026-03-09T21:57:27.087Z",
+              "__v": 0
+            },
+            "escale": "DKR",
+            "horaire": "69af41929b16e3c698422d51",
+            "statut": "VERROUILLE",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "completude": 100,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T21:54:26.449Z",
+            "derniereModification": "2026-03-09T21:57:40.252Z",
+            "personnelAffecte": [
+              {
+                "nom": "MARTIN",
+                "prenom": "Paul",
+                "fonction": "CHEF_ESCALE",
+                "matricule": "CE-002",
+                "_id": "69af41c19b16e3c69842300d"
+              },
+              {
+                "nom": "DURAND",
+                "prenom": "Marie",
+                "fonction": "AGENT_TRAFIC",
+                "_id": "69af41c19b16e3c69842300e"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T21:54:26.449Z",
+            "updatedAt": "2026-03-09T21:57:40.252Z",
+            "__v": 13,
+            "modifiePar": "69a72cc044579001349b1b01",
+            "dateVerrouillage": "2026-03-09T21:57:32.136Z",
+            "verrouillePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": "1bUYoKrAtvV4ttRNpuHieoZ4wYSs5Wm57",
+              "driveWebViewLink": "https://drive.google.com/file/d/1bUYoKrAtvV4ttRNpuHieoZ4wYSs5Wm57/view?usp=drivesdk",
+              "filename": "CRV_TS09444A_2026-03-09.pdf",
+              "folderPath": "CRV/2026/03-Mars/TS",
+              "size": 29544,
+              "archivedAt": "2026-03-09T21:53:43.032Z",
+              "archivedBy": "69a72cc044579001349b1b01",
+              "version": 2
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69af40929b16e3c698422431",
+            "numeroCRV": "CRV260309-0034",
+            "vol": {
+              "_id": "69af40919b16e3c69842242c",
+              "numeroVol": "TS09444A",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "TEST AIRLINES",
+              "codeIATA": "TS",
+              "aeroportOrigine": "CDG",
+              "aeroportDestination": null,
+              "dateVol": "2026-03-09T00:00:00.000Z",
+              "statut": "TERMINE",
+              "avion": null,
+              "posteStationnement": null,
+              "horsProgramme": true,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": "Vol test certification",
+              "typeVolHorsProgramme": "COMMERCIAL",
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-09T21:50:09.819Z",
+              "updatedAt": "2026-03-09T21:53:29.566Z",
+              "__v": 0
+            },
+            "escale": "DKR",
+            "horaire": "69af40929b16e3c69842242e",
+            "statut": "VERROUILLE",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "completude": 100,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T21:50:10.380Z",
+            "derniereModification": "2026-03-09T21:53:43.033Z",
+            "personnelAffecte": [
+              {
+                "nom": "MARTIN",
+                "prenom": "Paul",
+                "fonction": "CHEF_ESCALE",
+                "matricule": "CE-002",
+                "_id": "69af40c89b16e3c6984226e6"
+              },
+              {
+                "nom": "DURAND",
+                "prenom": "Marie",
+                "fonction": "AGENT_TRAFIC",
+                "_id": "69af40c89b16e3c6984226e7"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T21:50:10.381Z",
+            "updatedAt": "2026-03-09T21:53:43.033Z",
+            "__v": 13,
+            "modifiePar": "69a72cc044579001349b1b01",
+            "dateVerrouillage": "2026-03-09T21:53:34.526Z",
+            "verrouillePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": "1uYrGScAHW1_2RA-giFuDGzTuEJ9UODOd",
+              "driveWebViewLink": "https://drive.google.com/file/d/1uYrGScAHW1_2RA-giFuDGzTuEJ9UODOd/view?usp=drivesdk",
+              "filename": "CRV_TS71637A_2026-03-09.pdf",
+              "folderPath": "CRV/2026/03-Mars/TS",
+              "size": 29539,
+              "archivedAt": "2026-03-09T21:49:30.150Z",
+              "archivedBy": "69a72cc044579001349b1b01",
+              "version": 2
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69af3fa49b16e3c698421b77",
+            "numeroCRV": "CRV260309-0031",
+            "vol": {
+              "_id": "69af3fa39b16e3c698421b72",
+              "numeroVol": "TS71637A",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "TEST AIRLINES",
+              "codeIATA": "TS",
+              "aeroportOrigine": "CDG",
+              "aeroportDestination": null,
+              "dateVol": "2026-03-09T00:00:00.000Z",
+              "statut": "TERMINE",
+              "avion": null,
+              "posteStationnement": null,
+              "horsProgramme": true,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": "Vol test certification",
+              "typeVolHorsProgramme": "COMMERCIAL",
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-09T21:46:11.989Z",
+              "updatedAt": "2026-03-09T21:49:16.697Z",
+              "__v": 0
+            },
+            "escale": "DKR",
+            "horaire": "69af3fa49b16e3c698421b74",
+            "statut": "VERROUILLE",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "completude": 100,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T21:46:12.564Z",
+            "derniereModification": "2026-03-09T21:49:30.151Z",
+            "personnelAffecte": [
+              {
+                "nom": "MARTIN",
+                "prenom": "Paul",
+                "fonction": "CHEF_ESCALE",
+                "matricule": "CE-002",
+                "_id": "69af3fd19b16e3c698421e28"
+              },
+              {
+                "nom": "DURAND",
+                "prenom": "Marie",
+                "fonction": "AGENT_TRAFIC",
+                "_id": "69af3fd19b16e3c698421e29"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T21:46:12.565Z",
+            "updatedAt": "2026-03-09T21:49:30.151Z",
+            "__v": 13,
+            "modifiePar": "69a72cc044579001349b1b01",
+            "dateVerrouillage": "2026-03-09T21:49:22.275Z",
+            "verrouillePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": "1uiWjqP1k3DF-tWMPYxZgvnce9NpW35zX",
+              "driveWebViewLink": "https://drive.google.com/file/d/1uiWjqP1k3DF-tWMPYxZgvnce9NpW35zX/view?usp=drivesdk",
+              "filename": "CRV_TS97101A_2026-03-09.pdf",
+              "folderPath": "CRV/2026/03-Mars/TS",
+              "size": 29738,
+              "archivedAt": "2026-03-09T21:44:59.959Z",
+              "archivedBy": "69a72cc044579001349b1b01",
+              "version": 2
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69af3e929b16e3c6984212c3",
+            "numeroCRV": "CRV260309-0028",
+            "vol": {
+              "_id": "69af3e919b16e3c6984212be",
+              "numeroVol": "TS97101A",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "TEST AIRLINES",
+              "codeIATA": "TS",
+              "aeroportOrigine": "CDG",
+              "aeroportDestination": null,
+              "dateVol": "2026-03-09T00:00:00.000Z",
+              "statut": "TERMINE",
+              "avion": null,
+              "posteStationnement": null,
+              "horsProgramme": true,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": "Vol test certification",
+              "typeVolHorsProgramme": "COMMERCIAL",
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-09T21:41:37.452Z",
+              "updatedAt": "2026-03-09T21:44:47.565Z",
+              "__v": 0
+            },
+            "escale": "DKR",
+            "horaire": "69af3e919b16e3c6984212c0",
+            "statut": "VERROUILLE",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "completude": 100,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T21:41:38.044Z",
+            "derniereModification": "2026-03-09T21:44:59.960Z",
+            "personnelAffecte": [
+              {
+                "nom": "MARTIN",
+                "prenom": "Paul",
+                "fonction": "CHEF_ESCALE",
+                "matricule": "CE-002",
+                "_id": "69af3ebe9b16e3c698421570"
+              },
+              {
+                "nom": "DURAND",
+                "prenom": "Marie",
+                "fonction": "AGENT_TRAFIC",
+                "_id": "69af3ebe9b16e3c698421571"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T21:41:38.044Z",
+            "updatedAt": "2026-03-09T21:44:59.960Z",
+            "__v": 13,
+            "modifiePar": "69a72cc044579001349b1b01",
+            "dateVerrouillage": "2026-03-09T21:44:52.245Z",
+            "verrouillePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": "1fBQ_pRVBJBHMljaSwu95iYsdGGswEqmh",
+              "driveWebViewLink": "https://drive.google.com/file/d/1fBQ_pRVBJBHMljaSwu95iYsdGGswEqmh/view?usp=drivesdk",
+              "filename": "CRV_TS61057A_2026-03-09.pdf",
+              "folderPath": "CRV/2026/03-Mars/TS",
+              "size": 29690,
+              "archivedAt": "2026-03-09T21:40:57.266Z",
+              "archivedBy": "69a72cc044579001349b1b01",
+              "version": 2
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69af3da59b16e3c698420a1d",
+            "numeroCRV": "CRV260309-0025",
+            "vol": {
+              "_id": "69af3da59b16e3c698420a18",
+              "numeroVol": "TS61057A",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "TEST AIRLINES",
+              "codeIATA": "TS",
+              "aeroportOrigine": "CDG",
+              "aeroportDestination": null,
+              "dateVol": "2026-03-09T00:00:00.000Z",
+              "statut": "TERMINE",
+              "avion": null,
+              "posteStationnement": null,
+              "horsProgramme": true,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": "Vol test certification",
+              "typeVolHorsProgramme": "COMMERCIAL",
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-09T21:37:41.393Z",
+              "updatedAt": "2026-03-09T21:40:44.559Z",
+              "__v": 0
+            },
+            "escale": "DKR",
+            "horaire": "69af3da59b16e3c698420a1a",
+            "statut": "VERROUILLE",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "completude": 100,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T21:37:41.939Z",
+            "derniereModification": "2026-03-09T21:40:57.268Z",
+            "personnelAffecte": [
+              {
+                "nom": "MARTIN",
+                "prenom": "Paul",
+                "fonction": "CHEF_ESCALE",
+                "matricule": "CE-002",
+                "_id": "69af3dd69b16e3c698420cc6"
+              },
+              {
+                "nom": "DURAND",
+                "prenom": "Marie",
+                "fonction": "AGENT_TRAFIC",
+                "_id": "69af3dd69b16e3c698420cc7"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T21:37:41.941Z",
+            "updatedAt": "2026-03-09T21:40:57.268Z",
+            "__v": 13,
+            "modifiePar": "69a72cc044579001349b1b01",
+            "dateVerrouillage": "2026-03-09T21:40:49.143Z",
+            "verrouillePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": "1UgYIj2wmgK6M2YvsGMOT40Mc4CNvf5EG",
+              "driveWebViewLink": "https://drive.google.com/file/d/1UgYIj2wmgK6M2YvsGMOT40Mc4CNvf5EG/view?usp=drivesdk",
+              "filename": "CRV_TS20829A_2026-03-09.pdf",
+              "folderPath": "CRV/2026/03-Mars/TS",
+              "size": 29253,
+              "archivedAt": "2026-03-09T21:35:14.726Z",
+              "archivedBy": "69a72cc044579001349b1b01",
+              "version": 2
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69af3c51f19b274789e68d5e",
+            "numeroCRV": "CRV260309-0022",
+            "vol": {
+              "_id": "69af3c51f19b274789e68d59",
+              "numeroVol": "TS20829A",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "TEST AIRLINES",
+              "codeIATA": "TS",
+              "aeroportOrigine": "CDG",
+              "aeroportDestination": null,
+              "dateVol": "2026-03-09T00:00:00.000Z",
+              "statut": "TERMINE",
+              "avion": null,
+              "posteStationnement": null,
+              "horsProgramme": true,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": "Vol test certification",
+              "typeVolHorsProgramme": "COMMERCIAL",
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-09T21:32:01.175Z",
+              "updatedAt": "2026-03-09T21:35:01.784Z",
+              "__v": 0
+            },
+            "escale": "DKR",
+            "horaire": "69af3c51f19b274789e68d5b",
+            "statut": "VERROUILLE",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "completude": 100,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T21:32:01.706Z",
+            "derniereModification": "2026-03-09T21:35:14.727Z",
+            "personnelAffecte": [
+              {
+                "nom": "MARTIN",
+                "prenom": "Paul",
+                "fonction": "CHEF_ESCALE",
+                "matricule": "CE-002",
+                "_id": "69af3c7bf19b274789e69003"
+              },
+              {
+                "nom": "DURAND",
+                "prenom": "Marie",
+                "fonction": "AGENT_TRAFIC",
+                "_id": "69af3c7bf19b274789e69004"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T21:32:01.708Z",
+            "updatedAt": "2026-03-09T21:35:14.727Z",
+            "__v": 13,
+            "modifiePar": "69a72cc044579001349b1b01",
+            "dateVerrouillage": "2026-03-09T21:35:06.459Z",
+            "verrouillePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": "1fCYwrollC6MJBAZ6atQUJtSBSwrojWum",
+              "driveWebViewLink": "https://drive.google.com/file/d/1fCYwrollC6MJBAZ6atQUJtSBSwrojWum/view?usp=drivesdk",
+              "filename": "CRV_TS51407A_2026-03-09.pdf",
+              "folderPath": "CRV/2026/03-Mars/TS",
+              "size": 29550,
+              "archivedAt": "2026-03-09T15:55:41.249Z",
+              "archivedBy": "69a72cc044579001349b1b01",
+              "version": 2
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69aeecc0989ec3f826df4e06",
+            "numeroCRV": "CRV260309-0019",
+            "vol": {
+              "_id": "69aeecbf989ec3f826df4e01",
+              "numeroVol": "TS51407A",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "TEST AIRLINES",
+              "codeIATA": "TS",
+              "aeroportOrigine": "CDG",
+              "aeroportDestination": null,
+              "dateVol": "2026-03-09T00:00:00.000Z",
+              "statut": "TERMINE",
+              "avion": null,
+              "posteStationnement": null,
+              "horsProgramme": true,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": "Vol test certification",
+              "typeVolHorsProgramme": "COMMERCIAL",
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-09T15:52:31.740Z",
+              "updatedAt": "2026-03-09T15:55:29.165Z",
+              "__v": 0
+            },
+            "escale": "DKR",
+            "horaire": "69aeecbf989ec3f826df4e03",
+            "statut": "VERROUILLE",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "completude": 100,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T15:52:32.247Z",
+            "derniereModification": "2026-03-09T15:55:41.252Z",
+            "personnelAffecte": [
+              {
+                "nom": "MARTIN",
+                "prenom": "Paul",
+                "fonction": "CHEF_ESCALE",
+                "matricule": "CE-002",
+                "_id": "69aeeceb989ec3f826df50a7"
+              },
+              {
+                "nom": "DURAND",
+                "prenom": "Marie",
+                "fonction": "AGENT_TRAFIC",
+                "_id": "69aeeceb989ec3f826df50a8"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T15:52:32.249Z",
+            "updatedAt": "2026-03-09T15:55:41.251Z",
+            "__v": 13,
+            "modifiePar": "69a72cc044579001349b1b01",
+            "dateVerrouillage": "2026-03-09T15:55:33.752Z",
+            "verrouillePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": null,
+              "driveWebViewLink": null,
+              "filename": null,
+              "folderPath": null,
+              "size": null,
+              "archivedAt": null,
+              "archivedBy": null,
+              "version": 1
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69aeeb1b710de8254a62e850",
+            "numeroCRV": "CRV260309-0018",
+            "vol": {
+              "_id": "69aeeb1a710de8254a62e84b",
+              "numeroVol": "VOL0147",
+              "typeOperation": "DEPART",
+              "compagnieAerienne": "Air France",
+              "codeIATA": "AF",
+              "dateVol": "2026-03-09T15:45:30.557Z",
+              "statut": "PROGRAMME",
+              "posteStationnement": null,
+              "horsProgramme": false,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": null,
+              "typeVolHorsProgramme": null,
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-09T15:45:30.557Z",
+              "updatedAt": "2026-03-09T15:45:30.557Z",
+              "__v": 0
+            },
+            "escale": "DKR",
+            "horaire": "69aeeb1a710de8254a62e84d",
+            "statut": "BROUILLON",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": null,
+            "completude": 30,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T15:45:31.089Z",
+            "derniereModification": "2026-03-09T15:45:31.089Z",
+            "personnelAffecte": [],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T15:45:31.089Z",
+            "updatedAt": "2026-03-09T15:45:34.789Z",
+            "__v": 0
+          },
+          {
+            "archivage": {
+              "driveFileId": "16Uf9yF-y6se4-PwUkEgIcFSC3YP6ZwM7",
+              "driveWebViewLink": "https://drive.google.com/file/d/16Uf9yF-y6se4-PwUkEgIcFSC3YP6ZwM7/view?usp=drivesdk",
+              "filename": "CRV_TS99416A_2026-03-09.pdf",
+              "folderPath": "CRV/2026/03-Mars/TS",
+              "size": 29585,
+              "archivedAt": "2026-03-09T15:48:10.939Z",
+              "archivedBy": "69a72cc044579001349b1b01",
+              "version": 2
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69aeeafc710de8254a62e6f8",
+            "numeroCRV": "CRV260309-0015",
+            "vol": {
+              "_id": "69aeeafb710de8254a62e6f3",
+              "numeroVol": "TS99416A",
+              "typeOperation": "ARRIVEE",
+              "compagnieAerienne": "TEST AIRLINES",
+              "codeIATA": "TS",
+              "aeroportOrigine": "CDG",
+              "aeroportDestination": null,
+              "dateVol": "2026-03-09T00:00:00.000Z",
+              "statut": "TERMINE",
+              "avion": null,
+              "posteStationnement": null,
+              "horsProgramme": true,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": "Vol test certification",
+              "typeVolHorsProgramme": "COMMERCIAL",
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-09T15:44:59.724Z",
+              "updatedAt": "2026-03-09T15:47:57.642Z",
+              "__v": 0
+            },
+            "escale": "DKR",
+            "horaire": "69aeeafb710de8254a62e6f5",
+            "statut": "VERROUILLE",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "completude": 100,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T15:45:00.523Z",
+            "derniereModification": "2026-03-09T15:48:10.940Z",
+            "personnelAffecte": [
+              {
+                "nom": "MARTIN",
+                "prenom": "Paul",
+                "fonction": "CHEF_ESCALE",
+                "matricule": "CE-002",
+                "_id": "69aeeb2c710de8254a62e9c4"
+              },
+              {
+                "nom": "DURAND",
+                "prenom": "Marie",
+                "fonction": "AGENT_TRAFIC",
+                "_id": "69aeeb2c710de8254a62e9c5"
+              }
+            ],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T15:45:00.524Z",
+            "updatedAt": "2026-03-09T15:48:10.940Z",
+            "__v": 13,
+            "modifiePar": "69a72cc044579001349b1b01",
+            "dateVerrouillage": "2026-03-09T15:48:02.283Z",
+            "verrouillePar": "69a72cc044579001349b1b01"
+          },
+          {
+            "archivage": {
+              "driveFileId": null,
+              "driveWebViewLink": null,
+              "filename": null,
+              "folderPath": null,
+              "size": null,
+              "archivedAt": null,
+              "archivedBy": null,
+              "version": 1
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69aeea0f710de8254a62e6c2",
+            "numeroCRV": "CRV260309-0014",
+            "vol": {
+              "_id": "69aeea0f710de8254a62e6bd",
+              "numeroVol": "VOL0143",
+              "typeOperation": "DEPART",
+              "compagnieAerienne": "Air France",
+              "codeIATA": "AF",
+              "dateVol": "2026-03-09T15:41:03.286Z",
+              "statut": "PROGRAMME",
+              "posteStationnement": null,
+              "horsProgramme": false,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": null,
+              "typeVolHorsProgramme": null,
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-09T15:41:03.286Z",
+              "updatedAt": "2026-03-09T15:41:03.286Z",
+              "__v": 0
+            },
+            "escale": "DKR",
+            "horaire": "69aeea0f710de8254a62e6bf",
+            "statut": "BROUILLON",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": null,
+            "completude": 30,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T15:41:03.855Z",
+            "derniereModification": "2026-03-09T15:41:03.856Z",
+            "personnelAffecte": [],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T15:41:03.856Z",
+            "updatedAt": "2026-03-09T15:41:08.300Z",
+            "__v": 0
+          },
+          {
+            "archivage": {
+              "driveFileId": null,
+              "driveWebViewLink": null,
+              "filename": null,
+              "folderPath": null,
+              "size": null,
+              "archivedAt": null,
+              "archivedBy": null,
+              "version": 1
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69aee8fcc21e8219a699749b",
+            "numeroCRV": "CRV260309-0011",
+            "vol": {
+              "_id": "69aee8fcc21e8219a6997496",
+              "numeroVol": "VOL0140",
+              "typeOperation": "DEPART",
+              "compagnieAerienne": "Air France",
+              "codeIATA": "AF",
+              "dateVol": "2026-03-09T15:36:28.089Z",
+              "statut": "PROGRAMME",
+              "posteStationnement": null,
+              "horsProgramme": false,
+              "programmeVolReference": null,
+              "raisonHorsProgramme": null,
+              "typeVolHorsProgramme": null,
+              "bulletinMouvementReference": null,
+              "createdAt": "2026-03-09T15:36:28.090Z",
+              "updatedAt": "2026-03-09T15:36:28.090Z",
+              "__v": 0
+            },
+            "escale": "DKR",
+            "horaire": "69aee8fcc21e8219a6997498",
+            "statut": "BROUILLON",
+            "creePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "responsableVol": null,
+            "completude": 30,
+            "bulletinMouvementReference": null,
+            "crvDoublon": false,
+            "dateCreation": "2026-03-09T15:36:28.596Z",
+            "derniereModification": "2026-03-09T15:36:28.596Z",
+            "personnelAffecte": [],
+            "materielUtilise": [],
+            "createdAt": "2026-03-09T15:36:28.596Z",
+            "updatedAt": "2026-03-09T15:36:32.022Z",
+            "__v": 0
+          }
+        ],
+        "pagination": {
+          "page": 1,
+          "limit": 20,
+          "total": 126,
+          "pages": 7
+        }
+      },
+      "duration": 2636
+    },
+    {
+      "description": "Ajout personnel CRV verrouille — DOIT ETRE 403",
+      "method": "POST",
+      "path": "/crv/69af450c9b16e3c698423fa6/personnel",
+      "request": {
+        "nom": "HACKER",
+        "prenom": "Test",
+        "fonction": "AUTRE"
+      },
+      "status": 403,
+      "expectedStatus": 403,
+      "success": true,
+      "response": {
+        "success": false,
+        "message": "INTERDIT : CRV archivé — document immuable, aucune modification possible",
+        "code": "CRV_IMMUTABLE_ARCHIVE"
+      },
+      "duration": 336
+    },
+    {
+      "description": "Ajout charge CRV verrouille — DOIT ETRE 403",
+      "method": "POST",
+      "path": "/crv/69af450c9b16e3c698423fa6/charges",
+      "request": {
+        "typeCharge": "PASSAGERS",
+        "sensOperation": "DEBARQUEMENT",
+        "passagersAdultes": 10,
+        "passagersEnfants": 0,
+        "passagersPMR": 0,
+        "passagersTransit": 0,
+        "passagersBebes": 0
+      },
+      "status": 403,
+      "expectedStatus": 403,
+      "success": true,
+      "response": {
+        "success": false,
+        "message": "INTERDIT : CRV archivé — document immuable, aucune modification possible",
+        "code": "CRV_IMMUTABLE_ARCHIVE"
+      },
+      "duration": 344
+    },
+    {
+      "description": "GET /crv token invalide — DOIT ETRE 401",
+      "method": "GET",
+      "path": "/crv",
+      "request": null,
+      "status": 401,
+      "expectedStatus": 401,
+      "success": true,
+      "response": {
+        "message": "Token invalide",
+        "code": "TOKEN_INVALID"
+      },
+      "duration": 1
+    },
+    {
+      "description": "GET /crv sans header auth",
+      "method": "GET",
+      "path": "/crv",
+      "status": 401,
+      "expectedStatus": 401,
+      "success": true,
+      "response": {},
+      "duration": 0
+    },
+    {
+      "description": "E2E: Creer CRV TURN_AROUND (legacy)",
+      "method": "POST",
+      "path": "/crv",
+      "request": {
+        "type": "turnaround",
+        "escale": "NDJ"
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "archivage": {
+            "driveFileId": null,
+            "driveWebViewLink": null,
+            "filename": null,
+            "folderPath": null,
+            "size": null,
+            "archivedAt": null,
+            "archivedBy": null,
+            "version": 1
+          },
+          "annulation": {
+            "dateAnnulation": null,
+            "annulePar": null,
+            "raisonAnnulation": null,
+            "commentaireAnnulation": null,
+            "ancienStatut": null
+          },
+          "_id": "69b00ea6a56cde3d74d0720b",
+          "numeroCRV": "CRV260310-0011",
+          "vol": {
+            "_id": "69b00ea6a56cde3d74d07206",
+            "numeroVol": "VOL0189",
+            "typeOperation": "TURN_AROUND",
+            "compagnieAerienne": "Air France",
+            "codeIATA": "AF",
+            "dateVol": "2026-03-10T12:29:26.263Z",
+            "statut": "PROGRAMME",
+            "posteStationnement": null,
+            "horsProgramme": false,
+            "programmeVolReference": null,
+            "raisonHorsProgramme": null,
+            "typeVolHorsProgramme": null,
+            "bulletinMouvementReference": null,
+            "createdAt": "2026-03-10T12:29:26.264Z",
+            "updatedAt": "2026-03-10T12:29:26.264Z",
+            "__v": 0
+          },
+          "escale": "NDJ",
+          "horaire": {
+            "_id": "69b00ea6a56cde3d74d07208",
+            "vol": "69b00ea6a56cde3d74d07206",
+            "createdAt": "2026-03-10T12:29:26.455Z",
+            "updatedAt": "2026-03-10T12:29:26.455Z",
+            "__v": 0
+          },
+          "statut": "BROUILLON",
+          "creePar": {
+            "_id": "69a72cc044579001349b1b01",
+            "nom": "MARTIN",
+            "prenom": "Pierre",
+            "matricule": "SUP-001",
+            "email": "superviseur@crv.test",
+            "fonction": "SUPERVISEUR",
+            "specialites": [],
+            "statut": "ACTIF",
+            "statutCompte": "VALIDE",
+            "dateValidationCompte": null,
+            "valideParUserId": null,
+            "createdAt": "2026-03-03T18:47:28.257Z",
+            "updatedAt": "2026-03-07T10:23:18.242Z",
+            "__v": 0
+          },
+          "responsableVol": null,
+          "completude": 30,
+          "bulletinMouvementReference": null,
+          "crvDoublon": false,
+          "dateCreation": "2026-03-10T12:29:26.812Z",
+          "derniereModification": "2026-03-10T12:29:26.813Z",
+          "personnelAffecte": [],
+          "materielUtilise": [],
+          "createdAt": "2026-03-10T12:29:26.812Z",
+          "updatedAt": "2026-03-10T12:29:34.268Z",
+          "__v": 0
+        }
+      },
+      "duration": 8864
+    },
+    {
+      "description": "E2E: Demarrer (BROUILLON -> EN_COURS)",
+      "method": "POST",
+      "path": "/crv/69b00ea6a56cde3d74d0720b/demarrer",
+      "request": {},
+      "status": 200,
+      "expectedStatus": 200,
+      "success": true,
+      "response": {
+        "success": true,
+        "message": "CRV démarré avec succès",
+        "data": {
+          "archivage": {
+            "driveFileId": null,
+            "driveWebViewLink": null,
+            "filename": null,
+            "folderPath": null,
+            "size": null,
+            "archivedAt": null,
+            "archivedBy": null,
+            "version": 1
+          },
+          "annulation": {
+            "dateAnnulation": null,
+            "annulePar": null,
+            "raisonAnnulation": null,
+            "commentaireAnnulation": null,
+            "ancienStatut": null
+          },
+          "_id": "69b00ea6a56cde3d74d0720b",
+          "numeroCRV": "CRV260310-0011",
+          "vol": {
+            "_id": "69b00ea6a56cde3d74d07206",
+            "numeroVol": "VOL0189",
+            "typeOperation": "TURN_AROUND",
+            "compagnieAerienne": "Air France",
+            "codeIATA": "AF",
+            "dateVol": "2026-03-10T12:29:26.263Z",
+            "statut": "EN_COURS",
+            "posteStationnement": null,
+            "horsProgramme": false,
+            "programmeVolReference": null,
+            "raisonHorsProgramme": null,
+            "typeVolHorsProgramme": null,
+            "bulletinMouvementReference": null,
+            "createdAt": "2026-03-10T12:29:26.264Z",
+            "updatedAt": "2026-03-10T12:29:35.444Z",
+            "__v": 0
+          },
+          "escale": "NDJ",
+          "horaire": {
+            "_id": "69b00ea6a56cde3d74d07208",
+            "vol": "69b00ea6a56cde3d74d07206",
+            "createdAt": "2026-03-10T12:29:26.455Z",
+            "updatedAt": "2026-03-10T12:29:26.455Z",
+            "__v": 0
+          },
+          "statut": "EN_COURS",
+          "creePar": {
+            "_id": "69a72cc044579001349b1b01",
+            "nom": "MARTIN",
+            "prenom": "Pierre",
+            "matricule": "SUP-001",
+            "email": "superviseur@crv.test",
+            "fonction": "SUPERVISEUR",
+            "specialites": [],
+            "statut": "ACTIF",
+            "statutCompte": "VALIDE",
+            "dateValidationCompte": null,
+            "valideParUserId": null,
+            "createdAt": "2026-03-03T18:47:28.257Z",
+            "updatedAt": "2026-03-07T10:23:18.242Z",
+            "__v": 0
+          },
+          "responsableVol": null,
+          "completude": 30,
+          "bulletinMouvementReference": null,
+          "crvDoublon": false,
+          "dateCreation": "2026-03-10T12:29:26.812Z",
+          "derniereModification": "2026-03-10T12:29:35.109Z",
+          "personnelAffecte": [],
+          "materielUtilise": [],
+          "createdAt": "2026-03-10T12:29:26.812Z",
+          "updatedAt": "2026-03-10T12:29:35.109Z",
+          "__v": 0,
+          "modifiePar": "69a72cc044579001349b1b01"
+        }
+      },
+      "duration": 1338
+    },
+    {
+      "description": "E2E: Ajouter personnel",
+      "method": "POST",
+      "path": "/crv/69b00ea6a56cde3d74d0720b/personnel",
+      "request": {
+        "nom": "E2E_TEST",
+        "prenom": "Worker",
+        "fonction": "AGENT_PISTE"
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "message": "Personne ajoutée au personnel affecté",
+        "data": {
+          "personne": {
+            "nom": "E2E_TEST",
+            "prenom": "Worker",
+            "fonction": "AGENT_PISTE",
+            "_id": "69b00eb0a56cde3d74d0726c"
+          },
+          "personnelAffecte": [
+            {
+              "nom": "E2E_TEST",
+              "prenom": "Worker",
+              "fonction": "AGENT_PISTE",
+              "_id": "69b00eb0a56cde3d74d0726c"
+            }
+          ],
+          "nbPersonnes": 1
+        }
+      },
+      "duration": 868
+    },
+    {
+      "description": "E2E: Charge passagers debarquement",
+      "method": "POST",
+      "path": "/crv/69b00ea6a56cde3d74d0720b/charges",
+      "request": {
+        "typeCharge": "PASSAGERS",
+        "sensOperation": "DEBARQUEMENT",
+        "passagersAdultes": 120,
+        "passagersEnfants": 15,
+        "passagersPMR": 3,
+        "passagersTransit": 20,
+        "passagersBebes": 2
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "crv": "69b00ea6a56cde3d74d0720b",
+          "typeCharge": "PASSAGERS",
+          "sensOperation": "DEBARQUEMENT",
+          "passagersAdultes": 120,
+          "passagersEnfants": 15,
+          "passagersPMR": 3,
+          "passagersTransit": 20,
+          "passagersBebes": 2,
+          "categoriesPassagersDetaillees": {
+            "bebes": 0,
+            "enfants": 0,
+            "adolescents": 0,
+            "adultes": 0,
+            "seniors": 0,
+            "pmrFauteuilRoulant": 0,
+            "pmrMarcheAssistee": 0,
+            "pmrNonVoyant": 0,
+            "pmrSourd": 0,
+            "transitLocal": 0,
+            "transitInternational": 0,
+            "vip": 0,
+            "equipage": 0,
+            "deportes": 0
+          },
+          "classePassagers": {
+            "premiere": 0,
+            "affaires": 0,
+            "economique": 0
+          },
+          "besoinsMedicaux": {
+            "oxygeneBord": 0,
+            "brancardier": 0,
+            "accompagnementMedical": 0
+          },
+          "mineurs": {
+            "mineurNonAccompagne": 0,
+            "bebeNonAccompagne": 0
+          },
+          "remarquesPassagers": null,
+          "utiliseCategoriesDetaillees": false,
+          "nombreBagagesSoute": null,
+          "poidsBagagesSouteKg": null,
+          "nombreBagagesCabine": null,
+          "nombreFret": null,
+          "poidsFretKg": null,
+          "fretDetaille": {
+            "categoriesFret": {
+              "denreesPerissables": {
+                "nombre": 0,
+                "poidsKg": 0,
+                "temperature": null,
+                "chaineduFroid": false
+              },
+              "animauxVivants": {
+                "nombre": 0,
+                "espece": null,
+                "certificatVeterinaire": false
+              },
+              "vehicules": {
+                "nombre": 0,
+                "type": null
+              },
+              "equipements": {
+                "nombre": 0,
+                "type": null
+              },
+              "valeurDeclaree": {
+                "montant": 0,
+                "devise": "XOF"
+              },
+              "postal": 0,
+              "courrierExpress": 0,
+              "marchandiseGenerale": 0
+            },
+            "marchandisesDangereuses": {
+              "responsable": {
+                "nom": null,
+                "telephone": null
+              },
+              "present": false,
+              "declarationDGR": false,
+              "details": []
+            },
+            "logistique": {
+              "surdimensionne": {
+                "longueurCm": null,
+                "largeurCm": null,
+                "hauteurCm": null
+              },
+              "nombreColis": 0,
+              "volumeM3": 0,
+              "nombrePalettes": 0,
+              "typePalettes": null,
+              "nombreConteneurs": 0,
+              "typeConteneurs": null,
+              "dimensionsSpeciales": false
+            },
+            "douanes": {
+              "valeurDeclaree": 0,
+              "devise": "XOF",
+              "paysOrigine": null,
+              "paysDestination": null,
+              "numeroBL": null,
+              "numeroAWB": null,
+              "declarationDouane": false
+            },
+            "conditionsTransport": {
+              "temperatureControlee": false,
+              "temperatureMin": null,
+              "temperatureMax": null,
+              "humiditeControlee": false,
+              "fragile": false,
+              "protegeeLumiere": false,
+              "instructionsSpeciales": null
+            },
+            "remarquesFret": null,
+            "utiliseFretDetaille": false
+          },
+          "_id": "69b00eb1a56cde3d74d07276",
+          "createdAt": "2026-03-10T12:29:37.666Z",
+          "updatedAt": "2026-03-10T12:29:37.666Z",
+          "__v": 0
+        }
+      },
+      "duration": 2197
+    },
+    {
+      "description": "E2E: Charge passagers embarquement",
+      "method": "POST",
+      "path": "/crv/69b00ea6a56cde3d74d0720b/charges",
+      "request": {
+        "typeCharge": "PASSAGERS",
+        "sensOperation": "EMBARQUEMENT",
+        "passagersAdultes": 110,
+        "passagersEnfants": 10,
+        "passagersPMR": 2,
+        "passagersTransit": 15,
+        "passagersBebes": 1
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "crv": "69b00ea6a56cde3d74d0720b",
+          "typeCharge": "PASSAGERS",
+          "sensOperation": "EMBARQUEMENT",
+          "passagersAdultes": 110,
+          "passagersEnfants": 10,
+          "passagersPMR": 2,
+          "passagersTransit": 15,
+          "passagersBebes": 1,
+          "categoriesPassagersDetaillees": {
+            "bebes": 0,
+            "enfants": 0,
+            "adolescents": 0,
+            "adultes": 0,
+            "seniors": 0,
+            "pmrFauteuilRoulant": 0,
+            "pmrMarcheAssistee": 0,
+            "pmrNonVoyant": 0,
+            "pmrSourd": 0,
+            "transitLocal": 0,
+            "transitInternational": 0,
+            "vip": 0,
+            "equipage": 0,
+            "deportes": 0
+          },
+          "classePassagers": {
+            "premiere": 0,
+            "affaires": 0,
+            "economique": 0
+          },
+          "besoinsMedicaux": {
+            "oxygeneBord": 0,
+            "brancardier": 0,
+            "accompagnementMedical": 0
+          },
+          "mineurs": {
+            "mineurNonAccompagne": 0,
+            "bebeNonAccompagne": 0
+          },
+          "remarquesPassagers": null,
+          "utiliseCategoriesDetaillees": false,
+          "nombreBagagesSoute": null,
+          "poidsBagagesSouteKg": null,
+          "nombreBagagesCabine": null,
+          "nombreFret": null,
+          "poidsFretKg": null,
+          "fretDetaille": {
+            "categoriesFret": {
+              "denreesPerissables": {
+                "nombre": 0,
+                "poidsKg": 0,
+                "temperature": null,
+                "chaineduFroid": false
+              },
+              "animauxVivants": {
+                "nombre": 0,
+                "espece": null,
+                "certificatVeterinaire": false
+              },
+              "vehicules": {
+                "nombre": 0,
+                "type": null
+              },
+              "equipements": {
+                "nombre": 0,
+                "type": null
+              },
+              "valeurDeclaree": {
+                "montant": 0,
+                "devise": "XOF"
+              },
+              "postal": 0,
+              "courrierExpress": 0,
+              "marchandiseGenerale": 0
+            },
+            "marchandisesDangereuses": {
+              "responsable": {
+                "nom": null,
+                "telephone": null
+              },
+              "present": false,
+              "declarationDGR": false,
+              "details": []
+            },
+            "logistique": {
+              "surdimensionne": {
+                "longueurCm": null,
+                "largeurCm": null,
+                "hauteurCm": null
+              },
+              "nombreColis": 0,
+              "volumeM3": 0,
+              "nombrePalettes": 0,
+              "typePalettes": null,
+              "nombreConteneurs": 0,
+              "typeConteneurs": null,
+              "dimensionsSpeciales": false
+            },
+            "douanes": {
+              "valeurDeclaree": 0,
+              "devise": "XOF",
+              "paysOrigine": null,
+              "paysDestination": null,
+              "numeroBL": null,
+              "numeroAWB": null,
+              "declarationDouane": false
+            },
+            "conditionsTransport": {
+              "temperatureControlee": false,
+              "temperatureMin": null,
+              "temperatureMax": null,
+              "humiditeControlee": false,
+              "fragile": false,
+              "protegeeLumiere": false,
+              "instructionsSpeciales": null
+            },
+            "remarquesFret": null,
+            "utiliseFretDetaille": false
+          },
+          "_id": "69b00eb3a56cde3d74d0728a",
+          "createdAt": "2026-03-10T12:29:39.841Z",
+          "updatedAt": "2026-03-10T12:29:39.841Z",
+          "__v": 0
+        }
+      },
+      "duration": 2167
+    },
+    {
+      "description": "E2E: Charge bagages",
+      "method": "POST",
+      "path": "/crv/69b00ea6a56cde3d74d0720b/charges",
+      "request": {
+        "typeCharge": "BAGAGES",
+        "sensOperation": "DEBARQUEMENT",
+        "nombreBagagesSoute": 200,
+        "poidsBagagesSouteKg": 3500
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "crv": "69b00ea6a56cde3d74d0720b",
+          "typeCharge": "BAGAGES",
+          "sensOperation": "DEBARQUEMENT",
+          "passagersAdultes": null,
+          "passagersEnfants": null,
+          "passagersPMR": null,
+          "passagersTransit": null,
+          "passagersBebes": null,
+          "categoriesPassagersDetaillees": {
+            "bebes": 0,
+            "enfants": 0,
+            "adolescents": 0,
+            "adultes": 0,
+            "seniors": 0,
+            "pmrFauteuilRoulant": 0,
+            "pmrMarcheAssistee": 0,
+            "pmrNonVoyant": 0,
+            "pmrSourd": 0,
+            "transitLocal": 0,
+            "transitInternational": 0,
+            "vip": 0,
+            "equipage": 0,
+            "deportes": 0
+          },
+          "classePassagers": {
+            "premiere": 0,
+            "affaires": 0,
+            "economique": 0
+          },
+          "besoinsMedicaux": {
+            "oxygeneBord": 0,
+            "brancardier": 0,
+            "accompagnementMedical": 0
+          },
+          "mineurs": {
+            "mineurNonAccompagne": 0,
+            "bebeNonAccompagne": 0
+          },
+          "remarquesPassagers": null,
+          "utiliseCategoriesDetaillees": false,
+          "nombreBagagesSoute": 200,
+          "poidsBagagesSouteKg": 3500,
+          "nombreBagagesCabine": null,
+          "nombreFret": null,
+          "poidsFretKg": null,
+          "fretDetaille": {
+            "categoriesFret": {
+              "denreesPerissables": {
+                "nombre": 0,
+                "poidsKg": 0,
+                "temperature": null,
+                "chaineduFroid": false
+              },
+              "animauxVivants": {
+                "nombre": 0,
+                "espece": null,
+                "certificatVeterinaire": false
+              },
+              "vehicules": {
+                "nombre": 0,
+                "type": null
+              },
+              "equipements": {
+                "nombre": 0,
+                "type": null
+              },
+              "valeurDeclaree": {
+                "montant": 0,
+                "devise": "XOF"
+              },
+              "postal": 0,
+              "courrierExpress": 0,
+              "marchandiseGenerale": 0
+            },
+            "marchandisesDangereuses": {
+              "responsable": {
+                "nom": null,
+                "telephone": null
+              },
+              "present": false,
+              "declarationDGR": false,
+              "details": []
+            },
+            "logistique": {
+              "surdimensionne": {
+                "longueurCm": null,
+                "largeurCm": null,
+                "hauteurCm": null
+              },
+              "nombreColis": 0,
+              "volumeM3": 0,
+              "nombrePalettes": 0,
+              "typePalettes": null,
+              "nombreConteneurs": 0,
+              "typeConteneurs": null,
+              "dimensionsSpeciales": false
+            },
+            "douanes": {
+              "valeurDeclaree": 0,
+              "devise": "XOF",
+              "paysOrigine": null,
+              "paysDestination": null,
+              "numeroBL": null,
+              "numeroAWB": null,
+              "declarationDouane": false
+            },
+            "conditionsTransport": {
+              "temperatureControlee": false,
+              "temperatureMin": null,
+              "temperatureMax": null,
+              "humiditeControlee": false,
+              "fragile": false,
+              "protegeeLumiere": false,
+              "instructionsSpeciales": null
+            },
+            "remarquesFret": null,
+            "utiliseFretDetaille": false
+          },
+          "_id": "69b00eb6a56cde3d74d0729e",
+          "createdAt": "2026-03-10T12:29:42.058Z",
+          "updatedAt": "2026-03-10T12:29:42.058Z",
+          "__v": 0
+        }
+      },
+      "duration": 2345
+    },
+    {
+      "description": "E2E: Ajouter evenement",
+      "method": "POST",
+      "path": "/crv/69b00ea6a56cde3d74d0720b/evenements",
+      "request": {
+        "typeEvenement": "RETARD",
+        "gravite": "MINEURE",
+        "description": "Test E2E evenement nominal",
+        "dateHeureDebut": "2026-03-10T12:29:43.687Z"
+      },
+      "status": 201,
+      "expectedStatus": 201,
+      "success": true,
+      "response": {
+        "success": true,
+        "data": {
+          "crv": "69b00ea6a56cde3d74d0720b",
+          "typeEvenement": "RETARD",
+          "gravite": "MINEURE",
+          "dateHeureDebut": "2026-03-10T12:29:43.687Z",
+          "description": "Test E2E evenement nominal",
+          "impactPhases": [],
+          "declarePar": "69a72cc044579001349b1b01",
+          "statut": "OUVERT",
+          "_id": "69b00eb8a56cde3d74d072b1",
+          "createdAt": "2026-03-10T12:29:44.210Z",
+          "updatedAt": "2026-03-10T12:29:44.210Z",
+          "__v": 0
+        }
+      },
+      "duration": 2133
+    },
+    {
+      "description": "E2E: Confirmer absence observations",
+      "method": "POST",
+      "path": "/crv/69b00ea6a56cde3d74d0720b/confirmer-absence",
+      "request": {
+        "type": "observation"
+      },
+      "status": 200,
+      "expectedStatus": null,
+      "success": true,
+      "response": {
+        "success": true,
+        "message": "Confirmation \"aucun(e) observation\" enregistrée",
+        "data": {
+          "archivage": {
+            "driveFileId": null,
+            "driveWebViewLink": null,
+            "filename": null,
+            "folderPath": null,
+            "size": null,
+            "archivedAt": null,
+            "archivedBy": null,
+            "version": 1
+          },
+          "annulation": {
+            "dateAnnulation": null,
+            "annulePar": null,
+            "raisonAnnulation": null,
+            "commentaireAnnulation": null,
+            "ancienStatut": null
+          },
+          "_id": "69b00ea6a56cde3d74d0720b",
+          "numeroCRV": "CRV260310-0011",
+          "vol": {
+            "_id": "69b00ea6a56cde3d74d07206",
+            "numeroVol": "VOL0189",
+            "typeOperation": "TURN_AROUND",
+            "compagnieAerienne": "Air France",
+            "codeIATA": "AF",
+            "dateVol": "2026-03-10T12:29:26.263Z",
+            "statut": "EN_COURS",
+            "posteStationnement": null,
+            "horsProgramme": false,
+            "programmeVolReference": null,
+            "raisonHorsProgramme": null,
+            "typeVolHorsProgramme": null,
+            "bulletinMouvementReference": null,
+            "createdAt": "2026-03-10T12:29:26.264Z",
+            "updatedAt": "2026-03-10T12:29:35.444Z",
+            "__v": 0
+          },
+          "escale": "NDJ",
+          "horaire": {
+            "_id": "69b00ea6a56cde3d74d07208",
+            "vol": "69b00ea6a56cde3d74d07206",
+            "createdAt": "2026-03-10T12:29:26.455Z",
+            "updatedAt": "2026-03-10T12:29:26.455Z",
+            "__v": 0
+          },
+          "statut": "EN_COURS",
+          "creePar": "69a72cc044579001349b1b01",
+          "responsableVol": null,
+          "completude": 55,
+          "bulletinMouvementReference": null,
+          "crvDoublon": false,
+          "dateCreation": "2026-03-10T12:29:26.812Z",
+          "derniereModification": "2026-03-10T12:29:46.367Z",
+          "personnelAffecte": [
+            {
+              "nom": "E2E_TEST",
+              "prenom": "Worker",
+              "fonction": "AGENT_PISTE",
+              "_id": "69b00eb0a56cde3d74d0726c"
+            }
+          ],
+          "materielUtilise": [],
+          "createdAt": "2026-03-10T12:29:26.812Z",
+          "updatedAt": "2026-03-10T12:29:47.589Z",
+          "__v": 1,
+          "modifiePar": "69a72cc044579001349b1b01"
+        }
+      },
+      "duration": 2450
+    },
+    {
+      "description": "E2E: Terminer (EN_COURS -> TERMINE)",
+      "method": "POST",
+      "path": "/crv/69b00ea6a56cde3d74d0720b/terminer",
+      "request": {},
+      "status": 400,
+      "expectedStatus": null,
+      "success": false,
+      "response": {
+        "success": false,
+        "message": "Impossible de terminer le CRV",
+        "code": "CONDITIONS_TERMINAISON_NON_SATISFAITES",
+        "anomalies": [
+          "Phases obligatoires non traitées: Briefing équipes, Arrivée avion, Ouverture des soutes, Déchargement, Livraison bagages, Débarquement passagers, Inspection pré-vol, Avitaillement carburant, Nettoyage cabine, Chargement soute, Embarquement passagers, Fermeture des portes, Repoussage, Roulage vers piste, Décollage, Atterrissage, Roulage vers parking, Calage et sécurisation, Installation passerelle, Débarquement passagers, Déchargement soute, Livraison bagages au carrousel, Nettoyage cabine, Chargement soute, Embarquement passagers, Fermeture des portes, Repoussage, Contrôle sécurité, Remise documents de vol"
+        ],
+        "completude": 55
+      },
+      "duration": 2049
+    }
+  ]
+}
