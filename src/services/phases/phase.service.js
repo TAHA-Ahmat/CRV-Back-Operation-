@@ -1,5 +1,6 @@
 import Phase from '../../models/phases/Phase.js';
 import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
+import Horaire from '../../models/phases/Horaire.js';
 import { creerHorodatageTempsReel } from '../../utils/horodatage.js';
 
 /**
@@ -12,8 +13,9 @@ import { creerHorodatageTempsReel } from '../../utils/horodatage.js';
  *
  * @param {string} crvId - ID du CRV
  * @param {string} typeOperation - Type d'opération du vol (ARRIVEE, DEPART, TURN_AROUND)
+ * @param {string} horaireId - ID de l'horaire associé (pour calcul temps prévus, optionnel)
  */
-export const initialiserPhasesVol = async (crvId, typeOperation = null) => {
+export const initialiserPhasesVol = async (crvId, typeOperation = null, horaireId = null) => {
   const timestamp = new Date().toISOString();
 
   console.log('[CRV][SERVICE][INIT_PHASES_START]', {
@@ -59,12 +61,46 @@ export const initialiserPhasesVol = async (crvId, typeOperation = null) => {
 
     const chronologies = [];
 
+    // ========== EXTENSION 9 - Calcul temps prévus par cascade ==========
+    // NON-REGRESSION: horaireId = null par défaut, try/catch non-bloquant
+    // Si horaire disponible, on calcule heureDebutPrevue/heureFinPrevue pour chaque phase
+    // Cascade : fin phase N = début phase N+1
+    let tempsReference = null;
+    if (horaireId) {
+      try {
+        const horaire = await Horaire.findById(horaireId);
+        if (horaire) {
+          if (typeOperation === 'ARRIVEE' || typeOperation === 'TURN_AROUND') {
+            tempsReference = horaire.heureAtterrisagePrevue;
+          } else if (typeOperation === 'DEPART') {
+            tempsReference = horaire.heureDecollagePrevue;
+          }
+        }
+      } catch (err) {
+        console.warn('[CRV][SERVICE][INIT_PHASES_TEMPS_PREVUS_WARN]', {
+          crvId, reason: 'Calcul temps prévus échoué (non-bloquant)',
+          error: err.message, timestamp: new Date().toISOString()
+        });
+      }
+    }
+    // FIN EXTENSION 9
+
     for (const phase of phasesRef) {
-      const chrono = await ChronologiePhase.create({
+      const createData = {
         crv: crvId,
         phase: phase._id,
         statut: 'NON_COMMENCE'
-      });
+      };
+
+      // Ajout temps prévus si référence temporelle disponible
+      if (tempsReference) {
+        createData.heureDebutPrevue = tempsReference;
+        const fin = new Date(tempsReference.getTime() + (phase.dureeStandardMinutes || 0) * 60000);
+        createData.heureFinPrevue = fin;
+        tempsReference = fin; // Cascade : fin phase N = début phase N+1
+      }
+
+      const chrono = await ChronologiePhase.create(createData);
       chronologies.push(chrono);
     }
 

@@ -211,8 +211,10 @@ export const listerBulletins = async (req, res) => {
 export const obtenirBulletinEnCours = async (req, res) => {
   try {
     const { escale } = req.params;
+    // FIX BUG #3 — Accepter date de reference en query param
+    const { date } = req.query;
 
-    const bulletin = await bulletinService.obtenirBulletinEnCours(escale);
+    const bulletin = await bulletinService.obtenirBulletinEnCours(escale, date);
 
     if (!bulletin) {
       return res.status(404).json({
@@ -388,10 +390,17 @@ export const ajouterMouvement = async (req, res) => {
 
     const bulletin = await bulletinService.ajouterMouvement(id, mouvementData, userId);
 
+    // Récupérer le dernier mouvement ajouté
+    const mouvement = bulletin.mouvements[bulletin.mouvements.length - 1];
+
     res.status(201).json({
       success: true,
       message: `Mouvement ${mouvementData.numeroVol} ajoute`,
-      data: bulletin
+      data: {
+        bulletinId: bulletin._id,
+        mouvementId: mouvement._id,
+        mouvement
+      }
     });
 
   } catch (error) {

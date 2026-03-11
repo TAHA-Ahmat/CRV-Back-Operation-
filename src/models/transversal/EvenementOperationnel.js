@@ -8,7 +8,7 @@ const evenementOperationnelSchema = new mongoose.Schema({
   },
   typeEvenement: {
     type: String,
-    enum: ['PANNE_EQUIPEMENT', 'ABSENCE_PERSONNEL', 'RETARD', 'INCIDENT_SECURITE', 'PROBLEME_TECHNIQUE', 'METEO', 'AUTRE'],
+    enum: ['PANNE_EQUIPEMENT', 'ABSENCE_PERSONNEL', 'RETARD', 'INCIDENT_SECURITE', 'INCIDENT_TECHNIQUE', 'PROBLEME_TECHNIQUE', 'METEO', 'AUTRE'],
     required: true
   },
   gravite: {

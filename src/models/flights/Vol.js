@@ -54,6 +54,26 @@ const volSchema = new mongoose.Schema({
     ref: 'Avion'
   },
 
+  // Position de stationnement de l'avion (ex: P42, A12, TERMINAL_2)
+  posteStationnement: {
+    type: String,
+    trim: true,
+    uppercase: true,
+    default: null
+  },
+
+  // ========== EXTENSION 8 - Type avion propagé depuis bulletin ==========
+  // NON-REGRESSION: Champ OPTIONNEL avec valeur par defaut null
+  // Propagé depuis BulletinMouvement.mouvements[].typeAvion lors de la création du vol
+  typeAvion: {
+    type: String,
+    trim: true,
+    uppercase: true,
+    default: null,
+    description: 'Type avion (ex: B737, A320) — propagé depuis le bulletin de mouvement'
+  },
+  // FIN EXTENSION 8
+
   // ========== EXTENSION 2 - Distinction vol programmé / hors programme ==========
   // NON-RÉGRESSION: Tous les champs ci-dessous sont OPTIONNELS avec valeurs par défaut
   // Les vols existants auront automatiquement horsProgramme=false et programmeVolReference=null

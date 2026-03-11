@@ -19,7 +19,11 @@ export const errorHandler = (err, req, res, next) => {
     error = { message, statusCode: 400 };
   }
 
-  res.status(error.statusCode || 500).json({
+  // FIX BUG-3 CERTIFICATION: les services utilisent err.status (pas err.statusCode)
+  // Le spread { ...err } sur un Error ne copie pas les propriétés custom (.status)
+  // → il faut lire depuis l'objet original `err`, pas depuis la copie `error`
+  const statusCode = err.status || err.statusCode || error.statusCode || 500;
+  res.status(statusCode).json({
     success: false,
     message: error.message || 'Erreur serveur',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })

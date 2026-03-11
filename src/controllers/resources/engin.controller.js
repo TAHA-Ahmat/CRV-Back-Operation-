@@ -282,6 +282,33 @@ export const mettreAJourEnginsAffectes = async (req, res, next) => {
     // Créer les nouvelles affectations
     const nouvellesAffectations = [];
 
+    // Map des types frontend → types backend Engin
+    const typeEnginMap = {
+      'tracteur': 'TRACTEUR',
+      'chariot_bagages': 'CHARIOT_BAGAGES',
+      'chariot_fret': 'CHARIOT_FRET',
+      'camion_fret': 'CHARIOT_FRET',
+      'passerelle': 'STAIRS',
+      'gpu': 'GPU',
+      'asu': 'ASU',
+      'camion_avitaillement': 'AUTRE',
+      'convoyeur': 'CONVOYEUR',
+      'autre': 'AUTRE'
+    };
+
+    // FIX BUG-2 CERTIFICATION: Valider tous les types AVANT toute opération DB
+    const typesValides = Object.keys(typeEnginMap);
+    for (const enginData of engins) {
+      const typeLower = enginData.type?.toLowerCase();
+      if (typeLower && !typesValides.includes(typeLower)) {
+        return res.status(400).json({
+          success: false,
+          message: `Type d'engin invalide: "${enginData.type}". Types acceptés: ${typesValides.join(', ')}`,
+          code: 'INVALID_TYPE_ENGIN'
+        });
+      }
+    }
+
     for (const enginData of engins) {
       const { type, immatriculation, heureDebut, heureFin, utilise, usage, remarques } = enginData;
 
@@ -290,19 +317,6 @@ export const mettreAJourEnginsAffectes = async (req, res, next) => {
 
       if (!engin && immatriculation) {
         // Créer l'engin à la volée s'il n'existe pas
-        const typeEnginMap = {
-          'tracteur': 'TRACTEUR',
-          'chariot_bagages': 'CHARIOT_BAGAGES',
-          'chariot_fret': 'CHARIOT_FRET',
-          'camion_fret': 'CHARIOT_FRET',
-          'passerelle': 'STAIRS',
-          'gpu': 'GPU',
-          'asu': 'ASU',
-          'camion_avitaillement': 'AUTRE',
-          'convoyeur': 'CONVOYEUR',
-          'autre': 'AUTRE'
-        };
-
         engin = await Engin.create({
           numeroEngin: immatriculation.toUpperCase(),
           typeEngin: typeEnginMap[type?.toLowerCase()] || 'AUTRE',

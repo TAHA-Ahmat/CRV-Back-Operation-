@@ -241,11 +241,13 @@ export const obtenirBulletinParId = async (bulletinId) => {
 /**
  * Recupere le bulletin en cours pour une escale
  * @param {String} escale - Code IATA escale
+ * @param {String} [dateReference] - Date de reference ISO (FIX BUG #3)
  * @returns {Object} Bulletin en cours
  */
-export const obtenirBulletinEnCours = async (escale) => {
+export const obtenirBulletinEnCours = async (escale, dateReference) => {
   try {
-    const bulletin = await BulletinMouvement.getBulletinEnCours(escale);
+    // FIX BUG #3 — Passer dateReference au modele
+    const bulletin = await BulletinMouvement.getBulletinEnCours(escale, dateReference);
 
     if (!bulletin) return null;
 
@@ -807,7 +809,8 @@ export const creerVolsDepuisBulletin = async (bulletinId, userId) => {
             horsProgramme: mouvement.origine === 'HORS_PROGRAMME',
             programmeVolReference: mouvement.programmeVolReference,
             raisonHorsProgramme: mouvement.raisonHorsProgramme,
-            typeVolHorsProgramme: mouvement.typeHorsProgramme
+            typeVolHorsProgramme: mouvement.typeHorsProgramme,
+            typeAvion: mouvement.typeAvion || null
           });
 
           await vol.save();

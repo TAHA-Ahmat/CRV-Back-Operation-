@@ -109,3 +109,18 @@ export const excludeQualite = (req, res, next) => {
   }
   next();
 };
+
+/**
+ * FIX BUG #16 — Doctrine MADMIT : ADMIN = gestion systeme, pas d'acces operationnel
+ * Bloque l'acces ADMIN aux routes CRV operationnelles.
+ */
+export const excludeAdmin = (req, res, next) => {
+  if (req.user.fonction === 'ADMIN') {
+    return res.status(403).json({
+      success: false,
+      message: 'Acces refuse: ADMIN n\'a pas d\'acces operationnel aux CRV (doctrine MADMIT)',
+      code: 'ADMIN_NO_CRV_ACCESS'
+    });
+  }
+  next();
+};

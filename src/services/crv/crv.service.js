@@ -19,7 +19,7 @@ const Compteur = mongoose.models.Compteur || mongoose.model('Compteur', compteur
  * CALCUL DE COMPLÉTUDE CRV
  *
  * PONDÉRATION OFFICIELLE (Cahier des charges métier v1.0) :
- * - Phases       : 40% (pro-rata des phases terminées/non-réalisées)
+ * - Phases       : 30% (pro-rata des phases terminées/non-réalisées)
  * - Charges      : 30% (présence de charges opérationnelles - flux passagers/bagages/fret)
  * - Événements   : 20% (TOUJOURS attribués - absence = vol nominal, pas d'anomalie)
  * - Observations : 10% (TOUJOURS attribués - absence = rien de particulier à signaler)
@@ -69,13 +69,13 @@ export const calculerCompletude = async (crvId) => {
     const details = {};
 
     // ========================================
-    // PHASES : 40% (pro-rata des phases terminées)
+    // PHASES : 30% (pro-rata des phases terminées)
     // ========================================
     const phases = await ChronologiePhase.find({ crv: crvId });
     const phasesTerminees = phases.filter(p => p.statut === 'TERMINE' || p.statut === 'NON_REALISE');
 
     if (phases.length > 0) {
-      const scorePhases = (phasesTerminees.length / phases.length) * 40;
+      const scorePhases = (phasesTerminees.length / phases.length) * 30;
       score += scorePhases;
       details.phases = { total: phases.length, terminees: phasesTerminees.length, score: scorePhases };
     } else {
@@ -93,7 +93,8 @@ export const calculerCompletude = async (crvId) => {
     const chargesAvecDonnees = charges.filter(c => {
       // Vérifier si au moins un champ de données est renseigné
       const passagersSaisis = c.passagersAdultes !== null || c.passagersEnfants !== null ||
-                              c.passagersPMR !== null || c.passagersTransit !== null;
+                              c.passagersPMR !== null || c.passagersTransit !== null ||
+                              c.passagersBebes !== null;
       const bagagesSaisis = c.nombreBagagesSoute !== null || c.nombreBagagesCabine !== null;
       const fretSaisi = c.nombreFret !== null || c.poidsFretKg !== null || c.typeFret !== null;
 
@@ -632,7 +633,7 @@ export const detecterDoublonCRV = async (numeroVol, dateVol, escale) => {
  * @param {Object} bulletin - Document BulletinMouvement parent
  * @returns {Object} Vol créé
  */
-export const creerVolDepuisMouvement = async (mouvement, bulletin) => {
+export const creerVolDepuisMouvement = async (mouvement, bulletin, typeOperationOverride = null) => {
   const timestamp = new Date().toISOString();
 
   console.log('[CRV][SERVICE][CREER_VOL_MOUVEMENT_START]', {
@@ -643,8 +644,8 @@ export const creerVolDepuisMouvement = async (mouvement, bulletin) => {
   });
 
   try {
-    // Déduire typeOperation si non renseigné dans le mouvement
-    let typeOperation = mouvement.typeOperation;
+    // Utiliser le type override si fourni par l'utilisateur, sinon fallback mouvement/auto-detection
+    let typeOperation = typeOperationOverride || mouvement.typeOperation;
     if (!typeOperation) {
       if (mouvement.heureArriveePrevue && mouvement.heureDepartPrevue) {
         typeOperation = 'TURN_AROUND';
@@ -668,6 +669,7 @@ export const creerVolDepuisMouvement = async (mouvement, bulletin) => {
       raisonHorsProgramme: mouvement.raisonHorsProgramme || null,
       programmeVolReference: mouvement.programmeVolReference || null,
       bulletinMouvementReference: bulletin._id,
+      typeAvion: mouvement.typeAvion || null,
       statut: 'PROGRAMME'
     });
 

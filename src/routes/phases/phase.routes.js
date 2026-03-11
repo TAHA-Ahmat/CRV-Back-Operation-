@@ -42,7 +42,8 @@ router.post('/:id/terminer', protect, excludeQualite, verifierCRVNonVerrouilleVi
 // 🔒 P0-1: QUALITE exclu | 🔒 Mission 009: Verrouillage
 router.post('/:id/non-realise', protect, excludeQualite, verifierCRVNonVerrouilleViaPhase, verifierCoherencePhaseTypeOperation, [
   body('motifNonRealisation').isIn(['NON_NECESSAIRE', 'EQUIPEMENT_INDISPONIBLE', 'PERSONNEL_ABSENT', 'CONDITIONS_METEO', 'AUTRE']).withMessage('Motif invalide'),
-  body('detailMotif').notEmpty().withMessage('Détail de justification requis'),
+  // detailMotif optionnel sauf si motif = AUTRE (vérifié dans businessRules.middleware)
+  body('detailMotif').optional().isString().withMessage('detailMotif doit être une chaîne'),
   validate
 ], verifierJustificationNonRealisation, auditLog('MISE_A_JOUR'), marquerPhaseNonRealisee);
 

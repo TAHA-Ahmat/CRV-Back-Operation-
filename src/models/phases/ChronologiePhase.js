@@ -16,11 +16,14 @@ const horodatageSchema = new mongoose.Schema({
   timestampSysteme: {
     type: Date,
     required: true,
-    immutable: true  // Le timestamp serveur ne peut JAMAIS être modifié
+    // Note: immutable retiré car bloque la mise à jour via remplacement complet de horodatage
+    // La protection métier est assurée par le code (creerHorodatageDeclaration génère toujours un nouveau timestampSysteme)
+    default: Date.now
   },
   heureDeclaree: {
     type: Date,
-    required: true
+    required: true,
+    default: Date.now // Valeur par défaut si non fourni
   },
   source: {
     type: String,

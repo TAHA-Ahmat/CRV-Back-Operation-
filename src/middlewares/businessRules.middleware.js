@@ -120,8 +120,10 @@ export const verifierCoherencePhaseTypeOperation = async (req, res, next) => {
 };
 
 /**
- * RÈGLE MÉTIER CRITIQUE : Phase non réalisée DOIT avoir justification
- * motifNonRealisation ET detailMotif sont OBLIGATOIRES
+ * RÈGLE MÉTIER : Phase non réalisée DOIT avoir justification
+ * - motifNonRealisation : OBLIGATOIRE (enum validé en amont)
+ * - detailMotif : OBLIGATOIRE uniquement si motif = 'AUTRE'
+ *   (les autres motifs sont auto-explicatifs)
  */
 export const verifierJustificationNonRealisation = (req, res, next) => {
   const { motifNonRealisation, detailMotif } = req.body;
@@ -135,11 +137,12 @@ export const verifierJustificationNonRealisation = (req, res, next) => {
     });
   }
 
-  if (!detailMotif || detailMotif.trim() === '') {
+  // detailMotif obligatoire UNIQUEMENT si motif = AUTRE
+  if (motifNonRealisation === 'AUTRE' && (!detailMotif || detailMotif.trim() === '')) {
     return res.status(400).json({
       success: false,
-      message: 'INTERDIT : Une phase non réalisée doit avoir un détail de justification',
-      code: 'DETAIL_MOTIF_REQUIS',
+      message: 'INTERDIT : Le motif "AUTRE" nécessite un détail de justification',
+      code: 'DETAIL_MOTIF_REQUIS_POUR_AUTRE',
       champsManquants: ['detailMotif']
     });
   }
@@ -152,8 +155,9 @@ export const verifierJustificationNonRealisation = (req, res, next) => {
  * Pour les charges opérationnelles, 0 signifie "zéro enregistré"
  * undefined/null signifie "non saisi"
  */
-export const validerCoherenceCharges = (req, res, next) => {
+export const validerCoherenceCharges = async (req, res, next) => {
   const { typeCharge, sensOperation } = req.body;
+  const crvId = req.params.id;
 
   if (!typeCharge || !sensOperation) {
     return res.status(400).json({
@@ -163,20 +167,40 @@ export const validerCoherenceCharges = (req, res, next) => {
     });
   }
 
+  // FIX BUG #11 — Unicite typeCharge + sensOperation par CRV
+  try {
+    const { default: ChargeOperationnelle } = await import('../models/charges/ChargeOperationnelle.js');
+    const doublonExistant = await ChargeOperationnelle.findOne({
+      crv: crvId, typeCharge, sensOperation
+    });
+    if (doublonExistant) {
+      return res.status(409).json({
+        success: false,
+        message: `Doublon interdit: une charge ${typeCharge} ${sensOperation} existe deja pour ce CRV`,
+        code: 'CHARGE_DOUBLON',
+        details: { typeCharge, sensOperation, chargeExistanteId: doublonExistant._id }
+      });
+    }
+  } catch (err) {
+    console.error('[MIDDLEWARE][CHARGES] Erreur verification doublon:', err.message);
+  }
+
   if (typeCharge === 'PASSAGERS') {
     const {
       passagersAdultes,
       passagersEnfants,
       passagersPMR,
-      passagersTransit
+      passagersTransit,
+      passagersBebes
     } = req.body;
 
     const total = (passagersAdultes || 0) +
                   (passagersEnfants || 0) +
                   (passagersPMR || 0) +
-                  (passagersTransit || 0);
+                  (passagersTransit || 0) +
+                  (passagersBebes || 0);
 
-    if (total === 0 && passagersAdultes === undefined) {
+    if (total === 0 && passagersAdultes === undefined && passagersBebes === undefined) {
       return res.status(400).json({
         success: false,
         message: 'INTERDIT : Pour les passagers, vous devez saisir explicitement les valeurs (même si zéro)',
@@ -184,10 +208,33 @@ export const validerCoherenceCharges = (req, res, next) => {
         details: 'Distinguez "0 passagers" (saisi) de "non renseigné" (absent)'
       });
     }
+
+    // FIX BUG #12 — Limites raisonnables passagers
+    const MAX_PASSAGERS = 1000;
+    const valeurs = { passagersAdultes, passagersEnfants, passagersPMR, passagersTransit, passagersBebes };
+    for (const [champ, val] of Object.entries(valeurs)) {
+      if (val !== undefined && val > MAX_PASSAGERS) {
+        return res.status(400).json({
+          success: false,
+          message: `Valeur ${champ} (${val}) depasse le maximum autorise (${MAX_PASSAGERS})`,
+          code: 'VALEUR_CHARGE_EXCESSIVE',
+          details: { champ, valeur: val, maximum: MAX_PASSAGERS }
+        });
+      }
+    }
   }
 
   if (typeCharge === 'BAGAGES') {
     const { nombreBagagesSoute, poidsBagagesSouteKg } = req.body;
+
+    // FIX BUG #12 — Limites raisonnables bagages
+    if (nombreBagagesSoute !== undefined && nombreBagagesSoute > 50000) {
+      return res.status(400).json({
+        success: false,
+        message: `Nombre bagages (${nombreBagagesSoute}) depasse le maximum autorise (50000)`,
+        code: 'VALEUR_CHARGE_EXCESSIVE'
+      });
+    }
 
     if (nombreBagagesSoute !== undefined && nombreBagagesSoute > 0 && !poidsBagagesSouteKg) {
       return res.status(400).json({
@@ -200,6 +247,15 @@ export const validerCoherenceCharges = (req, res, next) => {
 
   if (typeCharge === 'FRET') {
     const { nombreFret, poidsFretKg, typeFret } = req.body;
+
+    // FIX BUG #12 — Limites raisonnables fret
+    if (poidsFretKg !== undefined && poidsFretKg > 200000) {
+      return res.status(400).json({
+        success: false,
+        message: `Poids fret (${poidsFretKg}kg) depasse le maximum autorise (200000kg)`,
+        code: 'VALEUR_CHARGE_EXCESSIVE'
+      });
+    }
 
     if (nombreFret !== undefined && nombreFret > 0) {
       if (!poidsFretKg) {

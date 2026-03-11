@@ -42,6 +42,11 @@ const chargeOperationnelleSchema = new mongoose.Schema({
     min: 0,
     default: null
   },
+  passagersBebes: {
+    type: Number,
+    min: 0,
+    default: null  // null = non saisi, 0 = zéro bébé
+  },
 
   // ========== EXTENSION 4 - Catégories passagers détaillées ==========
   // NON-RÉGRESSION: Tous les champs ci-dessous sont OPTIONNELS avec valeurs par défaut
@@ -585,14 +590,15 @@ chargeOperationnelleSchema.virtual('totalPassagers').get(function() {
   const enfants = this.passagersEnfants;
   const pmr = this.passagersPMR;
   const transit = this.passagersTransit;
+  const bebes = this.passagersBebes;
 
   // Si tous les champs sont null → données non saisies
-  if (adultes === null && enfants === null && pmr === null && transit === null) {
+  if (adultes === null && enfants === null && pmr === null && transit === null && bebes === null) {
     return null;
   }
 
   // Sinon, calculer le total (null traité comme 0 pour le calcul)
-  return (adultes || 0) + (enfants || 0) + (pmr || 0) + (transit || 0);
+  return (adultes || 0) + (enfants || 0) + (pmr || 0) + (transit || 0) + (bebes || 0);
 });
 
 /**

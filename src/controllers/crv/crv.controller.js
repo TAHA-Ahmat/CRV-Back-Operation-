@@ -7,7 +7,7 @@ import ChargeOperationnelle from '../../models/charges/ChargeOperationnelle.js';
 import EvenementOperationnel from '../../models/transversal/EvenementOperationnel.js';
 import Observation from '../../models/crv/Observation.js';
 import ValidationCRV from '../../models/validation/ValidationCRV.js';
-import { genererNumeroCRV, calculerCompletude, detecterDoublonCRV, creerVolDepuisMouvement } from '../../services/crv/crv.service.js';
+import { genererNumeroCRV, calculerCompletude, updateCompletude, detecterDoublonCRV, creerVolDepuisMouvement } from '../../services/crv/crv.service.js';
 import { initialiserPhasesVol } from '../../services/phases/phase.service.js';
 import { eventBus } from '../../services/notifications/notificationEngine.js';
 import { EVENTS } from '../../services/notifications/eventRegistry.js';
@@ -102,7 +102,9 @@ export const creerCRV = async (req, res, next) => {
       }
 
       // Créer Vol depuis mouvement (service dédié)
-      vol = await creerVolDepuisMouvement(mouvement, bulletin);
+      // typeOperation du body permet à l'utilisateur d'overrider l'auto-détection (ex: ARRIVEE au lieu de TURN_AROUND)
+      const typeOperationOverride = req.body.typeOperation || null;
+      vol = await creerVolDepuisMouvement(mouvement, bulletin, typeOperationOverride);
       volId = vol._id;
 
       // Lier mouvement.vol au Vol créé (mise à jour du sous-document)
@@ -243,8 +245,10 @@ export const creerCRV = async (req, res, next) => {
 
     // ========================================================================
     // PATH LEGACY: auto-création Vol (comportement original préservé)
+    // FIX BUG-1 CERTIFICATION: Exiger au minimum un `type` pour le path legacy
+    // Sans type, aucun path valide n'a matché → rejet 400
     // ========================================================================
-    } else {
+    } else if (type) {
       console.warn('[CRV][LEGACY_PATH_CONFIRMED_BY_USER]', {
         crvId: null, userId: req.user?._id || null, role: req.user?.fonction || null,
         input: { type },
@@ -269,6 +273,18 @@ export const creerCRV = async (req, res, next) => {
       volId = vol._id;
 
       horaire = await Horaire.create({ vol: vol._id });
+    } else {
+      // FIX BUG-1 CERTIFICATION: Aucun path de création valide ne correspond
+      return res.status(400).json({
+        success: false,
+        message: 'Données insuffisantes pour créer un CRV. Fournir: bulletinId+mouvementId (bulletin), vol (hors programme), volId (vol existant), ou type (legacy).',
+        paths: {
+          bulletin: 'bulletinId + mouvementId',
+          horsProgramme: 'vol: { numeroVol, compagnieAerienne, codeIATA, dateVol, typeOperation, ... }',
+          volExistant: 'volId',
+          legacy: 'type (arrivee|depart|turnaround)'
+        }
+      });
     }
 
     // ========================================================================
@@ -296,8 +312,8 @@ export const creerCRV = async (req, res, next) => {
       timestamp: new Date().toISOString()
     });
 
-    await initialiserPhasesVol(crv._id, vol.typeOperation);
-    await calculerCompletude(crv._id);
+    await initialiserPhasesVol(crv._id, vol.typeOperation, horaire?._id || null);
+    await updateCompletude(crv._id);
 
     const crvPopulated = await CRV.findById(crv._id)
       .populate('vol')
@@ -414,7 +430,7 @@ export const obtenirCRV = async (req, res, next) => {
 
   try {
     const crv = await CRV.findById(req.params.id)
-      .populate('vol')
+      .populate({ path: 'vol', populate: { path: 'avion' } })
       .populate('horaire')
       .populate('creePar')
       .populate('responsableVol')
@@ -473,7 +489,8 @@ export const obtenirCRV = async (req, res, next) => {
         phases,
         charges,
         evenements,
-        observations
+        observations,
+        engins: crv.materielUtilise || []
       }
     });
   } catch (error) {
@@ -731,6 +748,9 @@ export const mettreAJourCRV = async (req, res, next) => {
         if (volData.dateVol) {
           vol.dateVol = new Date(volData.dateVol);
         }
+        if (volData.posteStationnement) {
+          vol.posteStationnement = volData.posteStationnement.toUpperCase();
+        }
 
         // Gestion de l'avion (immatriculation + type)
         if (volData.immatriculation || volData.typeAvion) {
@@ -839,7 +859,7 @@ export const mettreAJourCRV = async (req, res, next) => {
 
     await crv.save();
 
-    await calculerCompletude(crv._id);
+    await updateCompletude(crv._id);
 
     const crvUpdated = await CRV.findById(crv._id)
       .populate('vol')
@@ -956,7 +976,7 @@ export const ajouterCharge = async (req, res, next) => {
       ...req.body
     });
 
-    await calculerCompletude(crv._id);
+    await updateCompletude(crv._id);
 
     console.log('[CRV][API_SUCCESS][AJOUTER_CHARGE]', {
       crvId: crv._id,
@@ -1041,7 +1061,7 @@ export const ajouterEvenement = async (req, res, next) => {
       ...req.body
     });
 
-    await calculerCompletude(crv._id);
+    await updateCompletude(crv._id);
 
     console.log('[CRV][API_SUCCESS][AJOUTER_EVENEMENT]', {
       crvId: crv._id,
@@ -1136,7 +1156,7 @@ export const ajouterObservation = async (req, res, next) => {
       ...req.body
     });
 
-    await calculerCompletude(crv._id);
+    await updateCompletude(crv._id);
 
     console.log('[CRV][API_SUCCESS][AJOUTER_OBSERVATION]', {
       crvId: crv._id,
@@ -1773,7 +1793,7 @@ export const mettreAJourHoraire = async (req, res, next) => {
     Object.assign(horaire, updateData);
     await horaire.save();
 
-    await calculerCompletude(crv._id);
+    await updateCompletude(crv._id);
 
     const crvUpdated = await CRV.findById(crv._id)
       .populate('vol')
@@ -1926,7 +1946,7 @@ export const confirmerAbsence = async (req, res, next) => {
     crv.modifiePar = req.user._id;
     await crv.save();
 
-    await calculerCompletude(crv._id);
+    await updateCompletude(crv._id);
 
     const crvUpdated = await CRV.findById(crv._id)
       .populate('vol')
@@ -2050,7 +2070,7 @@ export const annulerConfirmationAbsence = async (req, res, next) => {
     crv.modifiePar = req.user._id;
     await crv.save();
 
-    await calculerCompletude(crv._id);
+    await updateCompletude(crv._id);
 
     const crvUpdated = await CRV.findById(crv._id)
       .populate('vol')
@@ -2346,6 +2366,9 @@ export const terminerCRV = async (req, res, next) => {
     await session.commitTransaction();
     session.endSession();
 
+    // Persistance complétude APRÈS commit (évite write conflict transactionnel)
+    await updateCompletude(crv._id);
+
     const crvUpdated = await CRV.findById(crv._id)
       .populate('vol')
       .populate('horaire')
@@ -2353,7 +2376,7 @@ export const terminerCRV = async (req, res, next) => {
       .populate('responsableVol');
 
     console.log('[CRV][API_SUCCESS][TERMINER_CRV]', {
-      crvId: crv._id, statut: 'TERMINE', completude,
+      crvId: crv._id, statut: 'TERMINE', completude: crvUpdated.completude,
       timestamp: new Date().toISOString()
     });
 
@@ -2362,12 +2385,12 @@ export const terminerCRV = async (req, res, next) => {
     // ── NOTIFICATION ENGINE ──────────────────────────────────────
     eventBus.emitAsync(EVENTS.CRV_TERMINE, {
       crvId: crv._id, numeroCRV: crv.numeroCRV,
-      completude, userId: req.user?._id
+      completude: crvUpdated.completude, userId: req.user?._id
     });
-    if (completude >= 80) {
+    if (crvUpdated.completude >= 80) {
       eventBus.emitAsync(EVENTS.CRV_PRET_VALIDATION, {
         crvId: crv._id, numeroCRV: crv.numeroCRV,
-        completude, userId: req.user?._id
+        completude: crvUpdated.completude, userId: req.user?._id
       });
     }
     // ─────────────────────────────────────────────────────────────
@@ -2376,7 +2399,7 @@ export const terminerCRV = async (req, res, next) => {
       success: true,
       message: 'CRV terminé avec succès',
       data: crvUpdated,
-      completude
+      completude: crvUpdated.completude
     });
   } catch (error) {
     await session.abortTransaction();
@@ -2538,6 +2561,8 @@ export const mettreAJourPersonnel = async (req, res, next) => {
           code: 'INVALID_PERSONNEL_DATA'
         });
       }
+      // Normalisation fonction en uppercase pour compatibilité enum schema
+      personne.fonction = personne.fonction.toUpperCase();
     }
 
     const crv = await CRV.findById(req.params.id);

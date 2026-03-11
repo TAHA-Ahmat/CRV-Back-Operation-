@@ -540,13 +540,15 @@ bulletinMouvementSchema.methods.ajouterMouvement = function(mouvement) {
     throw new Error('Impossible d\'ajouter un mouvement: bulletin non modifiable');
   }
 
-  // Deduire le type d'operation
-  if (mouvement.heureArriveePrevue && mouvement.heureDepartPrevue) {
-    mouvement.typeOperation = 'TURN_AROUND';
-  } else if (mouvement.heureArriveePrevue) {
-    mouvement.typeOperation = 'ARRIVEE';
-  } else if (mouvement.heureDepartPrevue) {
-    mouvement.typeOperation = 'DEPART';
+  // Deduire le type d'operation (seulement si non explicitement fourni)
+  if (!mouvement.typeOperation) {
+    if (mouvement.heureArriveePrevue && mouvement.heureDepartPrevue) {
+      mouvement.typeOperation = 'TURN_AROUND';
+    } else if (mouvement.heureArriveePrevue) {
+      mouvement.typeOperation = 'ARRIVEE';
+    } else if (mouvement.heureDepartPrevue) {
+      mouvement.typeOperation = 'DEPART';
+    }
   }
 
   // Deduire le code compagnie si non fourni
@@ -673,12 +675,14 @@ bulletinMouvementSchema.statics.genererNumeroBulletin = function(escale, dateDeb
  * @param {String} escale - Code IATA escale
  * @returns {Document} Bulletin en cours
  */
-bulletinMouvementSchema.statics.getBulletinEnCours = async function(escale) {
-  const now = new Date();
+// FIX BUG #3: Accepte un parametre date optionnel pour chercher le bulletin a une date donnee
+bulletinMouvementSchema.statics.getBulletinEnCours = async function(escale, dateReference) {
+  if (!escale) return null;
+  const targetDate = dateReference ? new Date(dateReference) : new Date();
   return this.findOne({
     escale: escale.toUpperCase(),
-    dateDebut: { $lte: now },
-    dateFin: { $gte: now },
+    dateDebut: { $lte: targetDate },
+    dateFin: { $gte: targetDate },
     statut: { $in: ['BROUILLON', 'PUBLIE'] }
   }).sort({ dateDebut: -1 });
 };

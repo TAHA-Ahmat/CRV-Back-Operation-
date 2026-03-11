@@ -23,7 +23,10 @@ import { EVENTS } from '../notifications/eventRegistry.js';
  * - Responsable vol défini
  * - Toutes phases traitées (TERMINE ou NON_REALISE)
  */
-export const validerCRV = async (crvId, userId, commentaires, verrouillageAutomatique = true) => {
+// FIX BUG #15: verrouillageAutomatique = false par defaut
+// La doctrine machine a etats impose TERMINE → VALIDE → VERROUILLE en etapes separees
+// L'archivage ne se fait plus automatiquement lors de la validation
+export const validerCRV = async (crvId, userId, commentaires, verrouillageAutomatique = false) => {
   const timestamp = new Date().toISOString();
 
   console.log('[CRV][SERVICE][VALIDER_CRV_START]', {
@@ -44,15 +47,24 @@ export const validerCRV = async (crvId, userId, commentaires, verrouillageAutoma
     const crv = await CRV.findById(crvId).populate('vol').session(session);
 
     if (!crv) {
-      throw new Error('CRV non trouvé');
+      // FIX BUG-4 CERTIFICATION: status 404 au lieu de 500
+      const err = new Error('CRV non trouvé');
+      err.status = 404;
+      throw err;
     }
 
     if (crv.statut === 'VERROUILLE') {
-      throw new Error('Le CRV est déjà verrouillé');
+      // FIX BUG-4 CERTIFICATION: status 409 au lieu de 500
+      const err = new Error('Le CRV est déjà verrouillé');
+      err.status = 409;
+      throw err;
     }
 
     if (crv.statut !== 'TERMINE' && crv.statut !== 'VALIDE') {
-      throw new Error(`Le CRV doit être en statut TERMINE pour être validé (statut actuel: ${crv.statut})`);
+      // FIX BUG-4 CERTIFICATION: status 409 au lieu de 500
+      const err = new Error(`Le CRV doit être en statut TERMINE pour être validé (statut actuel: ${crv.statut})`);
+      err.status = 409;
+      throw err;
     }
 
     const completude = await calculerCompletude(crvId);
@@ -227,7 +239,10 @@ export const verrouillerCRV = async (crvId, userId) => {
         output: null,
         timestamp: new Date().toISOString()
       });
-      throw new Error('CRV non trouvé');
+      // FIX BUG-4 CERTIFICATION: status 404 au lieu de 500
+      const err404 = new Error('CRV non trouvé');
+      err404.status = 404;
+      throw err404;
     }
 
     if (crv.statut !== 'VALIDE') {
@@ -241,7 +256,10 @@ export const verrouillerCRV = async (crvId, userId) => {
         output: { statutActuel: crv.statut },
         timestamp: new Date().toISOString()
       });
-      throw new Error(`Le CRV doit être en statut VALIDE pour être verrouillé (statut actuel: ${crv.statut})`);
+      // FIX BUG-4 CERTIFICATION: status 409 au lieu de 500
+      const err409 = new Error(`Le CRV doit être en statut VALIDE pour être verrouillé (statut actuel: ${crv.statut})`);
+      err409.status = 409;
+      throw err409;
     }
 
     await CRV.findByIdAndUpdate(crvId, {
@@ -330,7 +348,10 @@ export const deverrouillerCRV = async (crvId, userId, raison) => {
         output: null,
         timestamp: new Date().toISOString()
       });
-      throw new Error('CRV non trouvé');
+      // FIX BUG-4 CERTIFICATION: status 404 au lieu de 500
+      const err404d = new Error('CRV non trouvé');
+      err404d.status = 404;
+      throw err404d;
     }
 
     if (crv.statut !== 'VERROUILLE') {
@@ -344,7 +365,10 @@ export const deverrouillerCRV = async (crvId, userId, raison) => {
         output: { statutActuel: crv.statut },
         timestamp: new Date().toISOString()
       });
-      throw new Error('Le CRV n\'est pas verrouillé');
+      // FIX BUG-4 CERTIFICATION: status 409 au lieu de 500
+      const err409d = new Error('Le CRV n\'est pas verrouillé');
+      err409d.status = 409;
+      throw err409d;
     }
 
     // ============================================================

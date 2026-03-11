@@ -325,6 +325,20 @@ export const mettreAJourPhase = async (req, res, next) => {
     const userId = req.user?._id || null;
     const timezone = timezoneAeroport || 'UTC';
 
+    // Validation cohérence heures : fin ne peut pas être avant début
+    if (heureDebutReelle && heureFinReelle) {
+      const debut = convertirHeureEnDate(heureDebutReelle);
+      const fin = convertirHeureEnDate(heureFinReelle);
+      if (debut && fin && fin < debut) {
+        console.log('❌ Validation heures échouée: fin < début');
+        return res.status(400).json({
+          success: false,
+          message: "L'heure de fin ne peut pas être antérieure à l'heure de début.",
+          code: 'HEURE_FIN_AVANT_DEBUT'
+        });
+      }
+    }
+
     console.log('\n── CHAMPS À METTRE À JOUR ──');
     if (heureDebutPrevue) {
       chronoPhase.heureDebutPrevue = convertirHeureEnDate(heureDebutPrevue);
@@ -447,8 +461,50 @@ export const mettreAJourPhaseCRV = async (req, res, next) => {
     const userId = req.user?._id || null;
     const timezone = timezoneAeroport || 'UTC';
 
-    // Mise à jour du statut
-    if (statut && ['NON_COMMENCE', 'EN_COURS', 'TERMINE', 'NON_REALISE'].includes(statut)) {
+    // FIX BUG #6 — Validation coherence heures : aussi contre valeurs existantes
+    const debutEffectif = heureDebutReelle !== undefined ? heureDebutReelle : chronoPhase.heureDebutReelle;
+    const finEffective = heureFinReelle !== undefined ? heureFinReelle : chronoPhase.heureFinReelle;
+    if (debutEffectif && finEffective) {
+      const debut = convertirHeureEnDate(debutEffectif);
+      const fin = convertirHeureEnDate(finEffective);
+      if (debut && fin && fin < debut) {
+        console.log('❌ Validation heures échouée: fin < début');
+        return res.status(400).json({
+          success: false,
+          message: "L'heure de fin ne peut pas être antérieure à l'heure de début.",
+          code: 'HEURE_FIN_AVANT_DEBUT'
+        });
+      }
+    }
+
+    // FIX BUG #9 — Validation enum strict statut phase
+    const STATUTS_PHASE_VALIDES = ['NON_COMMENCE', 'EN_COURS', 'TERMINE', 'NON_REALISE'];
+    if (statut && !STATUTS_PHASE_VALIDES.includes(statut)) {
+      return res.status(400).json({
+        success: false,
+        message: `Statut de phase invalide: ${statut}`,
+        code: 'STATUT_PHASE_INVALIDE',
+        statutsAutorises: STATUTS_PHASE_VALIDES
+      });
+    }
+
+    // FIX BUG #8 — Machine a etats phases : transitions autorisees
+    if (statut && STATUTS_PHASE_VALIDES.includes(statut)) {
+      const TRANSITIONS_PHASE = {
+        'NON_COMMENCE': ['EN_COURS', 'TERMINE', 'NON_REALISE'],
+        'EN_COURS': ['TERMINE', 'NON_REALISE'],
+        'TERMINE': ['EN_COURS'],  // correction possible
+        'NON_REALISE': ['NON_COMMENCE']  // annulation non-realisation
+      };
+      const transitionsPermises = TRANSITIONS_PHASE[chronoPhase.statut] || [];
+      if (statut !== chronoPhase.statut && !transitionsPermises.includes(statut)) {
+        return res.status(400).json({
+          success: false,
+          message: `Transition de statut interdite: ${chronoPhase.statut} → ${statut}`,
+          code: 'TRANSITION_PHASE_INTERDITE',
+          details: { statutActuel: chronoPhase.statut, statutDemande: statut, transitionsPermises }
+        });
+      }
       chronoPhase.statut = statut;
       console.log(`   → Nouveau statut: ${statut}`);
     }

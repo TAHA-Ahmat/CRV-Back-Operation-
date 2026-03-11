@@ -48,7 +48,7 @@ import {
   obtenirStatistiquesAnnulations,
   verifierPeutAnnuler
 } from '../../controllers/crv/annulation.controller.js';
-import { protect, authorize, excludeQualite } from '../../middlewares/auth.middleware.js';
+import { protect, authorize, excludeQualite, excludeAdmin } from '../../middlewares/auth.middleware.js';
 import { validate } from '../../middlewares/validation.middleware.js';
 import { auditLog } from '../../middlewares/auditLog.middleware.js';
 import {
@@ -94,23 +94,24 @@ router.post('/', protect, authorize(...ROLES_TOUS_SAUF_QUALITE), [
   validate
 ], verifierPhasesAutoriseesCreationCRV, auditLog('CREATION'), creerCRV);
 
-router.get('/', protect, listerCRVs);
+// FIX BUG #16: excludeAdmin — Doctrine MADMIT: ADMIN = pas d'acces operationnel CRV
+router.get('/', protect, excludeAdmin, listerCRVs);
 
 // ============================
 //   ROUTES RECHERCHE & ANALYTICS (AVANT /:id)
 // ============================
 
 // Recherche full-text
-router.get('/search', protect, rechercherCRV);
+router.get('/search', protect, excludeAdmin, rechercherCRV);
 
 // Stats et KPIs
-router.get('/stats', protect, obtenirStatsCRV);
+router.get('/stats', protect, excludeAdmin, obtenirStatsCRV);
 
 // Export Excel/CSV
-router.get('/export', protect, exporterCRVExcel);
+router.get('/export', protect, excludeAdmin, exporterCRVExcel);
 
 // EXTENSION 8 - Vols du jour sans CRV (avant /:id)
-router.get('/vols-sans-crv', protect, obtenirVolsSansCRV);
+router.get('/vols-sans-crv', protect, excludeAdmin, obtenirVolsSansCRV);
 
 // ============================
 //   EXTENSION 6 - ROUTES ANNULATION (NON-PARAMÉTRISÉES)
@@ -146,7 +147,7 @@ router.post('/archive/test', protect, excludeQualite, testerArchivage);
 //   ROUTES PARAMÉTRISÉES
 // ============================
 
-router.get('/:id', protect, obtenirCRV);
+router.get('/:id', protect, excludeAdmin, obtenirCRV);
 
 /**
  * @route   DELETE /api/crv/:id
@@ -221,18 +222,20 @@ router.post('/:id/charges', protect, excludeQualite, verifierCRVNonVerrouille, [
   validate
 ], validerCoherenceCharges, auditLog('MISE_A_JOUR'), ajouterCharge);
 
-// 🔒 P0-1: QUALITE exclu
+// 🔒 P0-1: QUALITE exclu | FIX BUG #13: .trim().escape() anti-XSS
 router.post('/:id/evenements', protect, excludeQualite, verifierCRVNonVerrouille, [
-  body('typeEvenement').notEmpty().withMessage('Type d\'événement requis'),
+  body('typeEvenement').notEmpty().trim().withMessage('Type d\'événement requis'),
   body('gravite').isIn(['MINEURE', 'MODEREE', 'MAJEURE', 'CRITIQUE']).withMessage('Gravité invalide'),
-  body('description').notEmpty().withMessage('Description requise'),
+  body('description').notEmpty().trim().escape().withMessage('Description requise'),
+  body('actionsCorrectives').optional().trim().escape(),
+  body('responsableSuivi').optional().trim().escape(),
   validate
 ], auditLog('MISE_A_JOUR'), ajouterEvenement);
 
-// 🔒 P0-1: QUALITE exclu
+// 🔒 P0-1: QUALITE exclu | FIX BUG #13: .trim().escape() anti-XSS
 router.post('/:id/observations', protect, excludeQualite, verifierCRVNonVerrouille, [
   body('categorie').isIn(['GENERALE', 'TECHNIQUE', 'OPERATIONNELLE', 'SECURITE', 'QUALITE', 'SLA']).withMessage('Catégorie invalide'),
-  body('contenu').notEmpty().withMessage('Contenu requis'),
+  body('contenu').notEmpty().trim().escape().withMessage('Contenu requis'),
   validate
 ], auditLog('MISE_A_JOUR'), ajouterObservation);
 
@@ -244,9 +247,20 @@ router.post('/:id/observations', protect, excludeQualite, verifierCRVNonVerrouil
  * @route   PUT /api/crv/:id/personnel
  * @desc    Mettre à jour (remplacer) tout le personnel affecté au vol
  * @access  Private (QUALITE exclu)
- * @body    { personnelAffecte: [{ nom, prenom, fonction, matricule?, telephone?, remarques? }] }
+ * @body    { personnelAffecte: [{ nom, prenom, fonction|role, matricule?, telephone?, remarques? }] }
  */
-router.put('/:id/personnel', protect, excludeQualite, verifierCRVNonVerrouille, [
+// FIX BUG #5: Middleware mapping role → fonction pour compatibilite frontend
+const mapRoleToFonction = (req, res, next) => {
+  if (req.body.personnelAffecte && Array.isArray(req.body.personnelAffecte)) {
+    req.body.personnelAffecte = req.body.personnelAffecte.map(p => {
+      if (p.role && !p.fonction) { p.fonction = p.role; }
+      return p;
+    });
+  }
+  if (req.body.role && !req.body.fonction) { req.body.fonction = req.body.role; }
+  next();
+};
+router.put('/:id/personnel', protect, excludeQualite, verifierCRVNonVerrouille, mapRoleToFonction, [
   body('personnelAffecte').isArray().withMessage('personnelAffecte doit être un tableau'),
   body('personnelAffecte.*.nom').notEmpty().withMessage('Nom requis'),
   body('personnelAffecte.*.prenom').notEmpty().withMessage('Prénom requis'),
@@ -258,9 +272,9 @@ router.put('/:id/personnel', protect, excludeQualite, verifierCRVNonVerrouille, 
  * @route   POST /api/crv/:id/personnel
  * @desc    Ajouter une personne au personnel affecté
  * @access  Private (QUALITE exclu)
- * @body    { nom, prenom, fonction, matricule?, telephone?, remarques? }
+ * @body    { nom, prenom, fonction|role, matricule?, telephone?, remarques? }
  */
-router.post('/:id/personnel', protect, excludeQualite, verifierCRVNonVerrouille, [
+router.post('/:id/personnel', protect, excludeQualite, verifierCRVNonVerrouille, mapRoleToFonction, [
   body('nom').notEmpty().withMessage('Nom requis'),
   body('prenom').notEmpty().withMessage('Prénom requis'),
   body('fonction').notEmpty().withMessage('Fonction requise'),
