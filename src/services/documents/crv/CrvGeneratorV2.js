@@ -1,8 +1,8 @@
 // ============================================
-// GÉNÉRATEUR PDF V3 — CRV REPORT AVIATION
+// GÉNÉRATEUR PDF V2 — CRV REPORT AVIATION
 // ============================================
-// 6 pages : Synthèse, Trafic, Timeline, Événements, Observations, Validation
-// 100% décisionnel aviation — aucun statut système affiché
+// 6 sections : Synthèse, Trafic, Timeline, Événements, Observations, Validation
+// Design aviation moderne — rapport décisionnel + audit
 
 import { DocumentGenerator } from '../base/DocumentGenerator.js';
 import { DOCUMENT_TYPES } from '../../../config/documents.config.js';
@@ -60,6 +60,7 @@ const THS = {
 
 const TYPE_OP_SHORT = { ARRIVEE: 'ARR', DEPART: 'DEP', TURN_AROUND: 'TAT' };
 const TYPE_OP_LABEL = { ARRIVEE: 'Arrivee', DEPART: 'Depart', TURN_AROUND: 'Turn Around' };
+const STATUT_CRV = { BROUILLON: 'Brouillon', EN_COURS: 'En cours', TERMINE: 'Termine', VALIDE: 'Valide', VERROUILLE: 'Verrouille', ANNULE: 'Annule' };
 const STATUT_PHASE = { NON_COMMENCE: 'Non commence', EN_COURS: 'En cours', TERMINE: 'Termine', NON_REALISE: 'Non realise', ANNULE: 'Annule' };
 const GRAVITE_LABEL = { MINEURE: 'Mineure', MODEREE: 'Moderee', MAJEURE: 'Majeure', CRITIQUE: 'CRITIQUE' };
 const TYPE_EVT = { PANNE_EQUIPEMENT: 'Panne equipement', ABSENCE_PERSONNEL: 'Absence personnel', RETARD: 'Retard', INCIDENT_SECURITE: 'Incident securite', INCIDENT_TECHNIQUE: 'Incident technique', PROBLEME_TECHNIQUE: 'Probleme technique', METEO: 'Meteo', AUTRE: 'Autre' };
@@ -75,6 +76,7 @@ const fmtDate = (d) => { if (!d) return '-'; return new Date(d).toLocaleDateStri
 const fmtTime = (d) => { if (!d) return '-'; return new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); };
 const fmtDateTime = (d) => { if (!d) return '-'; return new Date(d).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); };
 const n = (v) => v !== null && v !== undefined ? v : '-';
+const num = (v) => v !== null && v !== undefined ? String(v) : '0';
 
 function ecartColor(minutes) {
   if (minutes === null || minutes === undefined) return C.GRAY_500;
@@ -105,22 +107,10 @@ function statutPhaseColor(s) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// CLASSE GENERATEUR CRV — V3 (6 pages aviation report, 100% décisionnel)
+// CLASSE GENERATEUR V2
 // ═══════════════════════════════════════════════════════════════════════════
 
-function incidentColor(count) {
-  if (count === 0) return C.GREEN;
-  if (count <= 2) return C.ORANGE;
-  return C.RED;
-}
-
-function incidentBg(count) {
-  if (count === 0) return C.GREEN_BG;
-  if (count <= 2) return C.ORANGE_BG;
-  return C.RED_BG;
-}
-
-export class CrvGenerator extends DocumentGenerator {
+export class CrvGeneratorV2 extends DocumentGenerator {
   constructor(options = {}) {
     super(DOCUMENT_TYPES.CRV, options);
   }
@@ -130,8 +120,7 @@ export class CrvGenerator extends DocumentGenerator {
   // ─────────────────────────────────────────────────────────────────────────
   async fetchData(crvId) {
     const crv = await CRV.findById(crvId)
-      .populate({ path: 'vol', populate: { path: 'avion' } })
-      .populate('horaire')
+      .populate('vol')
       .populate('creePar', 'nom prenom')
       .populate('responsableVol', 'nom prenom')
       .populate('verrouillePar', 'nom prenom')
@@ -151,7 +140,6 @@ export class CrvGenerator extends DocumentGenerator {
       entity: crv,
       data: {
         vol: crv.vol,
-        horaire: crv.horaire,
         personnel: crv.personnelAffecte || [],
         materiel: crv.materielUtilise || [],
         phases,
@@ -294,10 +282,15 @@ export class CrvGenerator extends DocumentGenerator {
 
   _page1_synthese(crv, data) {
     const vol = data.vol || {};
-    const horaire = data.horaire || {};
     const phases = data.phases || [];
     const validation = data.validation;
     const evenements = data.evenements || [];
+
+    // Calcul KPI
+    const statutOp = evenements.some(e => e.gravite === 'CRITIQUE' || e.gravite === 'MAJEURE') ? 'INCIDENT' :
+                     evenements.length > 0 ? 'MINEUR' : 'CONFORME';
+    const statutColor = statutOp === 'CONFORME' ? C.GREEN : statutOp === 'MINEUR' ? C.ORANGE : C.RED;
+    const statutBg = statutOp === 'CONFORME' ? C.GREEN_BG : statutOp === 'MINEUR' ? C.ORANGE_BG : C.RED_BG;
 
     // Ecarts phases
     const phasesArr = phases.filter(p => p.phase?.typeOperation === 'ARRIVEE' || p.phase?.typeOperation === 'COMMUN');
@@ -309,9 +302,6 @@ export class CrvGenerator extends DocumentGenerator {
     const slaOk = validation?.conformiteSLA !== false;
     const slaColor = slaOk ? C.GREEN : C.RED;
     const slaBg = slaOk ? C.GREEN_BG : C.RED_BG;
-
-    // Incidents
-    const nbIncidents = evenements.length;
 
     return {
       stack: [
@@ -339,43 +329,43 @@ export class CrvGenerator extends DocumentGenerator {
           ],
         },
 
-        // HORAIRES PREVUS
-        this._sectionBar('HORAIRES PREVUS'),
+        // KPI CARDS
+        this._sectionBar('INDICATEURS CLES'),
         {
           columns: [
-            { width: '50%', table: { widths: ['35%', '65%'], body: [
-              [{ text: 'Atterrissage prevu', style: 'label' }, { text: fmtTime(horaire.heureAtterrisagePrevue), style: 'value', bold: true }],
-            ]}, layout: 'noBorders' },
-            { width: '50%', table: { widths: ['35%', '65%'], body: [
-              [{ text: 'Decollage prevu', style: 'label' }, { text: fmtTime(horaire.heureDecollagePrevue), style: 'value', bold: true }],
-            ]}, layout: 'noBorders' },
-          ],
-        },
-
-        // AERONEF
-        this._sectionBar('AERONEF'),
-        {
-          columns: [
-            { width: '50%', table: { widths: ['35%', '65%'], body: [
-              [{ text: 'Type avion', style: 'label' }, { text: vol.typeAvion || vol.avion?.typeAvion || '-', style: 'value', bold: true }],
-            ]}, layout: 'noBorders' },
-            { width: '50%', table: { widths: ['35%', '65%'], body: [
-              [{ text: 'Immatriculation', style: 'label' }, { text: vol.avion?.immatriculation || vol.immatriculation || '-', style: 'value', bold: true }],
-            ]}, layout: 'noBorders' },
-          ],
-        },
-
-        // PERFORMANCE DU VOL
-        this._sectionBar('PERFORMANCE DU VOL'),
-        {
-          columns: [
+            this._kpiCard('OPERATION', statutOp, statutColor, statutBg),
             this._kpiCard('RETARD ARR', ecartText(maxEcartArr), ecartColor(maxEcartArr), C.GRAY_50),
             this._kpiCard('RETARD DEP', ecartText(maxEcartDep), ecartColor(maxEcartDep), C.GRAY_50),
-            this._kpiCard('SLA', slaOk ? 'CONFORME' : 'NON CONFORME', slaColor, slaBg),
-            this._kpiCard('INCIDENTS', String(nbIncidents), incidentColor(nbIncidents), incidentBg(nbIncidents)),
+            this._kpiCard('SLA', slaOk ? 'OK' : 'NON CONFORME', slaColor, slaBg),
           ],
           columnGap: 8,
           margin: [0, 0, 0, 6],
+        },
+
+        // STATUT + COMPLETUDE
+        this._sectionBar('STATUT'),
+        {
+          columns: [
+            { width: '25%', table: { widths: ['*'], body: [
+              [{ text: 'Statut CRV', style: 'kpiLabel' }],
+              [{ text: STATUT_CRV[crv.statut] || crv.statut, fontSize: 12, bold: true, alignment: 'center',
+                 color: crv.statut === 'VALIDE' || crv.statut === 'VERROUILLE' ? C.GREEN : crv.statut === 'ANNULE' ? C.RED : C.BLUE }],
+            ]}, layout: 'noBorders' },
+            { width: '25%', table: { widths: ['*'], body: [
+              [{ text: 'Completude', style: 'kpiLabel' }],
+              [{ text: `${crv.completude || 0}%`, fontSize: 12, bold: true, alignment: 'center',
+                 color: (crv.completude || 0) >= 80 ? C.GREEN : C.ORANGE }],
+            ]}, layout: 'noBorders' },
+            { width: '25%', table: { widths: ['*'], body: [
+              [{ text: 'Evenements', style: 'kpiLabel' }],
+              [{ text: String(evenements.length), fontSize: 12, bold: true, alignment: 'center',
+                 color: evenements.length === 0 ? C.GREEN : C.ORANGE }],
+            ]}, layout: 'noBorders' },
+            { width: '25%', table: { widths: ['*'], body: [
+              [{ text: 'Cree le', style: 'kpiLabel' }],
+              [{ text: fmtDate(crv.dateCreation), fontSize: 9, alignment: 'center' }],
+            ]}, layout: 'noBorders' },
+          ],
         },
       ],
     };
@@ -477,7 +467,6 @@ export class CrvGenerator extends DocumentGenerator {
       { text: p.phase?.libelle || '-', style: 'tdLeft', fontSize: 6 },
       { text: fmtTime(p.heureDebutPrevue), style: 'td', fontSize: 6 },
       { text: fmtTime(p.heureDebutReelle), style: 'td', fontSize: 6 },
-      { text: fmtTime(p.heureFinPrevue), style: 'td', fontSize: 6 },
       { text: fmtTime(p.heureFinReelle), style: 'td', fontSize: 6 },
       { text: p.dureeReelleMinutes !== null && p.dureeReelleMinutes !== undefined ? `${p.dureeReelleMinutes}'` : '-', style: 'td', fontSize: 6 },
       { text: ecartText(p.ecartMinutes), style: 'td', fontSize: 6, color: ecartColor(p.ecartMinutes) },
@@ -509,14 +498,13 @@ export class CrvGenerator extends DocumentGenerator {
         phases.length > 0 ? {
           table: {
             headerRows: 1,
-            widths: ['20%', '10%', '10%', '10%', '10%', '9%', '12%', '19%'],
+            widths: ['24%', '11%', '11%', '11%', '10%', '14%', '19%'],
             body: [
               [
                 { text: 'Phase', style: 'th' },
-                { text: 'Deb. prevu', style: 'th' },
-                { text: 'Deb. reel', style: 'th' },
-                { text: 'Fin prevue', style: 'th' },
-                { text: 'Fin reelle', style: 'th' },
+                { text: 'Prevu', style: 'th' },
+                { text: 'Debut', style: 'th' },
+                { text: 'Fin', style: 'th' },
                 { text: 'Duree', style: 'th' },
                 { text: 'Ecart', style: 'th' },
                 { text: 'Statut', style: 'th' },
@@ -566,10 +554,9 @@ export class CrvGenerator extends DocumentGenerator {
     const evtRows = evenements.map(e => [
       { text: TYPE_EVT[e.typeEvenement] || e.typeEvenement || '-', style: 'tdLeft' },
       { text: GRAVITE_LABEL[e.gravite] || e.gravite || '-', style: 'td', color: graviteColor(e.gravite), bold: true },
-      { text: (e.description || '-').substring(0, 70), style: 'tdLeft', fontSize: 6 },
-      { text: e.delayCode || '-', style: 'td', fontSize: 6 },
+      { text: (e.description || '-').substring(0, 80), style: 'tdLeft', fontSize: 6 },
       { text: e.dureeImpactMinutes ? `${e.dureeImpactMinutes}'` : '-', style: 'td' },
-      { text: (e.actionsCorrectives || '-').substring(0, 50), style: 'tdLeft', fontSize: 6 },
+      { text: (e.actionsCorrectives || '-').substring(0, 60), style: 'tdLeft', fontSize: 6 },
     ]);
 
     return {
@@ -580,13 +567,12 @@ export class CrvGenerator extends DocumentGenerator {
         evenements.length > 0 ? {
           table: {
             headerRows: 1,
-            widths: ['16%', '10%', '26%', '10%', '8%', '30%'],
+            widths: ['18%', '12%', '30%', '10%', '30%'],
             body: [
               [
                 { text: 'Type', style: 'th' },
                 { text: 'Gravite', style: 'th' },
                 { text: 'Description', style: 'th' },
-                { text: 'Delay', style: 'th' },
                 { text: 'Impact', style: 'th' },
                 { text: 'Action corrective', style: 'th' },
               ],
@@ -677,6 +663,8 @@ export class CrvGenerator extends DocumentGenerator {
                  color: (validation?.scoreCompletude || crv.completude || 0) >= 80 ? C.GREEN : C.ORANGE }],
               [{ text: 'Conformite SLA', style: 'label' }, { text: validation?.conformiteSLA ? 'CONFORME' : 'NON CONFORME', style: 'value',
                  color: validation?.conformiteSLA ? C.GREEN : C.RED, bold: true }],
+              [{ text: 'Statut validation', style: 'label' }, { text: validation?.statut || '-', style: 'value',
+                 color: validation?.statut === 'VALIDE' ? C.GREEN : C.ORANGE }],
             ],
           },
           layout: 'noBorders',
@@ -742,7 +730,7 @@ export class CrvGenerator extends DocumentGenerator {
     const { entity: crv, data } = await this.fetchData(crvId);
     return {
       documentType: this.documentType,
-      version: 'V3',
+      version: 'V2',
       label: this.config.label,
       filename: this.getFilename(crv),
       folderPath: this.getFolderPath(crv),
@@ -767,4 +755,4 @@ export class CrvGenerator extends DocumentGenerator {
   }
 }
 
-export default CrvGenerator;
+export default CrvGeneratorV2;
