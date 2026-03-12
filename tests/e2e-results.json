@@ -1,0 +1,461 @@
+{
+  "steps": [
+    {
+      "step": "LOGIN",
+      "msg": "Connexion superviseur@crv.test",
+      "data": null,
+      "time": "2026-03-10T13:56:14.283Z"
+    },
+    {
+      "step": "LOGIN",
+      "msg": "OK",
+      "data": {
+        "nom": "MARTIN",
+        "prenom": "Pierre",
+        "fonction": "SUPERVISEUR"
+      },
+      "time": "2026-03-10T13:56:14.602Z"
+    },
+    {
+      "step": "PROG",
+      "msg": "Creer programme",
+      "data": {
+        "status": 201
+      },
+      "time": "2026-03-10T13:56:15.320Z"
+    },
+    {
+      "step": "PROG",
+      "msg": "Programme cree",
+      "data": {
+        "id": "69b022fea56cde3d74d07ed6"
+      },
+      "time": "2026-03-10T13:56:15.321Z"
+    },
+    {
+      "step": "PROG_VOL",
+      "msg": "Vol AF123: 201",
+      "data": {
+        "type": "ARRIVEE"
+      },
+      "time": "2026-03-10T13:56:16.771Z"
+    },
+    {
+      "step": "PROG_VOL",
+      "msg": "Vol ET450: 201",
+      "data": {
+        "type": "DEPART"
+      },
+      "time": "2026-03-10T13:56:18.232Z"
+    },
+    {
+      "step": "PROG_VOL",
+      "msg": "Vol TK890: 201",
+      "data": {
+        "type": "TURN_AROUND"
+      },
+      "time": "2026-03-10T13:56:19.698Z"
+    },
+    {
+      "step": "PROG",
+      "msg": "Valider programme",
+      "data": {
+        "status": 200
+      },
+      "time": "2026-03-10T13:56:20.410Z"
+    },
+    {
+      "step": "PROG",
+      "msg": "Activer programme",
+      "data": {
+        "status": 200,
+        "statut": "ACTIF"
+      },
+      "time": "2026-03-10T13:56:21.354Z"
+    },
+    {
+      "step": "BULLETIN",
+      "msg": "Creer bulletin",
+      "data": {
+        "status": 409
+      },
+      "time": "2026-03-10T13:56:21.724Z"
+    },
+    {
+      "step": "BULLETIN",
+      "msg": "Bulletin existant?",
+      "data": {
+        "status": 200
+      },
+      "time": "2026-03-10T13:56:22.271Z"
+    },
+    {
+      "step": "BULLETIN",
+      "msg": "Bulletin existant trouve",
+      "data": {
+        "id": "69af705a9b16e3c69842498f",
+        "mouvements": 3
+      },
+      "time": "2026-03-10T13:56:22.271Z"
+    },
+    {
+      "step": "BULLETIN",
+      "msg": "Bulletin en cours NDJ",
+      "data": {
+        "status": 200
+      },
+      "time": "2026-03-10T13:56:22.814Z"
+    },
+    {
+      "step": "BULLETIN",
+      "msg": "Mouvements trouves: 3",
+      "data": null,
+      "time": "2026-03-10T13:56:22.814Z"
+    },
+    {
+      "step": "BULLETIN",
+      "msg": "  ET100 | ARRIVEE | ET | CRV: OUI",
+      "data": null,
+      "time": "2026-03-10T13:56:22.814Z"
+    },
+    {
+      "step": "BULLETIN",
+      "msg": "  ET201 | DEPART | ET | CRV: OUI",
+      "data": null,
+      "time": "2026-03-10T13:56:22.814Z"
+    },
+    {
+      "step": "BULLETIN",
+      "msg": "  AF500 | TURN_AROUND | AF | CRV: OUI",
+      "data": null,
+      "time": "2026-03-10T13:56:22.814Z"
+    },
+    {
+      "step": "CRV",
+      "msg": "Mouvements sans CRV: 0",
+      "data": null,
+      "time": "2026-03-10T13:56:22.814Z"
+    },
+    {
+      "step": "CRV",
+      "msg": "Pas de mouvement sans CRV, creation en mode legacy",
+      "data": null,
+      "time": "2026-03-10T13:56:22.814Z"
+    },
+    {
+      "step": "CRV",
+      "msg": "Creer CRV arrivee: 201",
+      "data": {
+        "id": "69b02307a56cde3d74d07f34",
+        "statut": "BROUILLON",
+        "numeroCRV": "CRV260310-0019"
+      },
+      "time": "2026-03-10T13:56:27.888Z"
+    },
+    {
+      "step": "CRV",
+      "msg": "Creer CRV depart: 201",
+      "data": {
+        "id": "69b0230ca56cde3d74d07f62",
+        "statut": "BROUILLON",
+        "numeroCRV": "CRV260310-0020"
+      },
+      "time": "2026-03-10T13:56:32.879Z"
+    },
+    {
+      "step": "CRV",
+      "msg": "Creer CRV arrivee: 201",
+      "data": {
+        "id": "69b02311a56cde3d74d07f92",
+        "statut": "BROUILLON",
+        "numeroCRV": "CRV260310-0021"
+      },
+      "time": "2026-03-10T13:56:37.676Z"
+    },
+    {
+      "step": "CRV",
+      "msg": "Total CRV crees: 3",
+      "data": null,
+      "time": "2026-03-10T13:56:37.676Z"
+    },
+    {
+      "step": "SEARCH",
+      "msg": "CRV CRV260310-0019: 200",
+      "data": {
+        "statut": "BROUILLON",
+        "typeOperation": "ARRIVEE",
+        "compagnie": "Air France",
+        "numeroVol": "VOL0197",
+        "completude": 30
+      },
+      "time": "2026-03-10T13:56:39.027Z"
+    },
+    {
+      "step": "SEARCH",
+      "msg": "CRV CRV260310-0020: 200",
+      "data": {
+        "statut": "BROUILLON",
+        "typeOperation": "DEPART",
+        "compagnie": "Air France",
+        "numeroVol": "VOL0198",
+        "completude": 30
+      },
+      "time": "2026-03-10T13:56:40.370Z"
+    },
+    {
+      "step": "SEARCH",
+      "msg": "CRV CRV260310-0021: 200",
+      "data": {
+        "statut": "BROUILLON",
+        "typeOperation": "ARRIVEE",
+        "compagnie": "Air France",
+        "numeroVol": "VOL0199",
+        "completude": 30
+      },
+      "time": "2026-03-10T13:56:41.666Z"
+    },
+    {
+      "step": "DEMARRER",
+      "msg": "CRV260310-0019: 200",
+      "data": {
+        "statut": "EN_COURS"
+      },
+      "time": "2026-03-10T13:56:43.035Z"
+    },
+    {
+      "step": "DEMARRER",
+      "msg": "CRV260310-0020: 200",
+      "data": {
+        "statut": "EN_COURS"
+      },
+      "time": "2026-03-10T13:56:44.336Z"
+    },
+    {
+      "step": "DEMARRER",
+      "msg": "CRV260310-0021: 200",
+      "data": {
+        "statut": "EN_COURS"
+      },
+      "time": "2026-03-10T13:56:45.632Z"
+    },
+    {
+      "step": "PERSONNEL",
+      "msg": "CHEF_ESCALE HASSAN: 201",
+      "data": {},
+      "time": "2026-03-10T13:56:46.475Z"
+    },
+    {
+      "step": "PERSONNEL",
+      "msg": "AGENT_PISTE OMAR: 201",
+      "data": {},
+      "time": "2026-03-10T13:56:47.303Z"
+    },
+    {
+      "step": "PERSONNEL",
+      "msg": "AGENT_TRAFIC MOUSSA: 201",
+      "data": {},
+      "time": "2026-03-10T13:56:48.119Z"
+    },
+    {
+      "step": "PERSONNEL",
+      "msg": "CRV apres personnel: undefined personnes",
+      "data": null,
+      "time": "2026-03-10T13:56:49.452Z"
+    },
+    {
+      "step": "PHASES",
+      "msg": "Phases trouvees: 12",
+      "data": null,
+      "time": "2026-03-10T13:56:50.113Z"
+    },
+    {
+      "step": "PHASES",
+      "msg": "Phase 1: undefined - statut: NON_COMMENCE",
+      "data": null,
+      "time": "2026-03-10T13:56:50.113Z"
+    },
+    {
+      "step": "PHASES",
+      "msg": "Demarrer phase: 200",
+      "data": {
+        "statut": "EN_COURS"
+      },
+      "time": "2026-03-10T13:56:52.284Z"
+    },
+    {
+      "step": "PHASES",
+      "msg": "Terminer phase: 200",
+      "data": {
+        "statut": "TERMINE"
+      },
+      "time": "2026-03-10T13:56:55.456Z"
+    },
+    {
+      "step": "PHASES",
+      "msg": "Non-realise phase 2: 200",
+      "data": {
+        "statut": "NON_REALISE"
+      },
+      "time": "2026-03-10T13:56:58.449Z"
+    },
+    {
+      "step": "PHASES",
+      "msg": "Phase 3: terminer=200",
+      "data": null,
+      "time": "2026-03-10T13:57:04.248Z"
+    },
+    {
+      "step": "PHASES",
+      "msg": "Phase 4: terminer=200",
+      "data": null,
+      "time": "2026-03-10T13:57:10.206Z"
+    },
+    {
+      "step": "PHASES",
+      "msg": "Phase 5: terminer=200",
+      "data": null,
+      "time": "2026-03-10T13:57:16.249Z"
+    },
+    {
+      "step": "PHASES",
+      "msg": "Toutes les phases traitees",
+      "data": null,
+      "time": "2026-03-10T13:57:57.241Z"
+    },
+    {
+      "step": "CHARGES",
+      "msg": "PASSAGERS: 201",
+      "data": {},
+      "time": "2026-03-10T13:57:59.748Z"
+    },
+    {
+      "step": "CHARGES",
+      "msg": "BAGAGES: 201",
+      "data": {},
+      "time": "2026-03-10T13:58:02.578Z"
+    },
+    {
+      "step": "CHARGES",
+      "msg": "FRET: 201",
+      "data": {},
+      "time": "2026-03-10T13:58:05.102Z"
+    },
+    {
+      "step": "EVENEMENT",
+      "msg": "Creer evenement: 201",
+      "data": {
+        "typeEvenement": "RETARD"
+      },
+      "time": "2026-03-10T13:58:07.446Z"
+    },
+    {
+      "step": "EVENEMENT",
+      "msg": "XSS test: 201",
+      "data": null,
+      "time": "2026-03-10T13:58:09.785Z"
+    },
+    {
+      "step": "EVENEMENT",
+      "msg": "XSS protection: OK - script echappe",
+      "data": null,
+      "time": "2026-03-10T13:58:09.785Z"
+    },
+    {
+      "step": "RESPONSABLE",
+      "msg": "Personnel du CRV: 0",
+      "data": null,
+      "time": "2026-03-10T13:58:11.510Z"
+    },
+    {
+      "step": "RESPONSABLE",
+      "msg": "Aucun personnel, on essaie avec le user ID",
+      "data": null,
+      "time": "2026-03-10T13:58:11.510Z"
+    },
+    {
+      "step": "RESPONSABLE",
+      "msg": "Set responsableVol (user): 200",
+      "data": null,
+      "time": "2026-03-10T13:58:14.002Z"
+    },
+    {
+      "step": "TERMINER",
+      "msg": "Completude avant: 100%",
+      "data": null,
+      "time": "2026-03-10T13:58:15.489Z"
+    },
+    {
+      "step": "TERMINER",
+      "msg": "Terminer CRV: 200",
+      "data": {
+        "statut": "TERMINE"
+      },
+      "time": "2026-03-10T13:58:19.300Z"
+    },
+    {
+      "step": "VALIDATION",
+      "msg": "Statut actuel: TERMINE",
+      "data": null,
+      "time": "2026-03-10T13:58:21.929Z"
+    },
+    {
+      "step": "VALIDATION",
+      "msg": "Valider: 200",
+      "data": {
+        "statut": "VALIDE",
+        "anomalies": [],
+        "scoreCompletude": 100
+      },
+      "time": "2026-03-10T13:58:33.229Z"
+    },
+    {
+      "step": "VALIDATION",
+      "msg": "Statut apres validation: VALIDE",
+      "data": null,
+      "time": "2026-03-10T13:58:34.746Z"
+    },
+    {
+      "step": "VALIDATION",
+      "msg": "Verrouiller: 200",
+      "data": {
+        "statut": "VERROUILLE"
+      },
+      "time": "2026-03-10T13:58:35.920Z"
+    },
+    {
+      "step": "VALIDATION",
+      "msg": "Statut final: VERROUILLE",
+      "data": null,
+      "time": "2026-03-10T13:58:37.422Z"
+    },
+    {
+      "step": "ARCHIVE",
+      "msg": "CRV final",
+      "data": {
+        "statut": "VERROUILLE",
+        "completude": 100,
+        "archivage": "non archive"
+      },
+      "time": "2026-03-10T13:58:38.949Z"
+    },
+    {
+      "step": "ARCHIVE",
+      "msg": "Test immutabilite (modif CRV verrouille): 403",
+      "data": {
+        "expected": "403 ou 400"
+      },
+      "time": "2026-03-10T13:58:39.282Z"
+    }
+  ],
+  "errors": [
+    {
+      "step": "BULLETIN",
+      "msg": "Pas de bulletinId",
+      "data": {
+        "success": false,
+        "message": "Un bulletin avec le numero BM-NDJ-20260310 existe deja"
+      }
+    }
+  ],
+  "warnings": []
+}

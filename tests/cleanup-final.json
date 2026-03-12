@@ -1,0 +1,37 @@
+{
+  "before": {
+    "bulletinsmouvements": 1,
+    "evenementoperationnels": 1,
+    "validationcrvs": 3,
+    "phaseexecutions": 0,
+    "historiquemodifications": 35,
+    "chronologiephases": 0
+  },
+  "deletions": {
+    "bulletinsmouvements": 1,
+    "evenementoperationnels": 1,
+    "validationcrvs": 3,
+    "phaseexecutions": 0,
+    "historiquemodifications": 35,
+    "chronologiephases": 0
+  },
+  "protectedBefore": {
+    "users": 0,
+    "programmesvol": 3,
+    "programmesvolsaisonniers": 1,
+    "vols": 209,
+    "engins": 24,
+    "avions": 3,
+    "personnes": 9,
+    "notifications": 2452,
+    "notificationrules": 492,
+    "notificationrecipients": 6,
+    "useractivitylogs": 128,
+    "compteurs": 8,
+    "horaires": 153,
+    "affectationenginvols": 60,
+    "volsprogramme": 83
+  },
+  "allOK": true,
+  "timestamp": "2026-03-10T23:27:39.179Z"
+}

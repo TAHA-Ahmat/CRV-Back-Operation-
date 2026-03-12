@@ -1,0 +1,2948 @@
+{
+  "timestamp": "2026-03-11T05:08:35.269Z",
+  "results": {
+    "phase0": {
+      "status": "OK",
+      "message": "Nettoyage effectue"
+    },
+    "phase1": {
+      "status": "OK",
+      "programmeId": "69b0a43597243159a260de4a",
+      "nom": "E2E_TEST_MARS_2026",
+      "nbVols": 23
+    },
+    "phase2": {
+      "status": "OK",
+      "bulletinId": "69b0f8654ac095d05f1fec54"
+    },
+    "phase3": {
+      "status": "OK",
+      "volId": "69b0f8684ac095d05f1fecd2",
+      "typeAvion": "E145",
+      "typeOperation": "TURN_AROUND"
+    },
+    "phase4": {
+      "status": "OK",
+      "crvId": "69b0f8704ac095d05f1fed4b",
+      "numeroCRV": "CRV260311-0014",
+      "statut": "BROUILLON"
+    },
+    "phase5": {
+      "status": "OK",
+      "nbPhases": 20,
+      "cascadeInitialisee": true
+    },
+    "phase6": {
+      "status": "OK"
+    },
+    "phase7": {
+      "status": "OK"
+    },
+    "phase8": {
+      "status": "OK"
+    },
+    "phase9": {
+      "status": "OK"
+    }
+  },
+  "logs": [
+    {
+      "timestamp": "2026-03-11T05:06:41.863Z",
+      "phase": "AUTH",
+      "message": "Connexion superviseur...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:41.866Z",
+      "phase": "API",
+      "message": "POST /auth/login",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:42.313Z",
+      "phase": "AUTH",
+      "message": "Token superviseur obtenu",
+      "data": {
+        "tokenLength": 260
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:42.313Z",
+      "phase": "AUTH",
+      "message": "Connexion agent...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:42.313Z",
+      "phase": "API",
+      "message": "POST /auth/login",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:42.545Z",
+      "phase": "AUTH",
+      "message": "Token agent obtenu",
+      "data": {
+        "tokenLength": 251
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:42.545Z",
+      "phase": "PHASE_0",
+      "message": "=== NETTOYAGE BASE ===",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:42.545Z",
+      "phase": "API",
+      "message": "GET /bulletins",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:42.917Z",
+      "phase": "PHASE_0",
+      "message": "Bulletins existants: 0",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:42.917Z",
+      "phase": "API",
+      "message": "GET /crv",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:43.587Z",
+      "phase": "PHASE_0",
+      "message": "CRVs existants: 4",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:43.587Z",
+      "phase": "PHASE_1",
+      "message": "=== IDENTIFIER PROGRAMME VOL ===",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:43.587Z",
+      "phase": "API",
+      "message": "GET /programmes-vol",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:44.083Z",
+      "phase": "PHASE_1",
+      "message": "Programmes trouves: 3",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:44.083Z",
+      "phase": "PHASE_1",
+      "message": "Programme selectionne",
+      "data": {
+        "id": "69b0a43597243159a260de4a",
+        "nom": "E2E_TEST_MARS_2026",
+        "statut": "ACTIF",
+        "dateDebut": "2026-03-10T00:00:00.000Z",
+        "dateFin": "2026-06-30T00:00:00.000Z"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:44.084Z",
+      "phase": "API",
+      "message": "GET /programmes-vol/69b0a43597243159a260de4a/vols",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:44.670Z",
+      "phase": "PHASE_1",
+      "message": "Vols dans le programme: 23",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:44.670Z",
+      "phase": "PHASE_1",
+      "message": "Vol programme",
+      "data": {
+        "numeroVol": "CH110/111",
+        "compagnie": "CH",
+        "typeAvion": "E145",
+        "heureArrivee": "10:00",
+        "heureDepart": "07:00",
+        "provenance": "AEH",
+        "destination": "AEH",
+        "joursSemaine": [
+          1,
+          3
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:44.670Z",
+      "phase": "PHASE_1",
+      "message": "Vol programme",
+      "data": {
+        "numeroVol": "CH220/221",
+        "compagnie": "CH",
+        "typeAvion": "ATR42",
+        "heureArrivee": "12:00",
+        "heureDepart": "07:30",
+        "provenance": "FYT",
+        "destination": "FYT",
+        "joursSemaine": [
+          1,
+          4
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:44.670Z",
+      "phase": "PHASE_1",
+      "message": "Vol programme",
+      "data": {
+        "numeroVol": "KP033",
+        "compagnie": "KP",
+        "typeAvion": "B737-700",
+        "heureDepart": "07:45",
+        "provenance": null,
+        "destination": "ABV-LFW",
+        "joursSemaine": [
+          1,
+          4
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:44.670Z",
+      "phase": "PHASE_1",
+      "message": "Vol programme",
+      "data": {
+        "numeroVol": "KP039",
+        "compagnie": "KP",
+        "typeAvion": "B737-800",
+        "heureDepart": "07:55",
+        "provenance": null,
+        "destination": "DLA-LFW",
+        "joursSemaine": [
+          0,
+          1,
+          3,
+          5
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:44.670Z",
+      "phase": "PHASE_1",
+      "message": "Vol programme",
+      "data": {
+        "numeroVol": "TK635",
+        "compagnie": "TK",
+        "typeAvion": "B737-800",
+        "heureArrivee": "09:05",
+        "heureDepart": "10:20",
+        "provenance": "IST (DIRECT)",
+        "destination": "NIM-IST",
+        "joursSemaine": [
+          1,
+          5
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:44.671Z",
+      "phase": "PHASE_2",
+      "message": "=== CREATION BULLETIN DE MOUVEMENT ===",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:44.671Z",
+      "phase": "PHASE_2",
+      "message": "Creation bulletin depuis programme...",
+      "data": {
+        "progId": "69b0a43597243159a260de4a",
+        "today": "2026-03-11",
+        "tomorrow": "2026-03-12"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:44.671Z",
+      "phase": "API",
+      "message": "POST /bulletins/depuis-programme",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:46.032Z",
+      "phase": "PHASE_2",
+      "message": "Bulletin cree avec succes",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec54",
+        "escale": "ALG",
+        "statut": "BROUILLON",
+        "mouvements": 16
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:46.032Z",
+      "phase": "API",
+      "message": "GET /bulletins/69b0f8654ac095d05f1fec54",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:46.557Z",
+      "phase": "PHASE_2",
+      "message": "Mouvements dans le bulletin: 16",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:46.557Z",
+      "phase": "API",
+      "message": "GET /bulletins/69b0f8654ac095d05f1fec54",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.112Z",
+      "phase": "PHASE_2",
+      "message": "Mouvements finaux: 16",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec5a",
+        "numeroVol": "CH110/111",
+        "typeAvion": "E145",
+        "heureArriveePrevue": "2026-03-11T09:00:00.000Z",
+        "heureDepartPrevue": "2026-03-11T06:00:00.000Z",
+        "provenance": "AEH",
+        "destination": "AEH",
+        "codeCompagnie": "CH"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec5b",
+        "numeroVol": "KP039",
+        "typeAvion": "B737-800",
+        "heureArriveePrevue": null,
+        "heureDepartPrevue": "2026-03-11T06:55:00.000Z",
+        "provenance": null,
+        "destination": "DLA-LFW",
+        "codeCompagnie": "KP"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec5c",
+        "numeroVol": "ET3913",
+        "typeAvion": "B737F/B77F/B763F",
+        "heureArriveePrevue": "2026-03-11T08:30:00.000Z",
+        "heureDepartPrevue": "2026-03-11T09:30:00.000Z",
+        "provenance": "ADD",
+        "destination": "ADD (ET3912)",
+        "codeCompagnie": "ET"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec5d",
+        "numeroVol": "ET939",
+        "typeAvion": "B737-800",
+        "heureArriveePrevue": "2026-03-11T11:10:00.000Z",
+        "heureDepartPrevue": "2026-03-11T13:05:00.000Z",
+        "provenance": "ADD",
+        "destination": "ADD (ET938)",
+        "codeCompagnie": "ET"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec5e",
+        "numeroVol": "AF908",
+        "typeAvion": "B777",
+        "heureArriveePrevue": "2026-03-11T17:20:00.000Z",
+        "heureDepartPrevue": "2026-03-11T18:50:00.000Z",
+        "provenance": "CDG",
+        "destination": "NSI-CDG",
+        "codeCompagnie": "AF"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec5f",
+        "numeroVol": "AH5350",
+        "typeAvion": "B737",
+        "heureArriveePrevue": "2026-03-11T02:25:00.000Z",
+        "heureDepartPrevue": "2026-03-11T03:30:00.000Z",
+        "provenance": "DLA-ALG",
+        "destination": "ALG",
+        "codeCompagnie": "AH"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec60",
+        "numeroVol": "ET3633",
+        "typeAvion": "B77F/B763F",
+        "heureArriveePrevue": "2026-03-11T07:45:00.000Z",
+        "heureDepartPrevue": "2026-03-11T09:15:00.000Z",
+        "provenance": "SARJAH",
+        "destination": "ADD (ET3912)",
+        "codeCompagnie": "ET"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec61",
+        "numeroVol": "QC312",
+        "typeAvion": "E90",
+        "heureArriveePrevue": "2026-03-11T13:25:00.000Z",
+        "heureDepartPrevue": "2026-03-11T14:10:00.000Z",
+        "provenance": "DLA-NSI",
+        "destination": "NSI-DLA (QC313)",
+        "codeCompagnie": "QC"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec62",
+        "numeroVol": "KP032",
+        "typeAvion": "B737-800",
+        "heureArriveePrevue": "2026-03-11T17:55:00.000Z",
+        "heureDepartPrevue": null,
+        "provenance": "LFW-ABV",
+        "destination": null,
+        "codeCompagnie": "KP"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec63",
+        "numeroVol": "CH220/221",
+        "typeAvion": "ATR42",
+        "heureArriveePrevue": "2026-03-12T11:00:00.000Z",
+        "heureDepartPrevue": "2026-03-12T06:30:00.000Z",
+        "provenance": "FYT",
+        "destination": "FYT",
+        "codeCompagnie": "CH"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec64",
+        "numeroVol": "KP033",
+        "typeAvion": "B737-700",
+        "heureArriveePrevue": null,
+        "heureDepartPrevue": "2026-03-12T06:45:00.000Z",
+        "provenance": null,
+        "destination": "ABV-LFW",
+        "codeCompagnie": "KP"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec65",
+        "numeroVol": "ET3913",
+        "typeAvion": "B737F/B77F/B763F",
+        "heureArriveePrevue": "2026-03-12T08:30:00.000Z",
+        "heureDepartPrevue": "2026-03-12T09:30:00.000Z",
+        "provenance": "ADD",
+        "destination": "ADD (ET3912)",
+        "codeCompagnie": "ET"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec66",
+        "numeroVol": "ET939",
+        "typeAvion": "B737-800",
+        "heureArriveePrevue": "2026-03-12T11:10:00.000Z",
+        "heureDepartPrevue": "2026-03-12T13:05:00.000Z",
+        "provenance": "ADD",
+        "destination": "ADD (ET938)",
+        "codeCompagnie": "ET"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec67",
+        "numeroVol": "AT293",
+        "typeAvion": "B737-800",
+        "heureArriveePrevue": "2026-03-12T03:25:00.000Z",
+        "heureDepartPrevue": "2026-03-12T04:25:00.000Z",
+        "provenance": "CMN",
+        "destination": "CMN",
+        "codeCompagnie": "AT"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec68",
+        "numeroVol": "MS885",
+        "typeAvion": "B737-800",
+        "heureArriveePrevue": "2026-03-12T10:40:00.000Z",
+        "heureDepartPrevue": "2026-03-12T12:10:00.000Z",
+        "provenance": "CAI",
+        "destination": "CAI (MS886)",
+        "codeCompagnie": "MS"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2",
+      "message": "Detail mouvement",
+      "data": {
+        "id": "69b0f8654ac095d05f1fec69",
+        "numeroVol": "KP038",
+        "typeAvion": "B737-800",
+        "heureArriveePrevue": "2026-03-12T17:50:00.000Z",
+        "heureDepartPrevue": null,
+        "provenance": "LFW-DLA",
+        "destination": null,
+        "codeCompagnie": "KP"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "PHASE_2B",
+      "message": "=== PUBLICATION BULLETIN ===",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.113Z",
+      "phase": "API",
+      "message": "POST /bulletins/69b0f8654ac095d05f1fec54/publier",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.784Z",
+      "phase": "PHASE_2B",
+      "message": "Publication bulletin",
+      "data": {
+        "status": 200,
+        "data": {
+          "success": true,
+          "message": "Bulletin BM-ALG-20260311 publie",
+          "data": {
+            "archivage": {
+              "driveFileId": null,
+              "driveWebViewLink": null,
+              "filename": null,
+              "folderPath": null,
+              "size": null,
+              "archivedAt": null,
+              "archivedBy": null,
+              "version": 1
+            },
+            "_id": "69b0f8654ac095d05f1fec54",
+            "numeroBulletin": "BM-ALG-20260311",
+            "escale": "ALG",
+            "titre": "Bulletin test E2E - 2026-03-11",
+            "dateDebut": "2026-03-11T00:00:00.000Z",
+            "dateFin": "2026-03-12T00:00:00.000Z",
+            "semaine": 11,
+            "annee": 2026,
+            "mouvements": [
+              {
+                "vol": null,
+                "numeroVol": "CH110/111",
+                "codeCompagnie": "CH",
+                "dateMouvement": "2026-03-11T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-11T09:00:00.000Z",
+                "heureDepartPrevue": "2026-03-11T06:00:00.000Z",
+                "provenance": "AEH",
+                "destination": "AEH",
+                "typeAvion": "E145",
+                "typeOperation": "TURN_AROUND",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a43697243159a260de50",
+                "statutMouvement": "PREVU",
+                "remarques": "Royal Airways",
+                "ordre": 0,
+                "_id": "69b0f8654ac095d05f1fec5a"
+              },
+              {
+                "vol": null,
+                "numeroVol": "KP039",
+                "codeCompagnie": "KP",
+                "dateMouvement": "2026-03-11T00:00:00.000Z",
+                "heureArriveePrevue": null,
+                "heureDepartPrevue": "2026-03-11T06:55:00.000Z",
+                "provenance": null,
+                "destination": "DLA-LFW",
+                "typeAvion": "B737-800",
+                "typeOperation": "DEPART",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a43897243159a260de5f",
+                "statutMouvement": "PREVU",
+                "remarques": null,
+                "ordre": 1,
+                "_id": "69b0f8654ac095d05f1fec5b"
+              },
+              {
+                "vol": null,
+                "numeroVol": "ET3913",
+                "codeCompagnie": "ET",
+                "dateMouvement": "2026-03-11T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-11T08:30:00.000Z",
+                "heureDepartPrevue": "2026-03-11T09:30:00.000Z",
+                "provenance": "ADD",
+                "destination": "ADD (ET3912)",
+                "typeAvion": "B737F/B77F/B763F",
+                "typeOperation": "TURN_AROUND",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a43997243159a260de69",
+                "statutMouvement": "PREVU",
+                "remarques": "Du 26 Oct.25 au 28 Mars 26",
+                "ordre": 2,
+                "_id": "69b0f8654ac095d05f1fec5c"
+              },
+              {
+                "vol": null,
+                "numeroVol": "ET939",
+                "codeCompagnie": "ET",
+                "dateMouvement": "2026-03-11T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-11T11:10:00.000Z",
+                "heureDepartPrevue": "2026-03-11T13:05:00.000Z",
+                "provenance": "ADD",
+                "destination": "ADD (ET938)",
+                "typeAvion": "B737-800",
+                "typeOperation": "TURN_AROUND",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a43b97243159a260de73",
+                "statutMouvement": "PREVU",
+                "remarques": "Du 26 Oct.25 au 28 Mars 26",
+                "ordre": 3,
+                "_id": "69b0f8654ac095d05f1fec5d"
+              },
+              {
+                "vol": null,
+                "numeroVol": "AF908",
+                "codeCompagnie": "AF",
+                "dateMouvement": "2026-03-11T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-11T17:20:00.000Z",
+                "heureDepartPrevue": "2026-03-11T18:50:00.000Z",
+                "provenance": "CDG",
+                "destination": "NSI-CDG",
+                "typeAvion": "B777",
+                "typeOperation": "TURN_AROUND",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a43c97243159a260de78",
+                "statutMouvement": "PREVU",
+                "remarques": "Du 27 Oct. au 28 Nov. 2025",
+                "ordre": 4,
+                "_id": "69b0f8654ac095d05f1fec5e"
+              },
+              {
+                "vol": null,
+                "numeroVol": "AH5350",
+                "codeCompagnie": "AH",
+                "dateMouvement": "2026-03-11T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-11T02:25:00.000Z",
+                "heureDepartPrevue": "2026-03-11T03:30:00.000Z",
+                "provenance": "DLA-ALG",
+                "destination": "ALG",
+                "typeAvion": "B737",
+                "typeOperation": "TURN_AROUND",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a44297243159a260dea5",
+                "statutMouvement": "PREVU",
+                "remarques": "Air Algérie du 26 Oct.25 au 28 Mars 26",
+                "ordre": 5,
+                "_id": "69b0f8654ac095d05f1fec5f"
+              },
+              {
+                "vol": null,
+                "numeroVol": "ET3633",
+                "codeCompagnie": "ET",
+                "dateMouvement": "2026-03-11T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-11T07:45:00.000Z",
+                "heureDepartPrevue": "2026-03-11T09:15:00.000Z",
+                "provenance": "SARJAH",
+                "destination": "ADD (ET3912)",
+                "typeAvion": "B77F/B763F",
+                "typeOperation": "TURN_AROUND",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a44397243159a260deaa",
+                "statutMouvement": "PREVU",
+                "remarques": "Du 26 Oct.25 au 28 Mars 26",
+                "ordre": 6,
+                "_id": "69b0f8654ac095d05f1fec60"
+              },
+              {
+                "vol": null,
+                "numeroVol": "QC312",
+                "codeCompagnie": "QC",
+                "dateMouvement": "2026-03-11T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-11T13:25:00.000Z",
+                "heureDepartPrevue": "2026-03-11T14:10:00.000Z",
+                "provenance": "DLA-NSI",
+                "destination": "NSI-DLA (QC313)",
+                "typeAvion": "E90",
+                "typeOperation": "TURN_AROUND",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a44397243159a260deaf",
+                "statutMouvement": "PREVU",
+                "remarques": "Du 26 Oct.25 au 28 Mars 26",
+                "ordre": 7,
+                "_id": "69b0f8654ac095d05f1fec61"
+              },
+              {
+                "vol": null,
+                "numeroVol": "KP032",
+                "codeCompagnie": "KP",
+                "dateMouvement": "2026-03-11T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-11T17:55:00.000Z",
+                "heureDepartPrevue": null,
+                "provenance": "LFW-ABV",
+                "destination": null,
+                "typeAvion": "B737-800",
+                "typeOperation": "ARRIVEE",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a44497243159a260deb4",
+                "statutMouvement": "PREVU",
+                "remarques": "NIGHT STOP",
+                "ordre": 8,
+                "_id": "69b0f8654ac095d05f1fec62"
+              },
+              {
+                "vol": null,
+                "numeroVol": "CH220/221",
+                "codeCompagnie": "CH",
+                "dateMouvement": "2026-03-12T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-12T11:00:00.000Z",
+                "heureDepartPrevue": "2026-03-12T06:30:00.000Z",
+                "provenance": "FYT",
+                "destination": "FYT",
+                "typeAvion": "ATR42",
+                "typeOperation": "TURN_AROUND",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a43797243159a260de55",
+                "statutMouvement": "PREVU",
+                "remarques": "Royal Airways",
+                "ordre": 9,
+                "_id": "69b0f8654ac095d05f1fec63"
+              },
+              {
+                "vol": null,
+                "numeroVol": "KP033",
+                "codeCompagnie": "KP",
+                "dateMouvement": "2026-03-12T00:00:00.000Z",
+                "heureArriveePrevue": null,
+                "heureDepartPrevue": "2026-03-12T06:45:00.000Z",
+                "provenance": null,
+                "destination": "ABV-LFW",
+                "typeAvion": "B737-700",
+                "typeOperation": "DEPART",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a43797243159a260de5a",
+                "statutMouvement": "PREVU",
+                "remarques": null,
+                "ordre": 10,
+                "_id": "69b0f8654ac095d05f1fec64"
+              },
+              {
+                "vol": null,
+                "numeroVol": "ET3913",
+                "codeCompagnie": "ET",
+                "dateMouvement": "2026-03-12T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-12T08:30:00.000Z",
+                "heureDepartPrevue": "2026-03-12T09:30:00.000Z",
+                "provenance": "ADD",
+                "destination": "ADD (ET3912)",
+                "typeAvion": "B737F/B77F/B763F",
+                "typeOperation": "TURN_AROUND",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a43997243159a260de69",
+                "statutMouvement": "PREVU",
+                "remarques": "Du 26 Oct.25 au 28 Mars 26",
+                "ordre": 11,
+                "_id": "69b0f8654ac095d05f1fec65"
+              },
+              {
+                "vol": null,
+                "numeroVol": "ET939",
+                "codeCompagnie": "ET",
+                "dateMouvement": "2026-03-12T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-12T11:10:00.000Z",
+                "heureDepartPrevue": "2026-03-12T13:05:00.000Z",
+                "provenance": "ADD",
+                "destination": "ADD (ET938)",
+                "typeAvion": "B737-800",
+                "typeOperation": "TURN_AROUND",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a43b97243159a260de73",
+                "statutMouvement": "PREVU",
+                "remarques": "Du 26 Oct.25 au 28 Mars 26",
+                "ordre": 12,
+                "_id": "69b0f8654ac095d05f1fec66"
+              },
+              {
+                "vol": null,
+                "numeroVol": "AT293",
+                "codeCompagnie": "AT",
+                "dateMouvement": "2026-03-12T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-12T03:25:00.000Z",
+                "heureDepartPrevue": "2026-03-12T04:25:00.000Z",
+                "provenance": "CMN",
+                "destination": "CMN",
+                "typeAvion": "B737-800",
+                "typeOperation": "TURN_AROUND",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a43d97243159a260de82",
+                "statutMouvement": "PREVU",
+                "remarques": "Du 08 Déc.25 au 28 Mars 26",
+                "ordre": 13,
+                "_id": "69b0f8654ac095d05f1fec67"
+              },
+              {
+                "vol": null,
+                "numeroVol": "MS885",
+                "codeCompagnie": "MS",
+                "dateMouvement": "2026-03-12T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-12T10:40:00.000Z",
+                "heureDepartPrevue": "2026-03-12T12:10:00.000Z",
+                "provenance": "CAI",
+                "destination": "CAI (MS886)",
+                "typeAvion": "B737-800",
+                "typeOperation": "TURN_AROUND",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a44097243159a260de96",
+                "statutMouvement": "PREVU",
+                "remarques": "Du 26 Oct.25 au 28 Mars 26",
+                "ordre": 14,
+                "_id": "69b0f8654ac095d05f1fec68"
+              },
+              {
+                "vol": null,
+                "numeroVol": "KP038",
+                "codeCompagnie": "KP",
+                "dateMouvement": "2026-03-12T00:00:00.000Z",
+                "heureArriveePrevue": "2026-03-12T17:50:00.000Z",
+                "heureDepartPrevue": null,
+                "provenance": "LFW-DLA",
+                "destination": null,
+                "typeAvion": "B737-800",
+                "typeOperation": "ARRIVEE",
+                "origine": "PROGRAMME",
+                "typeHorsProgramme": null,
+                "raisonHorsProgramme": null,
+                "programmeVolReference": "69b0a43597243159a260de4a",
+                "volProgrammeReference": "69b0a44197243159a260dea0",
+                "statutMouvement": "PREVU",
+                "remarques": "NIGHT STOP",
+                "ordre": 15,
+                "_id": "69b0f8654ac095d05f1fec69"
+              }
+            ],
+            "nombreMouvements": 16,
+            "nombreMouvementsProgramme": 16,
+            "nombreMouvementsHorsProgramme": 0,
+            "compagnies": [
+              "AF",
+              "AH",
+              "AT",
+              "CH",
+              "ET",
+              "KP",
+              "MS",
+              "QC"
+            ],
+            "statut": "PUBLIE",
+            "datePublication": "2026-03-11T05:06:47.436Z",
+            "publiePar": "69a72cc044579001349b1b01",
+            "programmeVolSource": "69b0a43597243159a260de4a",
+            "remarques": "Test pipeline E2E automatise",
+            "creePar": "69a72cc044579001349b1b01",
+            "modifiePar": "69a72cc044579001349b1b01",
+            "derniereModification": "2026-03-11T05:06:47.441Z",
+            "createdAt": "2026-03-11T05:06:45.163Z",
+            "updatedAt": "2026-03-11T05:06:47.440Z",
+            "__v": 1
+          }
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:47.784Z",
+      "phase": "API",
+      "message": "POST /bulletins/69b0f8654ac095d05f1fec54/creer-vols",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:53.664Z",
+      "phase": "PHASE_2B",
+      "message": "Creation vols depuis bulletin",
+      "data": {
+        "status": 200,
+        "data": {
+          "success": true,
+          "message": "15 vol(s) cree(s), 1 existant(s)",
+          "data": {
+            "bulletin": "69b0f8654ac095d05f1fec54",
+            "crees": [
+              {
+                "numeroVol": "CH110/111",
+                "volId": "69b0f8684ac095d05f1fecd2"
+              },
+              {
+                "numeroVol": "KP039",
+                "volId": "69b0f8684ac095d05f1fecd5"
+              },
+              {
+                "numeroVol": "ET3913",
+                "volId": "69b0f8684ac095d05f1fecd8"
+              },
+              {
+                "numeroVol": "ET939",
+                "volId": "69b0f8694ac095d05f1fecdb"
+              },
+              {
+                "numeroVol": "AF908",
+                "volId": "69b0f8694ac095d05f1fecde"
+              },
+              {
+                "numeroVol": "AH5350",
+                "volId": "69b0f86a4ac095d05f1fece1"
+              },
+              {
+                "numeroVol": "ET3633",
+                "volId": "69b0f86a4ac095d05f1fece4"
+              },
+              {
+                "numeroVol": "QC312",
+                "volId": "69b0f86a4ac095d05f1fece7"
+              },
+              {
+                "numeroVol": "KP032",
+                "volId": "69b0f86b4ac095d05f1fecea"
+              },
+              {
+                "numeroVol": "CH220/221",
+                "volId": "69b0f86b4ac095d05f1feced"
+              },
+              {
+                "numeroVol": "KP033",
+                "volId": "69b0f86b4ac095d05f1fecf0"
+              },
+              {
+                "numeroVol": "ET3913",
+                "volId": "69b0f86c4ac095d05f1fecf3"
+              },
+              {
+                "numeroVol": "ET939",
+                "volId": "69b0f86c4ac095d05f1fecf6"
+              },
+              {
+                "numeroVol": "AT293",
+                "volId": "69b0f86c4ac095d05f1fecf9"
+              },
+              {
+                "numeroVol": "MS885",
+                "volId": "69b0f86c4ac095d05f1fecfc"
+              }
+            ],
+            "existants": [
+              {
+                "numeroVol": "KP038",
+                "volId": "69aec5dfdd9349c3a26ae72f"
+              }
+            ],
+            "erreurs": []
+          }
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:53.664Z",
+      "phase": "PHASE_3",
+      "message": "=== VERIFICATION VOL + HORAIRE ===",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:53.664Z",
+      "phase": "API",
+      "message": "GET /bulletins/69b0f8654ac095d05f1fec54",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:54.201Z",
+      "phase": "PHASE_3",
+      "message": "Vol trouve via mouvement",
+      "data": {
+        "mouvementId": "69b0f8654ac095d05f1fec5a",
+        "volId": "69b0f8684ac095d05f1fecd2"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:54.201Z",
+      "phase": "API",
+      "message": "GET /vols/69b0f8684ac095d05f1fecd2",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:54.537Z",
+      "phase": "PHASE_3",
+      "message": "Detail vol",
+      "data": {
+        "id": "69b0f8684ac095d05f1fecd2",
+        "numeroVol": "CH110/111",
+        "typeAvion": "E145",
+        "typeOperation": "TURN_AROUND",
+        "dateVol": "2026-03-11T00:00:00.000Z",
+        "compagnieAerienne": "CH",
+        "statut": "PROGRAMME",
+        "bulletinMouvementReference": null
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:54.537Z",
+      "phase": "PHASE_4",
+      "message": "=== CREATION CRV ===",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:54.537Z",
+      "phase": "API",
+      "message": "GET /bulletins/69b0f8654ac095d05f1fec54",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:06:55.038Z",
+      "phase": "PHASE_4",
+      "message": "Creation CRV PATH 1 (bulletin+mouvement)",
+      "data": {
+        "bulletinId": "69b0f8654ac095d05f1fec54",
+        "mouvementId": "69b0f8654ac095d05f1fec5a"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:06:55.038Z",
+      "phase": "API",
+      "message": "POST /crv",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:02.141Z",
+      "phase": "PHASE_4",
+      "message": "CRV cree avec succes",
+      "data": {
+        "id": "69b0f8704ac095d05f1fed4b",
+        "numeroCRV": "CRV260311-0014",
+        "statut": "BROUILLON",
+        "completude": 30,
+        "typeOperation": "TURN_AROUND"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:02.141Z",
+      "phase": "PHASE_5",
+      "message": "=== VERIFICATION CHRONOLOGIE PHASES ===",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:02.141Z",
+      "phase": "API",
+      "message": "GET /crv/69b0f8704ac095d05f1fed4b",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.482Z",
+      "phase": "PHASE_5",
+      "message": "Nombre de phases: 20",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.482Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8724ac095d05f1fed63",
+        "nom": "N/A",
+        "typeOperation": "DEPART",
+        "ordre": 3,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T11:20:00.000Z",
+        "heureFinPrevue": "2026-03-11T11:50:00.000Z",
+        "dureeStandardMinutes": 30
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.482Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8724ac095d05f1fed5b",
+        "nom": "N/A",
+        "typeOperation": "COMMUN",
+        "ordre": 2,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T10:25:00.000Z",
+        "heureFinPrevue": "2026-03-11T10:35:00.000Z",
+        "dureeStandardMinutes": 10
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8714ac095d05f1fed55",
+        "nom": "N/A",
+        "typeOperation": "COMMUN",
+        "ordre": 1,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T09:30:00.000Z",
+        "heureFinPrevue": "2026-03-11T09:45:00.000Z",
+        "dureeStandardMinutes": 15
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8724ac095d05f1fed5f",
+        "nom": "N/A",
+        "typeOperation": "TURN_AROUND",
+        "ordre": 3,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T10:55:00.000Z",
+        "heureFinPrevue": "2026-03-11T11:15:00.000Z",
+        "dureeStandardMinutes": 20
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8724ac095d05f1fed59",
+        "nom": "N/A",
+        "typeOperation": "TURN_AROUND",
+        "ordre": 2,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T10:00:00.000Z",
+        "heureFinPrevue": "2026-03-11T10:25:00.000Z",
+        "dureeStandardMinutes": 25
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8714ac095d05f1fed53",
+        "nom": "N/A",
+        "typeOperation": "TURN_AROUND",
+        "ordre": 1,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T09:20:00.000Z",
+        "heureFinPrevue": "2026-03-11T09:30:00.000Z",
+        "dureeStandardMinutes": 10
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8744ac095d05f1fed73",
+        "nom": "N/A",
+        "typeOperation": "DEPART",
+        "ordre": 7,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T14:00:00.000Z",
+        "heureFinPrevue": "2026-03-11T14:10:00.000Z",
+        "dureeStandardMinutes": 10
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8734ac095d05f1fed6f",
+        "nom": "N/A",
+        "typeOperation": "DEPART",
+        "ordre": 6,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T13:20:00.000Z",
+        "heureFinPrevue": "2026-03-11T13:30:00.000Z",
+        "dureeStandardMinutes": 10
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8734ac095d05f1fed6b",
+        "nom": "N/A",
+        "typeOperation": "DEPART",
+        "ordre": 5,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T13:00:00.000Z",
+        "heureFinPrevue": "2026-03-11T13:05:00.000Z",
+        "dureeStandardMinutes": 5
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8734ac095d05f1fed67",
+        "nom": "N/A",
+        "typeOperation": "DEPART",
+        "ordre": 4,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T12:15:00.000Z",
+        "heureFinPrevue": "2026-03-11T12:40:00.000Z",
+        "dureeStandardMinutes": 25
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8704ac095d05f1fed4f",
+        "nom": "N/A",
+        "typeOperation": "ARRIVEE",
+        "ordre": 1,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T09:00:00.000Z",
+        "heureFinPrevue": "2026-03-11T09:10:00.000Z",
+        "dureeStandardMinutes": 10
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8724ac095d05f1fed5d",
+        "nom": "N/A",
+        "typeOperation": "DEPART",
+        "ordre": 2,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T10:35:00.000Z",
+        "heureFinPrevue": "2026-03-11T10:55:00.000Z",
+        "dureeStandardMinutes": 20
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8714ac095d05f1fed51",
+        "nom": "N/A",
+        "typeOperation": "DEPART",
+        "ordre": 1,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T09:10:00.000Z",
+        "heureFinPrevue": "2026-03-11T09:20:00.000Z",
+        "dureeStandardMinutes": 10
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8744ac095d05f1fed75",
+        "nom": "N/A",
+        "typeOperation": "ARRIVEE",
+        "ordre": 8,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T14:10:00.000Z",
+        "heureFinPrevue": "2026-03-11T14:20:00.000Z",
+        "dureeStandardMinutes": 10
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8744ac095d05f1fed71",
+        "nom": "N/A",
+        "typeOperation": "ARRIVEE",
+        "ordre": 7,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T13:30:00.000Z",
+        "heureFinPrevue": "2026-03-11T14:00:00.000Z",
+        "dureeStandardMinutes": 30
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8734ac095d05f1fed6d",
+        "nom": "N/A",
+        "typeOperation": "ARRIVEE",
+        "ordre": 6,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T13:05:00.000Z",
+        "heureFinPrevue": "2026-03-11T13:20:00.000Z",
+        "dureeStandardMinutes": 15
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8734ac095d05f1fed69",
+        "nom": "N/A",
+        "typeOperation": "ARRIVEE",
+        "ordre": 5,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T12:40:00.000Z",
+        "heureFinPrevue": "2026-03-11T13:00:00.000Z",
+        "dureeStandardMinutes": 20
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8734ac095d05f1fed65",
+        "nom": "N/A",
+        "typeOperation": "ARRIVEE",
+        "ordre": 4,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T11:50:00.000Z",
+        "heureFinPrevue": "2026-03-11T12:15:00.000Z",
+        "dureeStandardMinutes": 25
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8724ac095d05f1fed61",
+        "nom": "N/A",
+        "typeOperation": "ARRIVEE",
+        "ordre": 3,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T11:15:00.000Z",
+        "heureFinPrevue": "2026-03-11T11:20:00.000Z",
+        "dureeStandardMinutes": 5
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "Phase",
+      "data": {
+        "id": "69b0f8714ac095d05f1fed57",
+        "nom": "N/A",
+        "typeOperation": "ARRIVEE",
+        "ordre": 2,
+        "statut": "NON_COMMENCE",
+        "heureDebutPrevue": "2026-03-11T09:45:00.000Z",
+        "heureFinPrevue": "2026-03-11T10:00:00.000Z",
+        "dureeStandardMinutes": 15
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T10:25:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T11:50:00.000Z",
+        "ecartMs": -5100000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T09:30:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T10:35:00.000Z",
+        "ecartMs": -3900000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T10:55:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T09:45:00.000Z",
+        "ecartMs": 4200000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T10:00:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T11:15:00.000Z",
+        "ecartMs": -4500000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T09:20:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T10:25:00.000Z",
+        "ecartMs": -3900000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T14:00:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T09:30:00.000Z",
+        "ecartMs": 16200000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T13:20:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T14:10:00.000Z",
+        "ecartMs": -3000000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T13:00:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T13:30:00.000Z",
+        "ecartMs": -1800000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T12:15:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T13:05:00.000Z",
+        "ecartMs": -3000000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T09:00:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T12:40:00.000Z",
+        "ecartMs": -13200000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T10:35:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T09:10:00.000Z",
+        "ecartMs": 5100000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T09:10:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T10:55:00.000Z",
+        "ecartMs": -6300000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.483Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T14:10:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T09:20:00.000Z",
+        "ecartMs": 17400000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.484Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T13:30:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T14:20:00.000Z",
+        "ecartMs": -3000000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.484Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T13:05:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T14:00:00.000Z",
+        "ecartMs": -3300000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.484Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T12:40:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T13:20:00.000Z",
+        "ecartMs": -2400000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.484Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T11:50:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T13:00:00.000Z",
+        "ecartMs": -4200000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.484Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T11:15:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T12:15:00.000Z",
+        "ecartMs": -3600000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.484Z",
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T09:45:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T11:20:00.000Z",
+        "ecartMs": -5700000
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.484Z",
+      "phase": "PHASE_6",
+      "message": "=== OPERATIONS AGENT ESCALE ===",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.484Z",
+      "phase": "PHASE_6",
+      "message": "Demarrage CRV...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:03.484Z",
+      "phase": "API",
+      "message": "POST /crv/69b0f8704ac095d05f1fed4b/demarrer",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:04.834Z",
+      "phase": "PHASE_6",
+      "message": "Resultat demarrage CRV",
+      "data": {
+        "status": 200,
+        "data": {
+          "success": true,
+          "message": "CRV démarré avec succès",
+          "data": {
+            "archivage": {
+              "driveFileId": null,
+              "driveWebViewLink": null,
+              "filename": null,
+              "folderPath": null,
+              "size": null,
+              "archivedAt": null,
+              "archivedBy": null,
+              "version": 1
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69b0f8704ac095d05f1fed4b",
+            "numeroCRV": "CRV260311-0014",
+            "vol": {
+              "_id": "69b0f86f4ac095d05f1fed45",
+              "numeroVol": "CH110/111",
+              "typeOperation": "TURN_AROUND",
+              "compagnieAerienne": "CH",
+              "codeIATA": "CH",
+              "aeroportOrigine": "AEH",
+              "aeroportDestination": "AEH",
+              "dateVol": "2026-03-11T00:00:00.000Z",
+              "statut": "EN_COURS",
+              "posteStationnement": null,
+              "typeAvion": "E145",
+              "horsProgramme": false,
+              "programmeVolReference": "69b0a43597243159a260de4a",
+              "raisonHorsProgramme": null,
+              "typeVolHorsProgramme": null,
+              "bulletinMouvementReference": "69b0f8654ac095d05f1fec54",
+              "createdAt": "2026-03-11T05:06:55.683Z",
+              "updatedAt": "2026-03-11T05:07:04.154Z",
+              "__v": 0
+            },
+            "escale": "ALG",
+            "horaire": {
+              "_id": "69b0f86f4ac095d05f1fed48",
+              "vol": "69b0f86f4ac095d05f1fed45",
+              "heureAtterrisagePrevue": "2026-03-11T09:00:00.000Z",
+              "heureDecollagePrevue": "2026-03-11T06:00:00.000Z",
+              "createdAt": "2026-03-11T05:06:55.999Z",
+              "updatedAt": "2026-03-11T05:06:55.999Z",
+              "__v": 0
+            },
+            "statut": "EN_COURS",
+            "creePar": {
+              "_id": "69a72cbf44579001349b1afd",
+              "nom": "TAHA",
+              "prenom": "Ahmat",
+              "matricule": "AGT-001",
+              "email": "agent@crv.test",
+              "fonction": "AGENT_ESCALE",
+              "specialites": [
+                "PISTE",
+                "PASSAGERS"
+              ],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:27.319Z",
+              "updatedAt": "2026-03-07T10:23:16.495Z",
+              "__v": 0
+            },
+            "responsableVol": null,
+            "completude": 30,
+            "bulletinMouvementReference": "69b0f8654ac095d05f1fec54",
+            "crvDoublon": false,
+            "dateCreation": "2026-03-11T05:06:56.356Z",
+            "derniereModification": "2026-03-11T05:07:03.824Z",
+            "personnelAffecte": [],
+            "materielUtilise": [],
+            "createdAt": "2026-03-11T05:06:56.356Z",
+            "updatedAt": "2026-03-11T05:07:03.824Z",
+            "__v": 0,
+            "modifiePar": "69a72cbf44579001349b1afd"
+          }
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:04.834Z",
+      "phase": "PHASE_6",
+      "message": "Demarrage phase 69b0f8724ac095d05f1fed63...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:04.834Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8724ac095d05f1fed63/demarrer",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:07.015Z",
+      "phase": "PHASE_6",
+      "message": "Resultat demarrage phase",
+      "data": {
+        "status": 200,
+        "ok": true
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:08.019Z",
+      "phase": "PHASE_6",
+      "message": "Terminaison phase 69b0f8724ac095d05f1fed63...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:08.020Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8724ac095d05f1fed63/terminer",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:11.199Z",
+      "phase": "PHASE_6",
+      "message": "Resultat terminaison phase",
+      "data": {
+        "status": 200,
+        "ok": true
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:11.199Z",
+      "phase": "PHASE_6",
+      "message": "Demarrage phase 2: 69b0f8724ac095d05f1fed5b...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:11.199Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8724ac095d05f1fed5b/demarrer",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:13.430Z",
+      "phase": "PHASE_6",
+      "message": "Phase 2 demarree",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:13.940Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8724ac095d05f1fed5b/terminer",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:17.137Z",
+      "phase": "PHASE_6",
+      "message": "Phase 2 terminee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:17.137Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 3 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:17.137Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8714ac095d05f1fed55/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:20.013Z",
+      "phase": "PHASE_6",
+      "message": "Phase 3 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:20.013Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 4 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:20.013Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8724ac095d05f1fed5f/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:22.819Z",
+      "phase": "PHASE_6",
+      "message": "Phase 4 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:22.819Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 5 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:22.819Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8724ac095d05f1fed59/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:25.671Z",
+      "phase": "PHASE_6",
+      "message": "Phase 5 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:25.671Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 6 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:25.671Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8714ac095d05f1fed53/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:28.632Z",
+      "phase": "PHASE_6",
+      "message": "Phase 6 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:28.632Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 7 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:28.632Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8744ac095d05f1fed73/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:31.912Z",
+      "phase": "PHASE_6",
+      "message": "Phase 7 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:31.912Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 8 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:31.912Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8734ac095d05f1fed6f/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:34.939Z",
+      "phase": "PHASE_6",
+      "message": "Phase 8 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:34.939Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 9 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:34.939Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8734ac095d05f1fed6b/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:37.975Z",
+      "phase": "PHASE_6",
+      "message": "Phase 9 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:37.975Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 10 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:37.975Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8734ac095d05f1fed67/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:40.955Z",
+      "phase": "PHASE_6",
+      "message": "Phase 10 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:40.956Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 11 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:40.956Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8704ac095d05f1fed4f/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:44.006Z",
+      "phase": "PHASE_6",
+      "message": "Phase 11 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:44.006Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 12 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:44.006Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8724ac095d05f1fed5d/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:46.946Z",
+      "phase": "PHASE_6",
+      "message": "Phase 12 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:46.946Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 13 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:46.946Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8714ac095d05f1fed51/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:50.203Z",
+      "phase": "PHASE_6",
+      "message": "Phase 13 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:50.203Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 14 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:50.203Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8744ac095d05f1fed75/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:53.140Z",
+      "phase": "PHASE_6",
+      "message": "Phase 14 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:53.141Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 15 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:53.141Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8744ac095d05f1fed71/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:56.012Z",
+      "phase": "PHASE_6",
+      "message": "Phase 15 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:56.012Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 16 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:56.012Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8734ac095d05f1fed6d/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:58.851Z",
+      "phase": "PHASE_6",
+      "message": "Phase 16 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:07:58.851Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 17 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:07:58.851Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8734ac095d05f1fed69/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:01.750Z",
+      "phase": "PHASE_6",
+      "message": "Phase 17 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:01.750Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 18 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:01.750Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8734ac095d05f1fed65/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:04.635Z",
+      "phase": "PHASE_6",
+      "message": "Phase 18 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:04.635Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 19 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:04.635Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8724ac095d05f1fed61/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:07.498Z",
+      "phase": "PHASE_6",
+      "message": "Phase 19 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:07.498Z",
+      "phase": "PHASE_6",
+      "message": "Marquer phase 20 comme NON_REALISE",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:07.498Z",
+      "phase": "API",
+      "message": "POST /phases/69b0f8714ac095d05f1fed57/non-realise",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:10.420Z",
+      "phase": "PHASE_6",
+      "message": "Phase 20 marquee",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:10.420Z",
+      "phase": "PHASE_6",
+      "message": "Terminaison CRV...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:10.420Z",
+      "phase": "API",
+      "message": "POST /crv/69b0f8704ac095d05f1fed4b/terminer",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:14.565Z",
+      "phase": "PHASE_6",
+      "message": "Resultat terminaison CRV",
+      "data": {
+        "status": 200,
+        "data": {
+          "success": true,
+          "message": "CRV terminé avec succès",
+          "data": {
+            "archivage": {
+              "driveFileId": null,
+              "driveWebViewLink": null,
+              "filename": null,
+              "folderPath": null,
+              "size": null,
+              "archivedAt": null,
+              "archivedBy": null,
+              "version": 1
+            },
+            "annulation": {
+              "dateAnnulation": null,
+              "annulePar": null,
+              "raisonAnnulation": null,
+              "commentaireAnnulation": null,
+              "ancienStatut": null
+            },
+            "_id": "69b0f8704ac095d05f1fed4b",
+            "numeroCRV": "CRV260311-0014",
+            "vol": {
+              "_id": "69b0f86f4ac095d05f1fed45",
+              "numeroVol": "CH110/111",
+              "typeOperation": "TURN_AROUND",
+              "compagnieAerienne": "CH",
+              "codeIATA": "CH",
+              "aeroportOrigine": "AEH",
+              "aeroportDestination": "AEH",
+              "dateVol": "2026-03-11T00:00:00.000Z",
+              "statut": "TERMINE",
+              "posteStationnement": null,
+              "typeAvion": "E145",
+              "horsProgramme": false,
+              "programmeVolReference": "69b0a43597243159a260de4a",
+              "raisonHorsProgramme": null,
+              "typeVolHorsProgramme": null,
+              "bulletinMouvementReference": "69b0f8654ac095d05f1fec54",
+              "createdAt": "2026-03-11T05:06:55.683Z",
+              "updatedAt": "2026-03-11T05:08:12.470Z",
+              "__v": 0
+            },
+            "escale": "ALG",
+            "horaire": {
+              "_id": "69b0f86f4ac095d05f1fed48",
+              "vol": "69b0f86f4ac095d05f1fed45",
+              "heureAtterrisagePrevue": "2026-03-11T09:00:00.000Z",
+              "heureDecollagePrevue": "2026-03-11T06:00:00.000Z",
+              "createdAt": "2026-03-11T05:06:55.999Z",
+              "updatedAt": "2026-03-11T05:06:55.999Z",
+              "__v": 0
+            },
+            "statut": "TERMINE",
+            "creePar": {
+              "_id": "69a72cbf44579001349b1afd",
+              "nom": "TAHA",
+              "prenom": "Ahmat",
+              "matricule": "AGT-001",
+              "email": "agent@crv.test",
+              "fonction": "AGENT_ESCALE",
+              "specialites": [
+                "PISTE",
+                "PASSAGERS"
+              ],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:27.319Z",
+              "updatedAt": "2026-03-07T10:23:16.495Z",
+              "__v": 0
+            },
+            "responsableVol": null,
+            "completude": 60,
+            "bulletinMouvementReference": "69b0f8654ac095d05f1fec54",
+            "crvDoublon": false,
+            "dateCreation": "2026-03-11T05:06:56.356Z",
+            "derniereModification": "2026-03-11T05:08:12.125Z",
+            "personnelAffecte": [],
+            "materielUtilise": [],
+            "createdAt": "2026-03-11T05:06:56.356Z",
+            "updatedAt": "2026-03-11T05:08:13.867Z",
+            "__v": 0,
+            "modifiePar": "69a72cbf44579001349b1afd"
+          },
+          "completude": 60
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:14.566Z",
+      "phase": "PHASE_7",
+      "message": "=== CREATION SERVICES (CHARGES) ===",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:14.566Z",
+      "phase": "PHASE_7",
+      "message": "Creation charge PASSAGERS...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:14.566Z",
+      "phase": "API",
+      "message": "POST /crv/69b0f8704ac095d05f1fed4b/charges",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:16.790Z",
+      "phase": "PHASE_7",
+      "message": "Charge passagers",
+      "data": {
+        "status": 201,
+        "ok": true
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:16.790Z",
+      "phase": "PHASE_7",
+      "message": "Creation charge BAGAGES...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:16.790Z",
+      "phase": "API",
+      "message": "POST /crv/69b0f8704ac095d05f1fed4b/charges",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:17.287Z",
+      "phase": "API",
+      "message": "ERREUR 400",
+      "data": {
+        "success": false,
+        "message": "INTERDIT : Si bagages en soute, le poids doit être renseigné",
+        "code": "POIDS_REQUIS_AVEC_BAGAGES"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:17.287Z",
+      "phase": "PHASE_7",
+      "message": "Charge bagages",
+      "data": {
+        "status": 400,
+        "ok": false
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:17.287Z",
+      "phase": "PHASE_7",
+      "message": "Creation charge FRET...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:17.287Z",
+      "phase": "API",
+      "message": "POST /crv/69b0f8704ac095d05f1fed4b/charges",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:19.500Z",
+      "phase": "PHASE_7",
+      "message": "Charge fret",
+      "data": {
+        "status": 201,
+        "ok": true
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:19.500Z",
+      "phase": "PHASE_7",
+      "message": "Confirmation absence evenements...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:19.500Z",
+      "phase": "API",
+      "message": "POST /crv/69b0f8704ac095d05f1fed4b/confirmer-absence",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:21.893Z",
+      "phase": "PHASE_7",
+      "message": "Absence evenements",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:21.893Z",
+      "phase": "PHASE_7",
+      "message": "Confirmation absence observations...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:21.893Z",
+      "phase": "API",
+      "message": "POST /crv/69b0f8704ac095d05f1fed4b/confirmer-absence",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:24.309Z",
+      "phase": "PHASE_7",
+      "message": "Absence observations",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:24.309Z",
+      "phase": "PHASE_8",
+      "message": "=== VALIDATION CRV ===",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:24.309Z",
+      "phase": "API",
+      "message": "GET /crv/69b0f8704ac095d05f1fed4b",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:25.722Z",
+      "phase": "PHASE_8",
+      "message": "Etat CRV avant validation",
+      "data": {}
+    },
+    {
+      "timestamp": "2026-03-11T05:08:25.722Z",
+      "phase": "API",
+      "message": "GET /validation/69b0f8704ac095d05f1fed4b",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:26.071Z",
+      "phase": "API",
+      "message": "ERREUR 404",
+      "data": {
+        "success": false,
+        "message": "Validation non trouvée"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:26.071Z",
+      "phase": "PHASE_8",
+      "message": "Etat validation",
+      "data": {
+        "status": 404,
+        "data": {
+          "success": false,
+          "message": "Validation non trouvée"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:26.071Z",
+      "phase": "PHASE_8",
+      "message": "Validation CRV par superviseur...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:26.071Z",
+      "phase": "API",
+      "message": "POST /validation/69b0f8704ac095d05f1fed4b/valider",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:30.091Z",
+      "phase": "PHASE_8",
+      "message": "Resultat validation",
+      "data": {
+        "status": 200,
+        "data": {
+          "success": true,
+          "data": {
+            "_id": "69b0f8cc4ac095d05f1ff0da",
+            "crv": {
+              "archivage": {
+                "driveFileId": null,
+                "driveWebViewLink": null,
+                "filename": null,
+                "folderPath": null,
+                "size": null,
+                "archivedAt": null,
+                "archivedBy": null,
+                "version": 1
+              },
+              "annulation": {
+                "dateAnnulation": null,
+                "annulePar": null,
+                "raisonAnnulation": null,
+                "commentaireAnnulation": null,
+                "ancienStatut": null
+              },
+              "_id": "69b0f8704ac095d05f1fed4b",
+              "numeroCRV": "CRV260311-0014",
+              "vol": "69b0f86f4ac095d05f1fed45",
+              "escale": "ALG",
+              "horaire": "69b0f86f4ac095d05f1fed48",
+              "statut": "TERMINE",
+              "creePar": "69a72cbf44579001349b1afd",
+              "responsableVol": null,
+              "completude": 85,
+              "bulletinMouvementReference": "69b0f8654ac095d05f1fec54",
+              "crvDoublon": false,
+              "dateCreation": "2026-03-11T05:06:56.356Z",
+              "derniereModification": "2026-03-11T05:08:22.390Z",
+              "personnelAffecte": [],
+              "materielUtilise": [],
+              "createdAt": "2026-03-11T05:06:56.356Z",
+              "updatedAt": "2026-03-11T05:08:23.627Z",
+              "__v": 0,
+              "modifiePar": "69a72cbf44579001349b1afd"
+            },
+            "validePar": {
+              "_id": "69a72cc044579001349b1b01",
+              "nom": "MARTIN",
+              "prenom": "Pierre",
+              "matricule": "SUP-001",
+              "email": "superviseur@crv.test",
+              "fonction": "SUPERVISEUR",
+              "specialites": [],
+              "statut": "ACTIF",
+              "statutCompte": "VALIDE",
+              "dateValidationCompte": null,
+              "valideParUserId": null,
+              "createdAt": "2026-03-03T18:47:28.257Z",
+              "updatedAt": "2026-03-07T10:23:18.242Z",
+              "__v": 0
+            },
+            "statut": "EN_ATTENTE_CORRECTION",
+            "scoreCompletude": 85,
+            "conformiteSLA": false,
+            "ecartsSLA": [
+              {
+                "phase": {
+                  "prerequis": [],
+                  "_id": "69b0abc587d686e1ce7b4283",
+                  "code": "DEP_CHARGEMENT",
+                  "libelle": "Chargement bagages/fret",
+                  "typeOperation": "DEPART",
+                  "categorie": "BAGAGE",
+                  "macroPhase": "REALISATION",
+                  "ordre": 3,
+                  "dureeStandardMinutes": 30,
+                  "obligatoire": true,
+                  "actif": true
+                },
+                "ecartMinutes": -30,
+                "description": "Écart de -30 minutes pour Chargement bagages/fret",
+                "_id": "69b0f8cc4ac095d05f1ff0db"
+              }
+            ],
+            "anomaliesDetectees": [
+              "Responsable du vol non défini"
+            ],
+            "verrouille": false,
+            "dateVerrouillage": null,
+            "dateValidation": "2026-03-11T05:08:28.320Z",
+            "createdAt": "2026-03-11T05:08:28.320Z",
+            "updatedAt": "2026-03-11T05:08:28.320Z",
+            "__v": 0
+          }
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:30.091Z",
+      "phase": "API",
+      "message": "GET /crv/69b0f8704ac095d05f1fed4b",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:31.793Z",
+      "phase": "PHASE_8",
+      "message": "Etat CRV apres validation",
+      "data": {}
+    },
+    {
+      "timestamp": "2026-03-11T05:08:31.794Z",
+      "phase": "PHASE_9",
+      "message": "=== ARCHIVAGE + PDF ===",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:31.794Z",
+      "phase": "PHASE_9",
+      "message": "Test generation PDF...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:31.794Z",
+      "phase": "API",
+      "message": "GET /crv/69b0f8704ac095d05f1fed4b/pdf-base64",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:32.922Z",
+      "phase": "PHASE_9",
+      "message": "PDF base64",
+      "data": {
+        "status": 200,
+        "ok": true,
+        "dataLength": 62866
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:32.922Z",
+      "phase": "PHASE_9",
+      "message": "Verification statut archivage...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:32.922Z",
+      "phase": "API",
+      "message": "GET /crv/69b0f8704ac095d05f1fed4b/archive/status",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:34.612Z",
+      "phase": "PHASE_9",
+      "message": "Statut archivage",
+      "data": {
+        "status": 200,
+        "data": {
+          "success": true,
+          "data": {
+            "canArchive": false,
+            "reason": "Archivage impossible : le CRV doit être validé avant archivage (statut actuel: TERMINE)",
+            "crv": {
+              "id": "69b0f8704ac095d05f1fed4b",
+              "numeroCRV": "CRV260311-0014",
+              "escale": "ALG",
+              "statut": "TERMINE",
+              "completude": 85,
+              "isAlreadyArchived": false,
+              "currentArchivage": {
+                "driveFileId": null,
+                "driveWebViewLink": null,
+                "filename": null,
+                "folderPath": null,
+                "size": null,
+                "archivedAt": null,
+                "archivedBy": null,
+                "version": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:34.612Z",
+      "phase": "PHASE_9",
+      "message": "Tentative archivage CRV...",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:34.612Z",
+      "phase": "API",
+      "message": "POST /crv/69b0f8704ac095d05f1fed4b/archive",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:35.269Z",
+      "phase": "API",
+      "message": "ERREUR 400",
+      "data": {
+        "success": false,
+        "message": "Archivage impossible : le CRV doit être validé avant archivage (statut actuel: TERMINE)"
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:35.269Z",
+      "phase": "PHASE_9",
+      "message": "Resultat archivage",
+      "data": {
+        "status": 400,
+        "data": {
+          "success": false,
+          "message": "Archivage impossible : le CRV doit être validé avant archivage (statut actuel: TERMINE)"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-03-11T05:08:35.269Z",
+      "phase": "PHASE_10",
+      "message": "=== SYNTHESE LOGS ===",
+      "data": null
+    },
+    {
+      "timestamp": "2026-03-11T05:08:35.269Z",
+      "phase": "PHASE_10",
+      "message": "Resume",
+      "data": {
+        "totalLogs": 215,
+        "erreurs": 3,
+        "warnings": 19,
+        "phases": {
+          "phase0": {
+            "status": "OK",
+            "message": "Nettoyage effectue"
+          },
+          "phase1": {
+            "status": "OK",
+            "programmeId": "69b0a43597243159a260de4a",
+            "nom": "E2E_TEST_MARS_2026",
+            "nbVols": 23
+          },
+          "phase2": {
+            "status": "OK",
+            "bulletinId": "69b0f8654ac095d05f1fec54"
+          },
+          "phase3": {
+            "status": "OK",
+            "volId": "69b0f8684ac095d05f1fecd2",
+            "typeAvion": "E145",
+            "typeOperation": "TURN_AROUND"
+          },
+          "phase4": {
+            "status": "OK",
+            "crvId": "69b0f8704ac095d05f1fed4b",
+            "numeroCRV": "CRV260311-0014",
+            "statut": "BROUILLON"
+          },
+          "phase5": {
+            "status": "OK",
+            "nbPhases": 20,
+            "cascadeInitialisee": true
+          },
+          "phase6": {
+            "status": "OK"
+          },
+          "phase7": {
+            "status": "OK"
+          },
+          "phase8": {
+            "status": "OK"
+          },
+          "phase9": {
+            "status": "OK"
+          }
+        }
+      }
+    }
+  ],
+  "errors": [
+    {
+      "phase": "API",
+      "message": "ERREUR 400",
+      "data": {
+        "success": false,
+        "message": "INTERDIT : Si bagages en soute, le poids doit être renseigné",
+        "code": "POIDS_REQUIS_AVEC_BAGAGES"
+      }
+    },
+    {
+      "phase": "API",
+      "message": "ERREUR 404",
+      "data": {
+        "success": false,
+        "message": "Validation non trouvée"
+      }
+    },
+    {
+      "phase": "API",
+      "message": "ERREUR 400",
+      "data": {
+        "success": false,
+        "message": "Archivage impossible : le CRV doit être validé avant archivage (statut actuel: TERMINE)"
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T10:25:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T11:50:00.000Z",
+        "ecartMs": -5100000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T09:30:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T10:35:00.000Z",
+        "ecartMs": -3900000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T10:55:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T09:45:00.000Z",
+        "ecartMs": 4200000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T10:00:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T11:15:00.000Z",
+        "ecartMs": -4500000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T09:20:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T10:25:00.000Z",
+        "ecartMs": -3900000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T14:00:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T09:30:00.000Z",
+        "ecartMs": 16200000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T13:20:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T14:10:00.000Z",
+        "ecartMs": -3000000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T13:00:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T13:30:00.000Z",
+        "ecartMs": -1800000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T12:15:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T13:05:00.000Z",
+        "ecartMs": -3000000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T09:00:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T12:40:00.000Z",
+        "ecartMs": -13200000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T10:35:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T09:10:00.000Z",
+        "ecartMs": 5100000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T09:10:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T10:55:00.000Z",
+        "ecartMs": -6300000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T14:10:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T09:20:00.000Z",
+        "ecartMs": 17400000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T13:30:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T14:20:00.000Z",
+        "ecartMs": -3000000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T13:05:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T14:00:00.000Z",
+        "ecartMs": -3300000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T12:40:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T13:20:00.000Z",
+        "ecartMs": -2400000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T11:50:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T13:00:00.000Z",
+        "ecartMs": -4200000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T11:15:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T12:15:00.000Z",
+        "ecartMs": -3600000
+      }
+    },
+    {
+      "phase": "PHASE_5",
+      "message": "ANOMALIE CASCADE",
+      "data": {
+        "debutPrevue": "2026-03-11T09:45:00.000Z",
+        "finPrevuePrecedente": "2026-03-11T11:20:00.000Z",
+        "ecartMs": -5700000
+      }
+    }
+  ]
+}

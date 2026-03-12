@@ -1,0 +1,5 @@
+# Ignorer tous les fichiers de credentials
+*.json
+
+# Sauf les fichiers d'exemple
+!*.json.example
