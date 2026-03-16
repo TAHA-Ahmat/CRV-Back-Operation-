@@ -11,6 +11,7 @@
 | P1_UI_API_001 | Backend / Traçabilité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P1_UI_API_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P1_UI_API_001.md) | Flux Personnel sans journalisation CRVEvent. Wrapper ajouté, 3 fichiers, 2 événements prouvés en base. |
 | P1_UI_API_002 | Backend / Traçabilité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P1_UI_API_002_RAPPORT.md) | [Briefing](BRIEFING_GPT_P1_UI_API_002.md) | Flux Engins sans journalisation CRVEvent. Wrapper ajouté, 3 fichiers, 2 événements prouvés en base. |
 | P1_UI_API_003 | Backend / Traçabilité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P1_UI_API_003_RAPPORT.md) | [Briefing](BRIEFING_GPT_P1_UI_API_003.md) | Flux Charges sans journalisation CRVEvent. Wrapper ajouté, 2 fichiers, 1 événement prouvé en base. |
+| P1_UI_API_004 | Backend / Traçabilité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P1_UI_API_004_RAPPORT.md) | [Briefing](BRIEFING_GPT_P1_UI_API_004.md) | Flux Événements sans journalisation CRVEvent. Wrapper dédié créé, 3 fichiers, 1 événement prouvé en base. |
 
 ## Backlog restant
 
@@ -30,7 +31,7 @@
 - [x] ~~Flux batch personnel vs événements unitaires~~ → Audité P1_UI_API_001, journal CRVEvent branché
 - [x] ~~Flux engins vs événements~~ → Audité P1_UI_API_002, journal CRVEvent branché
 - [x] ~~Flux charges vs journal CRVEvent~~ → Audité P1_UI_API_003, journal CRVEvent branché
-- [ ] Flux événements/incidents vs journal CRVEvent
+- [x] ~~Flux événements/incidents vs journal CRVEvent~~ → Audité P1_UI_API_004, journal CRVEvent branché
 - [ ] Flux observations vs journal CRVEvent
 
 ### P2 — dette technique
