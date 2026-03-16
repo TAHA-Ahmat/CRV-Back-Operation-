@@ -6,13 +6,9 @@ import {
   listerCRVs,
   mettreAJourCRV,
   supprimerCRV,
-  ajouterCharge,
-  ajouterEvenement,
-  ajouterObservation,
   rechercherCRV,
   obtenirStatsCRV,
   exporterCRVExcel,
-  mettreAJourHoraire,
   demarrerCRV,
   terminerCRV,
   obtenirTransitionsPossibles,
@@ -20,6 +16,12 @@ import {
   annulerConfirmationAbsence,
   obtenirVolsSansCRV
 } from '../../controllers/crv/crv.controller.js';
+import {
+  ajouterCharge,
+  ajouterEvenement,
+  ajouterObservation,
+  mettreAJourHoraire,
+} from '../../controllers/crv/crvChargesController.js';
 import {
   mettreAJourPersonnel,
   ajouterPersonnel,

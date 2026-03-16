@@ -10,6 +10,7 @@
 | P1_UX_004 | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_UX_004_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_UX_004.md) | isValidated non initialisé → step 7 bloquant sur CRV VALIDE/VERROUILLE. 3 fichiers, 15 lignes. |
 | P1_UI_API_001 | Backend / Traçabilité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P1_UI_API_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P1_UI_API_001.md) | Flux Personnel sans journalisation CRVEvent. Wrapper ajouté, 3 fichiers, 2 événements prouvés en base. |
 | P1_UI_API_002 | Backend / Traçabilité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P1_UI_API_002_RAPPORT.md) | [Briefing](BRIEFING_GPT_P1_UI_API_002.md) | Flux Engins sans journalisation CRVEvent. Wrapper ajouté, 3 fichiers, 2 événements prouvés en base. |
+| P1_UI_API_003 | Backend / Traçabilité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P1_UI_API_003_RAPPORT.md) | [Briefing](BRIEFING_GPT_P1_UI_API_003.md) | Flux Charges sans journalisation CRVEvent. Wrapper ajouté, 2 fichiers, 1 événement prouvé en base. |
 
 ## Backlog restant
 
@@ -28,7 +29,7 @@
 ### P1 — cohérence UI/API
 - [x] ~~Flux batch personnel vs événements unitaires~~ → Audité P1_UI_API_001, journal CRVEvent branché
 - [x] ~~Flux engins vs événements~~ → Audité P1_UI_API_002, journal CRVEvent branché
-- [ ] Flux charges vs journal CRVEvent
+- [x] ~~Flux charges vs journal CRVEvent~~ → Audité P1_UI_API_003, journal CRVEvent branché
 - [ ] Flux événements/incidents vs journal CRVEvent
 - [ ] Flux observations vs journal CRVEvent
 
