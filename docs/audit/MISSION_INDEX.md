@@ -13,6 +13,7 @@
 | P1_UI_API_003 | Backend / Traçabilité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P1_UI_API_003_RAPPORT.md) | [Briefing](BRIEFING_GPT_P1_UI_API_003.md) | Flux Charges sans journalisation CRVEvent. Wrapper ajouté, 2 fichiers, 1 événement prouvé en base. |
 | P1_UI_API_004 | Backend / Traçabilité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P1_UI_API_004_RAPPORT.md) | [Briefing](BRIEFING_GPT_P1_UI_API_004.md) | Flux Événements sans journalisation CRVEvent. Wrapper dédié créé, 3 fichiers, 1 événement prouvé en base. |
 | P1_UI_API_005 | Backend / Traçabilité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P1_UI_API_005_RAPPORT.md) | [Briefing](BRIEFING_GPT_P1_UI_API_005.md) | Flux Observations sans journalisation CRVEvent. Wrapper dédié créé, 3 fichiers, 1 événement prouvé en base. Pas d'UI observations (feature manquante). |
+| CLAUDE_MD_REALIGNMENT | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](CLAUDE_MD_REALIGNMENT_RAPPORT.md) | [Briefing](BRIEFING_GPT_CLAUDE_MD_REALIGNMENT.md) | CLAUDE.md réaligné : doctrine stable séparée de l'état vivant (MISSION_INDEX). Backlog obsolète retiré. Skill référencé. |
 
 ## Backlog restant
 
