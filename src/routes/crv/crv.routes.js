@@ -25,12 +25,12 @@ import {
   ajouterPersonnel,
   supprimerPersonnel,
 } from '../../controllers/crv/crvPersonnelController.js';
+import { obtenirEnginsAffectes } from '../../controllers/resources/engin.controller.js';
 import {
-  obtenirEnginsAffectes,
   mettreAJourEnginsAffectes,
   ajouterEnginAuCRV,
-  retirerEnginDuCRV
-} from '../../controllers/resources/engin.controller.js';
+  retirerEnginDuCRV,
+} from '../../controllers/crv/crvEnginsController.js';
 import { mettreAJourPhaseCRV } from '../../controllers/phases/phase.controller.js';
 import {
   getArchivageStatus,

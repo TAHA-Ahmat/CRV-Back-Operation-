@@ -21,6 +21,7 @@ const CRVEventSchema = new mongoose.Schema(
         'PERSONNEL_UPDATED',
         'ENGIN_ASSIGNED',
         'ENGIN_REMOVED',
+        'ENGINS_UPDATED',
         'INCIDENT_REPORTED',
         'CRV_TERMINATED',
         'CRV_VALIDATED',
