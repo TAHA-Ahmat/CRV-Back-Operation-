@@ -1,0 +1,47 @@
+# MISSION INDEX — Chantier CRV Operations
+
+| Mission | Domaine | Statut honnête | Merge | Rapport | Briefing | Commentaire |
+|---|---|---|---|---|---|---|
+| P0_ROUTE_AUTH_001 | Backend / Sécurité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P0_ROUTE_AUTH_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P0_ROUTE_AUTH_001.md) | 27 routes CRV manquaient excludeAdmin. Corrigé. 1 fichier, 113 tests PASS. |
+| P0_ROUTE_AUTH_002 | Backend / Sécurité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P0_ROUTE_AUTH_002_RAPPORT.md) | [Briefing](BRIEFING_GPT_P0_ROUTE_AUTH_002.md) | 20 routes phases/charges manquaient excludeAdmin. Corrigé. 2 fichiers, 113 tests PASS. |
+| P1_UX_001 | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_UX_001_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_UX_001.md) | Champs vol non pré-remplis sur CRV Départ/TurnAround. Noms de champs désalignés avec CRVHeader. 2 fichiers. |
+| P1_UX_002 | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_UX_002_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_UX_002.md) | Champs vol non persistés sur Départ/TurnAround (pas de case 1). Poste jamais envoyé/rechargé (3 vues). 3 fichiers. |
+| P1_UX_003 | Backend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P1_UX_003_RAPPORT.md) | [Briefing](BRIEFING_GPT_P1_UX_003.md) | fonctionAutre (personnel AUTRE) absent du schema Mongoose → perdu au save. 1 fichier, 4 lignes. |
+| P1_UX_004 | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_UX_004_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_UX_004.md) | isValidated non initialisé → step 7 bloquant sur CRV VALIDE/VERROUILLE. 3 fichiers, 15 lignes. |
+| P1_UI_API_001 | Backend / Traçabilité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P1_UI_API_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P1_UI_API_001.md) | Flux Personnel sans journalisation CRVEvent. Wrapper ajouté, 3 fichiers, 2 événements prouvés en base. |
+
+## Backlog restant
+
+### P0 — sécurité / prod
+- [x] ~~Route shadowing~~ → Audité P0_ROUTE_AUTH_001 : aucun shadowing détecté
+- [x] ~~Auth bypass ADMIN sur routes CRV~~ → Corrigé P0_ROUTE_AUTH_001
+- [x] ~~Auth bypass ADMIN sur routes phases/charges~~ → Corrigé P0_ROUTE_AUTH_002
+- [ ] Vérification ordre des routes + middlewares réels sur autres domaines
+
+### P1 — bugs UX réels
+- [x] ~~Champs vol non pré-remplis sur CRV existant~~ → Corrigé P1_UX_001
+- [x] ~~Champs vol non persistés sur CRV existant~~ → Corrigé P1_UX_002
+- [x] ~~Écarts UI / données réellement chargées~~ → Audité P1_UX_003, fonctionAutre corrigé
+- [x] ~~Parcours wizard bloquant ou incohérent~~ → Corrigé P1_UX_004, isValidated init depuis statut CRV
+
+### P1 — cohérence UI/API
+- [x] ~~Flux batch personnel vs événements unitaires~~ → Audité P1_UI_API_001, journal CRVEvent branché
+- [ ] Vérifier branchages backend vs flux UI réel (autres domaines : engins, charges, événements)
+
+### P2 — dette technique
+- [ ] Logs excessifs front/backend
+- [ ] crvTransaction.service.js possiblement non utilisé
+- [ ] Code mort / stratégie abandonnée
+- [ ] Nettoyage payloads incohérents
+- [ ] Double rechargement CRV après chaque action (inefficacité architecturale)
+- [ ] Exposer endpoint GET /api/crv/:id/events (controller existe, routes manquantes)
+
+### P2 — tests
+- [ ] Tests d'intégration réels sur périmètres critiques
+- [ ] Tests permissions / verrouillage / auth sur routes sensibles
+
+### P3 — améliorations futures
+- [ ] Migration frontend wizard
+- [ ] Nettoyage abstractions cosmétiques
+- [ ] Harmonisation documentaire
+- [ ] Brancher notifications eventRegistry sur CRVEvent

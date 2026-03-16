@@ -18,11 +18,13 @@ import {
   obtenirTransitionsPossibles,
   confirmerAbsence,
   annulerConfirmationAbsence,
+  obtenirVolsSansCRV
+} from '../../controllers/crv/crv.controller.js';
+import {
   mettreAJourPersonnel,
   ajouterPersonnel,
   supprimerPersonnel,
-  obtenirVolsSansCRV
-} from '../../controllers/crv/crv.controller.js';
+} from '../../controllers/crv/crvPersonnelController.js';
 import {
   obtenirEnginsAffectes,
   mettreAJourEnginsAffectes,
