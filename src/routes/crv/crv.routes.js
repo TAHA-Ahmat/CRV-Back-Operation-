@@ -18,10 +18,10 @@ import {
 } from '../../controllers/crv/crv.controller.js';
 import {
   ajouterCharge,
-  ajouterObservation,
   mettreAJourHoraire,
 } from '../../controllers/crv/crvChargesController.js';
 import { ajouterEvenement } from '../../controllers/crv/crvEvenementsController.js';
+import { ajouterObservation } from '../../controllers/crv/crvObservationsController.js';
 import {
   mettreAJourPersonnel,
   ajouterPersonnel,

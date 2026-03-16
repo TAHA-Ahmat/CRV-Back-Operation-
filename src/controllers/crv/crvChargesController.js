@@ -11,14 +11,14 @@
  */
 import {
   ajouterCharge as _ajouterCharge,
-  ajouterObservation,
   mettreAJourHoraire,
 } from './crv.controller.js';
 import { logCRVEvent } from '../../services/crv/crvEvent.service.js';
 
 // Re-export les fonctions non wrappées (hors scope charges)
 // ajouterEvenement → migré vers crvEvenementsController.js (P1_UI_API_004)
-export { ajouterObservation, mettreAJourHoraire };
+// ajouterObservation → migré vers crvObservationsController.js (P1_UI_API_005)
+export { mettreAJourHoraire };
 
 /**
  * POST /api/crv/:id/charges — Ajout d'une charge opérationnelle
