@@ -49,7 +49,7 @@ Après DOC_GOV_HARDENING, le système est cohérent en rôles mais :
 **Nouvelle conversation ChatGPT** :
 1. Fournir CLAUDE.md + MISSION_INDEX.md + PROJECT_STATE_COMPACT.md
 2. ChatGPT lit le compact → comprend le projet en 30 secondes
-3. ChatGPT lit MISSION_INDEX → voit les 14 missions + backlog
+3. ChatGPT lit MISSION_INDEX → voit les 15 missions + backlog
 4. ChatGPT lit CLAUDE.md → connaît les zones rouges et la doctrine
 → Reprise fiable ✓
 

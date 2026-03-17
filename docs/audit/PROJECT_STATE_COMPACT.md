@@ -19,7 +19,7 @@
 
 ## État global réel
 
-- **14 missions exécutées** — toutes FAIT ET BRANCHÉ, toutes MERGEABLE
+- **15 missions exécutées** — toutes FAIT ET BRANCHÉ, toutes MERGEABLE
 - **P0 sécurité** : couvert (auth bypass corrigé sur routes CRV + phases/charges)
 - **P1 bugs UX** : couvert (champs vol, wizard navigation, personnel)
 - **P1 cohérence UI/API** : couvert (journal CRVEvent branché sur Personnel, Engins, Charges, Événements, Observations)
@@ -49,7 +49,7 @@
 
 ## Branches actives (non mergées)
 
-- `mission/P1-UI-API-001` (Back) — 7 commits : P1_UI_API_001→005 + CLAUDE_MD_REALIGNMENT + DOC_GOV_HARDENING
+- `mission/P1-UI-API-001` (Back) — 8 commits : P1_UI_API_001→005 + CLAUDE_MD_REALIGNMENT + DOC_GOV_HARDENING + DOC_FINAL_LOCK
 - `mission/P1-UX-004` (Front) — 1 commit : P1_UX_004
 - Missions P0/P1_UX_001-003 — sur branches antérieures (voir git log)
 
