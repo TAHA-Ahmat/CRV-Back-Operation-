@@ -11,7 +11,7 @@
 - Fichiers zone rouge touchés : NON
 - Lignes ajoutées/supprimées : réécriture test (0 fichier source modifié)
 - Build avant/après : OK/OK
-- Tests avant/après : 378 pass, 44 fail / 380 pass, 42 fail
+- Tests avant/après : 378 pass, 44 fail / 386 pass, 36 fail
 - Impact comportemental : Aucun — tests uniquement
 - Rollback : git revert [hash]
 
@@ -45,7 +45,7 @@ Le fichier `tests/integration/subresource-events-branchage.test.js` existait (no
 | Test | Résultat |
 |---|---|
 | Tests intégration sous-ressources | 10/10 pass |
-| Tests globaux | 380 pass, 42 fail |
+| Tests globaux | 386 pass (+8), 36 fail (-8) |
 | Zone rouge | Aucun fichier touché |
 | Build/start backend | OK |
 
