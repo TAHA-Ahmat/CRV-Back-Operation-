@@ -21,6 +21,7 @@
 | P2_DEAD_SERVICE_001 | Backend / Code mort | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_DEAD_SERVICE_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P2_DEAD_SERVICE_001.md) | crvTransaction.service.js supprimé (5/5 critères). crv-transaction.test.js supprimé (orphelin, 9 tests cassés). -558 lignes. |
 | P2_CRVEVENT_INTEGRATION_001 | Backend / Tests CRVEvent | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_CRVEVENT_INTEGRATION_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P2_CRVEVENT_INTEGRATION_001.md) | 10/10 tests wrappers sous-ressources corrigés (imports vers wrappers, assertions alignées). 1 fichier test, 0 fichier source. |
 | P2_DOUBLE_RELOAD_001 | Frontend / UX CRV Arrivée | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_DOUBLE_RELOAD_001_RAPPORT.md) | — | 3 handlers parent supprimaient le double loadCRV() redondant. 1 fichier, -19 lignes. |
+| RUNTIME_E2E_CRV_BROWSER_AUDIT | Frontend+Backend / Audit | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](RUNTIME_E2E_CRV_BROWSER_AUDIT_RAPPORT.md) | [Briefing](BRIEFING_GPT_RUNTIME_E2E_CRV_BROWSER_AUDIT.md) | Audit runtime navigateur complet. 8 bugs identifiés : wizard step 7 (P1), VersionError 500 (P0), charges invisibles (P1), Supprimer sur Terminé (P1), 4 P2/P3. 0 fichier source modifié. |
 
 ## Backlog restant
 
@@ -29,12 +30,16 @@
 - [x] ~~Auth bypass ADMIN sur routes CRV~~ → Corrigé P0_ROUTE_AUTH_001
 - [x] ~~Auth bypass ADMIN sur routes phases/charges~~ → Corrigé P0_ROUTE_AUTH_002
 - [ ] Vérification ordre des routes + middlewares réels sur autres domaines
+- [ ] **VersionError 500 sur sauvegarde sous-ressources après création CRV** (BUG-002 audit E2E) — Mongoose __v conflict après auto-démarrage BROUILLON→EN_COURS. Bloque toute saisie sur CRV fraîchement créé. Zone rouge (crv.controller.js).
 
 ### P1 — bugs UX réels
 - [x] ~~Champs vol non pré-remplis sur CRV existant~~ → Corrigé P1_UX_001
 - [x] ~~Champs vol non persistés sur CRV existant~~ → Corrigé P1_UX_002
 - [x] ~~Écarts UI / données réellement chargées~~ → Audité P1_UX_003, fonctionAutre corrigé
 - [x] ~~Parcours wizard bloquant ou incohérent~~ → Corrigé P1_UX_004, isValidated init depuis statut CRV
+- [ ] **Wizard "Continuer" saute au step 7** (BUG-001 audit E2E) — currentStep=7 au lieu d'incrémenter. Bloque navigation séquentielle. CRVArrivee.vue / CRVTurnAround.vue / CRVDepart.vue.
+- [ ] **Charges existantes non affichées** (BUG-003 audit E2E) — store charges=[] alors que base a des données. GET /crv/:id ne renvoie pas les charges ou frontend ne les parse pas.
+- [ ] **Bouton Supprimer visible sur CRV ≥ TERMINÉ** (BUG-004 audit E2E) — Violation règle "Suppression interdite ≥ TERMINE". Vérifier si backend bloque aussi.
 
 ### P1 — cohérence UI/API
 - [x] ~~Flux batch personnel vs événements unitaires~~ → Audité P1_UI_API_001, journal CRVEvent branché
@@ -44,7 +49,9 @@
 - [x] ~~Flux observations vs journal CRVEvent~~ → Audité P1_UI_API_005, journal CRVEvent branché (pas d'UI — feature manquante documentée)
 
 ### P2 — dette technique
-- [ ] Logs excessifs front/backend
+- [ ] Logs excessifs front/backend (confirmé : 226+ entrées console pour 1 chargement CRV, logs x2 StrictMode)
+- [ ] **Requêtes réseau x4 sur sauvegarde** (BUG-008 audit E2E) — double mount Vue × double handler = 4 requêtes par action
+- [ ] **Aéroport destination non pré-rempli à la création** (BUG-005 audit E2E)
 - [x] ~~crvTransaction.service.js possiblement non utilisé~~ → Supprimé P2_DEAD_SERVICE_001 (5/5 critères + test orphelin)
 - [ ] Code mort / stratégie abandonnée
 - [ ] Nettoyage payloads incohérents
@@ -56,6 +63,7 @@
 - [ ] Tests permissions / verrouillage / auth sur routes sensibles
 
 ### P3 — améliorations futures
+- [ ] **Données vol vides sur cartes bulletin avant sélection** (BUG-006 audit E2E)
 - [ ] Migration frontend wizard
 - [ ] Nettoyage abstractions cosmétiques
 - [ ] Harmonisation documentaire
