@@ -23,6 +23,7 @@
 | P2_DOUBLE_RELOAD_001 | Frontend / UX CRV Arrivée | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_DOUBLE_RELOAD_001_RAPPORT.md) | — | 3 handlers parent supprimaient le double loadCRV() redondant. 1 fichier, -19 lignes. |
 | RUNTIME_E2E_CRV_BROWSER_AUDIT | Frontend+Backend / Audit | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](RUNTIME_E2E_CRV_BROWSER_AUDIT_RAPPORT.md) | [Briefing](BRIEFING_GPT_RUNTIME_E2E_CRV_BROWSER_AUDIT.md) | Audit runtime navigateur complet. 8 bugs identifiés : wizard step 7 (P1), VersionError 500 (P0), charges invisibles (P1), Supprimer sur Terminé (P1), 4 P2/P3. 0 fichier source modifié. |
 | P1_WIZARD_STEP_001 | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_WIZARD_STEP_001_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_WIZARD_STEP_001.md) | Wizard "Continuer" sautait des étapes (exécution concurrente nextStep). Verrou isNavigating ajouté. 3 fichiers, +21/-3 lignes. |
+| P1_CHARGES_DISPLAY_001 | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_CHARGES_DISPLAY_001_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_CHARGES_DISPLAY_001.md) | Charges invisibles sur Départ/TurnAround : v-model formData.charges remplacé par :charges="crvStore.charges". 2 fichiers, +10/-2 lignes. |
 
 ## Backlog restant
 
@@ -39,7 +40,7 @@
 - [x] ~~Écarts UI / données réellement chargées~~ → Audité P1_UX_003, fonctionAutre corrigé
 - [x] ~~Parcours wizard bloquant ou incohérent~~ → Corrigé P1_UX_004, isValidated init depuis statut CRV
 - [x] ~~Wizard "Continuer" saute au step 7~~ → Corrigé P1_WIZARD_STEP_001, verrou isNavigating dans 3 vues CRV
-- [ ] **Charges existantes non affichées** (BUG-003 audit E2E) — store charges=[] alors que base a des données. GET /crv/:id ne renvoie pas les charges ou frontend ne les parse pas.
+- [x] ~~Charges existantes non affichées~~ → Corrigé P1_CHARGES_DISPLAY_001, binding CRVCharges corrigé dans Départ/TurnAround
 - [ ] **Bouton Supprimer visible sur CRV ≥ TERMINÉ** (BUG-004 audit E2E) — Violation règle "Suppression interdite ≥ TERMINE". Vérifier si backend bloque aussi.
 
 ### P1 — cohérence UI/API
