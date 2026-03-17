@@ -25,6 +25,7 @@
 | P1_WIZARD_STEP_001 | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_WIZARD_STEP_001_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_WIZARD_STEP_001.md) | Wizard "Continuer" sautait des étapes (exécution concurrente nextStep). Verrou isNavigating ajouté. 3 fichiers, +21/-3 lignes. |
 | P1_CHARGES_DISPLAY_001 | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_CHARGES_DISPLAY_001_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_CHARGES_DISPLAY_001.md) | Charges invisibles sur Départ/TurnAround : v-model formData.charges remplacé par :charges="crvStore.charges". 2 fichiers, +10/-2 lignes. |
 | P1_DELETE_GUARD_001 | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_DELETE_GUARD_001_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_DELETE_GUARD_001.md) | Bouton Supprimer visible sur CRV ≥ TERMINÉ. canSupprimerCRV bloque maintenant TERMINE+VALIDE+VERROUILLE. 1 fichier, +3/-2 lignes. |
+| P0_VERSION_ERROR_001 | Backend / Personnel | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P0_VERSION_ERROR_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P0_VERSION_ERROR_001.md) | VersionError 500 sur sauvegarde personnel concurrente. findById+save() → findByIdAndUpdate atomique ($set/$push/$pull). Zone rouge autorisée. 2 fichiers, +41/-70 lignes. |
 
 ## Backlog restant
 
@@ -33,7 +34,7 @@
 - [x] ~~Auth bypass ADMIN sur routes CRV~~ → Corrigé P0_ROUTE_AUTH_001
 - [x] ~~Auth bypass ADMIN sur routes phases/charges~~ → Corrigé P0_ROUTE_AUTH_002
 - [ ] Vérification ordre des routes + middlewares réels sur autres domaines
-- [ ] **VersionError 500 sur sauvegarde sous-ressources après création CRV** (BUG-002 audit E2E) — Mongoose __v conflict après auto-démarrage BROUILLON→EN_COURS. Bloque toute saisie sur CRV fraîchement créé. Zone rouge (crv.controller.js).
+- [x] ~~VersionError 500 sur sauvegarde sous-ressources après création CRV~~ → Corrigé P0_VERSION_ERROR_001 (findById+save → findByIdAndUpdate atomique, 3 fonctions personnel)
 
 ### P1 — bugs UX réels
 - [x] ~~Champs vol non pré-remplis sur CRV existant~~ → Corrigé P1_UX_001
