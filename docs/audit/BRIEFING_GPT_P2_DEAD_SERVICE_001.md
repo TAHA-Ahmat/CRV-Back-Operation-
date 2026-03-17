@@ -19,7 +19,8 @@ Suppression de `crvTransaction.service.js` (service mort) et `crv-transaction.te
 3. **WORKFLOW_MACHINE.md L68 le référence encore** — c'est un document d'architecture descriptif, pas prescriptif. Nettoyage cosmétique possible en P3.
 
 ## Traçabilité versionnement
-- 2 fichiers supprimés et audit docs commités sur branche `mission/P1-UI-API-001` (repo Back)
+- **crvTransaction.service.js** et **crv-transaction.test.js** : supprimés du disque local uniquement. Ces fichiers n'ont **jamais été commités** sur aucune branche git — ils étaient untracked. Leur suppression n'apparaît dans aucun commit.
+- **Rapport, briefing, MISSION_INDEX** : commités sur branche `mission/P1-UI-API-001` (commit `7de6c71`)
 
 ## Proposition de verdict
 **MERGEABLE** — 5/5 critères de suppression remplis, zéro régression, zéro fichier modifié, fausse piste architecturale éliminée.

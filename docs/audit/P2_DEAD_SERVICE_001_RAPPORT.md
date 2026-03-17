@@ -14,7 +14,7 @@
 - Build avant/après : OK/OK
 - Tests avant/après : 378 pass, 53 fail / 378 pass, 44 fail (9 tests orphelins supprimés)
 - Impact comportemental : Aucun — service jamais appelé, tests jamais passants
-- Rollback : git revert <hash>
+- Rollback : recréer les fichiers depuis une copie (ils n'étaient pas versionnés — voir traçabilité)
 
 ## Objectif
 Appliquer les 5 critères de suppression de code mort (CLAUDE.md) sur crvTransaction.service.js.
@@ -60,11 +60,17 @@ Le fichier test `crv-transaction.test.js` :
 
 ## Traçabilité versionnement
 
-| Fichier | Versionné ? | Localisation |
-|---|---|---|
-| crvTransaction.service.js | Supprimé du repo | `Back/src/services/crv/` — branche `mission/P1-UI-API-001` |
-| crv-transaction.test.js | Supprimé du repo | `Back/tests/http/` — branche `mission/P1-UI-API-001` |
-| Rapport + briefing | OUI | `Back/docs/audit/` — branche `mission/P1-UI-API-001` |
+| Fichier | Était suivi par git ? | Suppression dans un commit ? | État actuel |
+|---|---|---|---|
+| crvTransaction.service.js | **NON** — jamais commité sur aucune branche | **NON** — la suppression est sur disque uniquement | Supprimé du disque |
+| crv-transaction.test.js | **NON** — jamais commité sur aucune branche | **NON** — la suppression est sur disque uniquement | Supprimé du disque |
+| Rapport mission | OUI | OUI — commit `7de6c71` | `Back/docs/audit/` — branche `mission/P1-UI-API-001` |
+| Briefing GPT | OUI | OUI — commit `7de6c71` | `Back/docs/audit/` — branche `mission/P1-UI-API-001` |
+| MISSION_INDEX.md | OUI | OUI — commit `7de6c71` | `Back/docs/audit/` — branche `mission/P1-UI-API-001` |
+
+**Conséquence** : si la branche `mission/P1-UI-API-001` est mergée dans main, les 2 fichiers supprimés n'apparaîtront pas dans le diff de merge (ils n'ont jamais été trackés). La suppression est uniquement locale. Si un autre développeur a ces fichiers sur son poste, ils ne seront pas affectés par le merge.
 
 ## Statut honnête final
 **FAIT ET BRANCHÉ — MERGEABLE**
+
+Les artefacts d'audit (rapport, briefing, MISSION_INDEX) sont commités. Les fichiers supprimés étaient untracked — leur suppression est sur disque uniquement, non versionnée.
