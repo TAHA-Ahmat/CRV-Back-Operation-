@@ -18,6 +18,7 @@
 | DOC_FINAL_LOCK | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](DOCUMENTATION_FINAL_LOCK_RAPPORT.md) | [Briefing](BRIEFING_GPT_DOCUMENTATION_FINAL_LOCK.md) | Chemins SKILL corrigés. Protocole reprise cross-conversation. PROJECT_STATE_COMPACT créé. |
 | GOVERNANCE_HARDENING_PRE_P2 | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](GOVERNANCE_HARDENING_PRE_P2_RAPPORT.md) | [Briefing](BRIEFING_GPT_GOVERNANCE_HARDENING_PRE_P2.md) | 7 règles ajoutées : anti-sac, qualification 4 classes, découpage ET, suppression code mort 5 critères, priorisation formalisée, preuve pré-patch, sortie mission. |
 | P2_ENDPOINT_001 | Backend / Journal CRVEvent | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_ENDPOINT_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P2_ENDPOINT_001.md) | 2 routes GET branchées (events + stats). Controller/service existants, 1 fichier modifié, +20 lignes, 13 events récupérés en test live. |
+| P2_DEAD_SERVICE_001 | Backend / Code mort | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_DEAD_SERVICE_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P2_DEAD_SERVICE_001.md) | crvTransaction.service.js supprimé (5/5 critères). crv-transaction.test.js supprimé (orphelin, 9 tests cassés). -558 lignes. |
 
 ## Backlog restant
 
@@ -42,7 +43,7 @@
 
 ### P2 — dette technique
 - [ ] Logs excessifs front/backend
-- [ ] crvTransaction.service.js possiblement non utilisé
+- [x] ~~crvTransaction.service.js possiblement non utilisé~~ → Supprimé P2_DEAD_SERVICE_001 (5/5 critères + test orphelin)
 - [ ] Code mort / stratégie abandonnée
 - [ ] Nettoyage payloads incohérents
 - [ ] Double rechargement CRV après chaque action (inefficacité architecturale)
