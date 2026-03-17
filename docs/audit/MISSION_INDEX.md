@@ -19,7 +19,7 @@
 | GOVERNANCE_HARDENING_PRE_P2 | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](GOVERNANCE_HARDENING_PRE_P2_RAPPORT.md) | [Briefing](BRIEFING_GPT_GOVERNANCE_HARDENING_PRE_P2.md) | 7 règles ajoutées : anti-sac, qualification 4 classes, découpage ET, suppression code mort 5 critères, priorisation formalisée, preuve pré-patch, sortie mission. |
 | P2_ENDPOINT_001 | Backend / Journal CRVEvent | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_ENDPOINT_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P2_ENDPOINT_001.md) | 2 routes GET branchées (events + stats). Controller/service existants, 1 fichier modifié, +20 lignes, 13 events récupérés en test live. |
 | P2_DEAD_SERVICE_001 | Backend / Code mort | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_DEAD_SERVICE_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P2_DEAD_SERVICE_001.md) | crvTransaction.service.js supprimé (5/5 critères). crv-transaction.test.js supprimé (orphelin, 9 tests cassés). -558 lignes. |
-| P2_CRVEVENT_INTEGRATION_001 | Backend / Tests CRVEvent | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_CRVEVENT_INTEGRATION_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P2_CRVEVENT_INTEGRATION_001.md) | 10/10 tests wrappers corrigés (imports vers wrappers, assertions alignées). 8 tests lifecycle .skip (zone rouge). Gap documenté. |
+| P2_CRVEVENT_INTEGRATION_001 | Backend / Tests CRVEvent | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_CRVEVENT_INTEGRATION_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P2_CRVEVENT_INTEGRATION_001.md) | 10/10 tests wrappers sous-ressources corrigés (imports vers wrappers, assertions alignées). 1 fichier test, 0 fichier source. |
 
 ## Backlog restant
 
@@ -51,8 +51,7 @@
 - [x] ~~Exposer endpoint GET /api/crv/:id/events~~ → Corrigé P2_ENDPOINT_001, 2 routes branchées
 
 ### P2 — tests
-- [x] ~~Tests d'intégration CRVEvent wrappers~~ → Corrigé P2_CRVEVENT_INTEGRATION_001 (10/10 pass)
-- [ ] Tests d'intégration CRVEvent lifecycle (CRV_CREATED, TERMINATED, VALIDATED, LOCKED, UNLOCKED, CANCELLED, REACTIVATED) — nécessite wrappers lifecycle (zone rouge)
+- [x] ~~Tests d'intégration CRVEvent wrappers sous-ressources~~ → Corrigé P2_CRVEVENT_INTEGRATION_001 (10/10 pass)
 - [ ] Tests permissions / verrouillage / auth sur routes sensibles
 
 ### P3 — améliorations futures
