@@ -22,6 +22,7 @@ import {
 } from '../../controllers/crv/crvChargesController.js';
 import { ajouterEvenement } from '../../controllers/crv/crvEvenementsController.js';
 import { ajouterObservation } from '../../controllers/crv/crvObservationsController.js';
+import { listerEvenementsCRV, statsEvenementsCRV } from '../../controllers/crv/crvEvent.controller.js';
 import {
   mettreAJourPersonnel,
   ajouterPersonnel,
@@ -172,6 +173,25 @@ router.delete('/:id', protect, excludeQualite, verifierCRVNonVerrouille, auditLo
  * @access  Private
  */
 router.get('/:id/transitions', protect, obtenirTransitionsPossibles);
+
+// ============================
+//   JOURNAL CRVEvent (P2_ENDPOINT_001)
+// ============================
+
+/**
+ * @route   GET /api/crv/:id/events
+ * @desc    Récupérer le journal d'événements d'un CRV
+ * @access  Private (ADMIN exclu)
+ * @query   type (filtrer par type), limit (défaut 100), skip (pagination)
+ */
+router.get('/:id/events', protect, excludeAdmin, listerEvenementsCRV);
+
+/**
+ * @route   GET /api/crv/:id/events/stats
+ * @desc    Statistiques des événements d'un CRV par type
+ * @access  Private (ADMIN exclu)
+ */
+router.get('/:id/events/stats', protect, excludeAdmin, statsEvenementsCRV);
 
 /**
  * @route   POST /api/crv/:id/demarrer

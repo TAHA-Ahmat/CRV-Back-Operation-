@@ -17,6 +17,7 @@
 | DOC_GOV_HARDENING | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](DOCUMENTATION_GOVERNANCE_HARDENING_RAPPORT.md) | [Briefing](BRIEFING_GPT_DOCUMENTATION_GOVERNANCE_HARDENING.md) | Vocabulaire statut migré dans CLAUDE.md. Règle MAJ du skill ajoutée. Règle contradiction CLAUDE/SKILL explicitée. |
 | DOC_FINAL_LOCK | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](DOCUMENTATION_FINAL_LOCK_RAPPORT.md) | [Briefing](BRIEFING_GPT_DOCUMENTATION_FINAL_LOCK.md) | Chemins SKILL corrigés. Protocole reprise cross-conversation. PROJECT_STATE_COMPACT créé. |
 | GOVERNANCE_HARDENING_PRE_P2 | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](GOVERNANCE_HARDENING_PRE_P2_RAPPORT.md) | [Briefing](BRIEFING_GPT_GOVERNANCE_HARDENING_PRE_P2.md) | 7 règles ajoutées : anti-sac, qualification 4 classes, découpage ET, suppression code mort 5 critères, priorisation formalisée, preuve pré-patch, sortie mission. |
+| P2_ENDPOINT_001 | Backend / Journal CRVEvent | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_ENDPOINT_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P2_ENDPOINT_001.md) | 2 routes GET branchées (events + stats). Controller/service existants, 1 fichier modifié, +20 lignes, 13 events récupérés en test live. |
 
 ## Backlog restant
 
@@ -45,7 +46,7 @@
 - [ ] Code mort / stratégie abandonnée
 - [ ] Nettoyage payloads incohérents
 - [ ] Double rechargement CRV après chaque action (inefficacité architecturale)
-- [ ] Exposer endpoint GET /api/crv/:id/events (controller existe, routes manquantes)
+- [x] ~~Exposer endpoint GET /api/crv/:id/events~~ → Corrigé P2_ENDPOINT_001, 2 routes branchées
 
 ### P2 — tests
 - [ ] Tests d'intégration réels sur périmètres critiques
