@@ -15,6 +15,7 @@
 | P1_UI_API_005 | Backend / Traçabilité | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P1_UI_API_005_RAPPORT.md) | [Briefing](BRIEFING_GPT_P1_UI_API_005.md) | Flux Observations sans journalisation CRVEvent. Wrapper dédié créé, 3 fichiers, 1 événement prouvé en base. Pas d'UI observations (feature manquante). |
 | CLAUDE_MD_REALIGNMENT | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](CLAUDE_MD_REALIGNMENT_RAPPORT.md) | [Briefing](BRIEFING_GPT_CLAUDE_MD_REALIGNMENT.md) | CLAUDE.md réaligné : doctrine stable séparée de l'état vivant (MISSION_INDEX). Backlog obsolète retiré. Skill référencé. |
 | DOC_GOV_HARDENING | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](DOCUMENTATION_GOVERNANCE_HARDENING_RAPPORT.md) | [Briefing](BRIEFING_GPT_DOCUMENTATION_GOVERNANCE_HARDENING.md) | Vocabulaire statut migré dans CLAUDE.md. Règle MAJ du skill ajoutée. Règle contradiction CLAUDE/SKILL explicitée. |
+| DOC_FINAL_LOCK | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](DOCUMENTATION_FINAL_LOCK_RAPPORT.md) | [Briefing](BRIEFING_GPT_DOCUMENTATION_FINAL_LOCK.md) | Chemins SKILL corrigés. Protocole reprise cross-conversation. PROJECT_STATE_COMPACT créé. |
 
 ## Backlog restant
 
