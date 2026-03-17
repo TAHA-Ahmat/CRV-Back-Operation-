@@ -20,6 +20,7 @@
 | P2_ENDPOINT_001 | Backend / Journal CRVEvent | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_ENDPOINT_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P2_ENDPOINT_001.md) | 2 routes GET branchées (events + stats). Controller/service existants, 1 fichier modifié, +20 lignes, 13 events récupérés en test live. |
 | P2_DEAD_SERVICE_001 | Backend / Code mort | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_DEAD_SERVICE_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P2_DEAD_SERVICE_001.md) | crvTransaction.service.js supprimé (5/5 critères). crv-transaction.test.js supprimé (orphelin, 9 tests cassés). -558 lignes. |
 | P2_CRVEVENT_INTEGRATION_001 | Backend / Tests CRVEvent | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_CRVEVENT_INTEGRATION_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P2_CRVEVENT_INTEGRATION_001.md) | 10/10 tests wrappers sous-ressources corrigés (imports vers wrappers, assertions alignées). 1 fichier test, 0 fichier source. |
+| P2_DOUBLE_RELOAD_001 | Frontend / UX CRV Arrivée | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P2_DOUBLE_RELOAD_001_RAPPORT.md) | — | 3 handlers parent supprimaient le double loadCRV() redondant. 1 fichier, -19 lignes. |
 
 ## Backlog restant
 
@@ -47,7 +48,7 @@
 - [x] ~~crvTransaction.service.js possiblement non utilisé~~ → Supprimé P2_DEAD_SERVICE_001 (5/5 critères + test orphelin)
 - [ ] Code mort / stratégie abandonnée
 - [ ] Nettoyage payloads incohérents
-- [ ] Double rechargement CRV après chaque action (inefficacité architecturale)
+- [x] ~~Double rechargement CRV après chaque action~~ → Corrigé P2_DOUBLE_RELOAD_001, 3 handlers CRVArrivee.vue
 - [x] ~~Exposer endpoint GET /api/crv/:id/events~~ → Corrigé P2_ENDPOINT_001, 2 routes branchées
 
 ### P2 — tests
