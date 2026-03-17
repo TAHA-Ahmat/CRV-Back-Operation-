@@ -46,9 +46,11 @@ const fakeCrv = {
 // Mock CRV model
 vi.mock('../../src/models/crv/CRV.js', () => {
   const findById = vi.fn();
+  const findByIdAndUpdate = vi.fn();
   return {
-    default: { findById, create: vi.fn(), find: vi.fn() },
+    default: { findById, findByIdAndUpdate, create: vi.fn(), find: vi.fn() },
     __findById: findById,
+    __findByIdAndUpdate: findByIdAndUpdate,
   };
 });
 
@@ -350,16 +352,12 @@ describe('PERSONNEL_ADDED / PERSONNEL_REMOVED — crvPersonnelController', () =>
 
   it('logCRVEvent(PERSONNEL_ADDED) appelé après ajout personne', async () => {
     const CRVModel = await import('../../src/models/crv/CRV.js');
-    const crvWithPersonnel = {
+    // findByIdAndUpdate retourne le CRV avec la personne ajoutée (atomique)
+    const crvAfterAdd = {
       ...fakeCrv,
-      personnelAffecte: [],
-      save: vi.fn().mockImplementation(function () {
-        this.personnelAffecte.push({ nom: 'Dupont', prenom: 'Jean', fonction: 'AGENT' });
-        return Promise.resolve(this);
-      }),
+      personnelAffecte: [{ nom: 'Dupont', prenom: 'Jean', fonction: 'AGENT' }],
     };
-    crvWithPersonnel.personnelAffecte = [];
-    CRVModel.__findById.mockResolvedValueOnce(crvWithPersonnel);
+    CRVModel.__findByIdAndUpdate.mockResolvedValueOnce(crvAfterAdd);
 
     // Import depuis le WRAPPER
     const { ajouterPersonnel } = await import('../../src/controllers/crv/crvPersonnelController.js');
@@ -390,18 +388,12 @@ describe('PERSONNEL_ADDED / PERSONNEL_REMOVED — crvPersonnelController', () =>
   it('logCRVEvent(PERSONNEL_REMOVED) appelé après suppression personne', async () => {
     const CRVModel = await import('../../src/models/crv/CRV.js');
     const fakePersonneId = new mongoose.Types.ObjectId();
-    const crvWithPersonnel = {
+    // findByIdAndUpdate avec $pull retourne le CRV APRÈS suppression (personnelAffecte vide)
+    const crvAfterRemove = {
       ...fakeCrv,
-      personnelAffecte: [{
-        _id: fakePersonneId,
-        nom: 'Martin',
-        prenom: 'Paul',
-        fonction: 'CHEF_EQUIPE',
-        id: fakePersonneId.toString(),
-      }],
-      save: vi.fn().mockResolvedValue(true),
+      personnelAffecte: [],
     };
-    CRVModel.__findById.mockResolvedValueOnce(crvWithPersonnel);
+    CRVModel.__findByIdAndUpdate.mockResolvedValueOnce(crvAfterRemove);
 
     const { supprimerPersonnel } = await import('../../src/controllers/crv/crvPersonnelController.js');
 
