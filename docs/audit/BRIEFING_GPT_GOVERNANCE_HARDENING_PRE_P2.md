@@ -17,5 +17,9 @@ Durcissement documentaire pré-P2 : 7 règles ajoutées dans CLAUDE.md et SKILL.
 2. **La priorisation PRODUIT > HYGIÈNE est-elle toujours juste ?** Cas limite : une dette technique dangereuse (service non branché qui masque un bug) vs une feature mineure. L'arbitrage humain reste le garde-fou.
 3. **La règle de sortie "1 ligne/changement" est-elle trop stricte ?** Elle sert de signal, pas de veto. Si le rapport dépasse mais reste clair, c'est MERGEABLE AVEC RÉSERVES, pas NON MERGEABLE.
 
+## Traçabilité versionnement
+- **CLAUDE.md** et **SKILL.md** : modifiés sur disque, hors repo git (par conception — ces fichiers ne font partie d'aucun dépôt)
+- **Rapport, briefing, MISSION_INDEX** : commités sur branche `mission/P1-UI-API-001` (repo Back)
+
 ## Proposition de verdict
 **MERGEABLE** — 7 règles ajoutées, zéro duplication, zéro contradiction, zéro code métier touché. Le cadre est prêt pour les missions P2.

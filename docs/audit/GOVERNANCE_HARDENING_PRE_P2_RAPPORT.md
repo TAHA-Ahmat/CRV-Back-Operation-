@@ -2,12 +2,13 @@
 
 ## Mission : GOVERNANCE_HARDENING_PRE_P2
 - Date : 2026-03-17
-- Branche : aucune (documentation hors git — CLAUDE.md et SKILL.md)
+- Branche : mission/P1-UI-API-001 (Back) — artefacts d'audit commités
 - Périmètre : documentation / gouvernance
 - Domaine : gouvernance documentaire
 - Classe : HYGIÈNE
 - Niveau cérémonie : standard
-- Fichiers modifiés : CLAUDE.md (3 sections ajoutées), SKILL.md (3 sections modifiées)
+- Fichiers modifiés (hors repo, sur disque) : CLAUDE.md (3 sections ajoutées), SKILL.md (3 sections modifiées)
+- Fichiers commités (repo Back) : rapport, briefing GPT, MISSION_INDEX
 - Fichiers zone rouge touchés : NON
 - Lignes ajoutées/supprimées : +65 / -15
 - Build avant/après : N/A (aucun code métier)
@@ -70,7 +71,17 @@ Les règles existantes ne couvraient pas :
 - Les 7 règles demandées sont couvertes
 - Chaque règle est dans le bon fichier selon la séparation doctrine/comportement
 
-## Statut honnête final
-**FAIT — MERGEABLE**
+## Traçabilité versionnement
 
-Pas de branche git (fichiers hors repo). Modifications sur disque uniquement.
+| Fichier | Versionné ? | Localisation |
+|---|---|---|
+| CLAUDE.md | NON — hors repo | `Operation/CLAUDE.md` (disque) |
+| SKILL.md | NON — hors repo | `~/.claude/skills/pilotage-critique/SKILL.md` (disque) |
+| Rapport mission | OUI | `Back/docs/audit/` — branche `mission/P1-UI-API-001` |
+| Briefing GPT | OUI | `Back/docs/audit/` — branche `mission/P1-UI-API-001` |
+| MISSION_INDEX.md | OUI | `Back/docs/audit/` — branche `mission/P1-UI-API-001` |
+
+## Statut honnête final
+**FAIT ET BRANCHÉ — MERGEABLE**
+
+Les livrables primaires (CLAUDE.md, SKILL.md) sont hors repo par conception — ils ne font partie d'aucun dépôt git. Les artefacts d'audit (rapport, briefing, MISSION_INDEX) sont commités sur branche `mission/P1-UI-API-001`.

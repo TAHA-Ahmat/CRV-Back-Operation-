@@ -16,7 +16,7 @@
 | CLAUDE_MD_REALIGNMENT | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](CLAUDE_MD_REALIGNMENT_RAPPORT.md) | [Briefing](BRIEFING_GPT_CLAUDE_MD_REALIGNMENT.md) | CLAUDE.md réaligné : doctrine stable séparée de l'état vivant (MISSION_INDEX). Backlog obsolète retiré. Skill référencé. |
 | DOC_GOV_HARDENING | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](DOCUMENTATION_GOVERNANCE_HARDENING_RAPPORT.md) | [Briefing](BRIEFING_GPT_DOCUMENTATION_GOVERNANCE_HARDENING.md) | Vocabulaire statut migré dans CLAUDE.md. Règle MAJ du skill ajoutée. Règle contradiction CLAUDE/SKILL explicitée. |
 | DOC_FINAL_LOCK | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](DOCUMENTATION_FINAL_LOCK_RAPPORT.md) | [Briefing](BRIEFING_GPT_DOCUMENTATION_FINAL_LOCK.md) | Chemins SKILL corrigés. Protocole reprise cross-conversation. PROJECT_STATE_COMPACT créé. |
-| GOVERNANCE_HARDENING_PRE_P2 | Documentation / Gouvernance | FAIT | MERGEABLE | [Rapport](GOVERNANCE_HARDENING_PRE_P2_RAPPORT.md) | [Briefing](BRIEFING_GPT_GOVERNANCE_HARDENING_PRE_P2.md) | 7 règles ajoutées : anti-sac, qualification 4 classes, découpage ET, suppression code mort 5 critères, priorisation formalisée, preuve pré-patch, sortie mission. |
+| GOVERNANCE_HARDENING_PRE_P2 | Documentation / Gouvernance | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](GOVERNANCE_HARDENING_PRE_P2_RAPPORT.md) | [Briefing](BRIEFING_GPT_GOVERNANCE_HARDENING_PRE_P2.md) | 7 règles ajoutées : anti-sac, qualification 4 classes, découpage ET, suppression code mort 5 critères, priorisation formalisée, preuve pré-patch, sortie mission. |
 
 ## Backlog restant
 
