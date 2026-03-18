@@ -6,6 +6,7 @@ import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
 import ChargeOperationnelle from '../../models/charges/ChargeOperationnelle.js';
 import EvenementOperationnel from '../../models/transversal/EvenementOperationnel.js';
 import Observation from '../../models/crv/Observation.js';
+import AffectationEnginVol from '../../models/resources/AffectationEnginVol.js';
 import ValidationCRV from '../../models/validation/ValidationCRV.js';
 import { genererNumeroCRV, calculerCompletude, updateCompletude, detecterDoublonCRV, creerVolDepuisMouvement } from '../../services/crv/crv.service.js';
 import { initialiserPhasesVol } from '../../services/phases/phase.service.js';
@@ -471,6 +472,12 @@ export const obtenirCRV = async (req, res, next) => {
       .populate('phaseConcernee')
       .sort({ dateHeure: -1 });
 
+    // Récupérer les engins affectés au Vol (via AffectationEnginVol)
+    const volId = crv.vol?._id || crv.vol;
+    const engins = volId
+      ? await AffectationEnginVol.find({ vol: volId }).populate('engin').sort({ heureDebut: 1 })
+      : [];
+
     console.log('[CRV][API_SUCCESS][OBTENIR_CRV]', {
       crvId: crv._id,
       userId: req.user?._id || null,
@@ -478,7 +485,7 @@ export const obtenirCRV = async (req, res, next) => {
       input: { id: req.params.id },
       decision: true,
       reason: 'CRV récupéré',
-      output: { statut: crv.statut, completude: crv.completude, nbPhases: phases.length, nbCharges: charges.length },
+      output: { statut: crv.statut, completude: crv.completude, nbPhases: phases.length, nbCharges: charges.length, nbEngins: engins.length },
       timestamp: new Date().toISOString()
     });
 
@@ -490,7 +497,7 @@ export const obtenirCRV = async (req, res, next) => {
         charges,
         evenements,
         observations,
-        engins: crv.materielUtilise || []
+        engins
       }
     });
   } catch (error) {
