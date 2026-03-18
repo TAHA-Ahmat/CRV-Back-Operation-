@@ -29,6 +29,7 @@
 | P1_PHASE_NONREALISE_001 | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_PHASE_NONREALISE_001_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_PHASE_NONREALISE_001.md) | Phases "Non réalisée" bloquées pour tous motifs sauf AUTRE. detailMotif exigé à tort par le store. Aligné sur businessRules.middleware.js. 1 fichier, +5/-5 lignes. |
 | P2_REMOVE_CRV_HOME | Frontend / Navigation | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P2_REMOVE_CRV_HOME_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P2_REMOVE_CRV_HOME.md) | Page intermédiaire /crv supprimée. Redirect vers /crv/nouveau. Boutons Retour → /crv/liste. 5 fichiers, +5/-17 lignes. |
 | P1_BINDING_DEPART_TURNAROUND | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_BINDING_DEPART_TURNAROUND_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_BINDING_DEPART_TURNAROUND.md) | 5 bugs DANGEREUX Départ/TurnAround : case 1 vol manquant, CRVCharges/Evenements v-model cassé. posteStationnement corrigé. 2 fichiers, +76/-6 lignes. |
+| P1_PREFILL_DEPART_TURNAROUND | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_PREFILL_DEPART_TURNAROUND_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_PREFILL_DEPART_TURNAROUND.md) | formData.header désaligné avec CRVHeader sur Départ/TurnAround. 5-6 champs bulletin invisibles malgré données en base. Réaligné + fix poste Arrivée. 3 fichiers, +42/-27 lignes. |
 
 ## Backlog restant
 
