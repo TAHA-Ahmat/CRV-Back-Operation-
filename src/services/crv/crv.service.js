@@ -113,6 +113,10 @@ export const calculerCompletude = async (crvId) => {
       }
       score += scoreCharges;
       details.charges = { count: chargesAvecDonnees.length, types: typesCharges, score: scoreCharges };
+    } else if (crv.confirmationAucuneCharge) {
+      // P0: vol sans charge (ferry, technique, repositionnement) — confirmation explicite
+      score += 30;
+      details.charges = { count: 0, score: 30, statut: 'absence_confirmee' };
     } else {
       details.charges = { count: 0, score: 0 };
     }

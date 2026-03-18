@@ -51,9 +51,12 @@ const crvSchema = new mongoose.Schema({
     max: 100,
     default: 0
   },
-  // SUPPRIMÉ : confirmationAucunEvenement, confirmationAucuneObservation, confirmationAucuneCharge
-  // Règle métier : on documente ce qui s'est passé, jamais ce qui ne s'est pas passé
-  // L'absence de données = opération non réalisée (cahier des charges §4)
+  // P0: confirmation explicite d'absence de charge (vol ferry/technique/repositionnement)
+  // Nécessaire pour débloquer la complétude sur les vols légitimement sans charge
+  confirmationAucuneCharge: {
+    type: Boolean,
+    default: false
+  },
   verrouillePar: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Personne'

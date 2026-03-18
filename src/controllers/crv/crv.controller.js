@@ -300,7 +300,7 @@ export const creerCRV = async (req, res, next) => {
       escale: escaleCode,
       horaire: horaire._id,
       creePar: req.user._id,
-      responsableVol: responsableVolId || null,
+      responsableVol: responsableVolId || req.user._id,
       statut: 'BROUILLON',
       bulletinMouvementReference: bulletinReference,
       crvDoublon: !!forceDoublon
@@ -2218,6 +2218,10 @@ export const demarrerCRV = async (req, res, next) => {
 
     crv.statut = 'EN_COURS';
     crv.modifiePar = req.user._id;
+    // P0: garantir responsableVol pour les CRV créés avant le fix
+    if (!crv.responsableVol) {
+      crv.responsableVol = req.user._id;
+    }
     await crv.save();
 
     // EXTENSION 8 - Sync Vol.statut → EN_COURS
