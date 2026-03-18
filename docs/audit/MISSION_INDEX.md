@@ -26,6 +26,8 @@
 | P1_CHARGES_DISPLAY_001 | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_CHARGES_DISPLAY_001_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_CHARGES_DISPLAY_001.md) | Charges invisibles sur Départ/TurnAround : v-model formData.charges remplacé par :charges="crvStore.charges". 2 fichiers, +10/-2 lignes. |
 | P1_DELETE_GUARD_001 | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_DELETE_GUARD_001_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_DELETE_GUARD_001.md) | Bouton Supprimer visible sur CRV ≥ TERMINÉ. canSupprimerCRV bloque maintenant TERMINE+VALIDE+VERROUILLE. 1 fichier, +3/-2 lignes. |
 | P0_VERSION_ERROR_001 | Backend / Personnel | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](P0_VERSION_ERROR_001_RAPPORT.md) | [Briefing](BRIEFING_GPT_P0_VERSION_ERROR_001.md) | VersionError 500 sur sauvegarde personnel concurrente. findById+save() → findByIdAndUpdate atomique ($set/$push/$pull). Zone rouge autorisée. 2 fichiers, +41/-70 lignes. |
+| P1_PHASE_NONREALISE_001 | Frontend / UX | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P1_PHASE_NONREALISE_001_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P1_PHASE_NONREALISE_001.md) | Phases "Non réalisée" bloquées pour tous motifs sauf AUTRE. detailMotif exigé à tort par le store. Aligné sur businessRules.middleware.js. 1 fichier, +5/-5 lignes. |
+| P2_REMOVE_CRV_HOME | Frontend / Navigation | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/P2_REMOVE_CRV_HOME_RAPPORT.md) | [Briefing](../../Front/docs/audit/BRIEFING_GPT_P2_REMOVE_CRV_HOME.md) | Page intermédiaire /crv supprimée. Redirect vers /crv/nouveau. Boutons Retour → /crv/liste. 5 fichiers, +5/-17 lignes. |
 
 ## Backlog restant
 
@@ -44,6 +46,7 @@
 - [x] ~~Wizard "Continuer" saute au step 7~~ → Corrigé P1_WIZARD_STEP_001, verrou isNavigating dans 3 vues CRV
 - [x] ~~Charges existantes non affichées~~ → Corrigé P1_CHARGES_DISPLAY_001, binding CRVCharges corrigé dans Départ/TurnAround
 - [x] ~~Bouton Supprimer visible sur CRV ≥ TERMINÉ~~ → Corrigé P1_DELETE_GUARD_001, canSupprimerCRV bloque TERMINE+VALIDE+VERROUILLE. Backend à vérifier séparément.
+- [x] ~~Phases "Non réalisée" bloquées pour motifs standards~~ → Corrigé P1_PHASE_NONREALISE_001, detailMotif aligné sur businessRules.middleware.js
 
 ### P1 — cohérence UI/API
 - [x] ~~Flux batch personnel vs événements unitaires~~ → Audité P1_UI_API_001, journal CRVEvent branché
@@ -57,6 +60,7 @@
 - [ ] **Requêtes réseau x4 sur sauvegarde** (BUG-008 audit E2E) — double mount Vue × double handler = 4 requêtes par action
 - [ ] **Aéroport destination non pré-rempli à la création** (BUG-005 audit E2E)
 - [x] ~~crvTransaction.service.js possiblement non utilisé~~ → Supprimé P2_DEAD_SERVICE_001 (5/5 critères + test orphelin)
+- [x] ~~Page intermédiaire /crv (CRVHome) obsolète~~ → Corrigé P2_REMOVE_CRV_HOME, redirect /crv → /crv/nouveau, boutons Retour → /crv/liste
 - [ ] Code mort / stratégie abandonnée
 - [ ] Nettoyage payloads incohérents
 - [x] ~~Double rechargement CRV après chaque action~~ → Corrigé P2_DOUBLE_RELOAD_001, 3 handlers CRVArrivee.vue
