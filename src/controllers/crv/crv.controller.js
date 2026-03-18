@@ -6,6 +6,7 @@ import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
 import ChargeOperationnelle from '../../models/charges/ChargeOperationnelle.js';
 import EvenementOperationnel from '../../models/transversal/EvenementOperationnel.js';
 import Observation from '../../models/crv/Observation.js';
+import AffectationEnginVol from '../../models/resources/AffectationEnginVol.js';
 import ValidationCRV from '../../models/validation/ValidationCRV.js';
 import { genererNumeroCRV, calculerCompletude, updateCompletude, detecterDoublonCRV, creerVolDepuisMouvement } from '../../services/crv/crv.service.js';
 import { initialiserPhasesVol } from '../../services/phases/phase.service.js';
@@ -471,6 +472,12 @@ export const obtenirCRV = async (req, res, next) => {
       .populate('phaseConcernee')
       .sort({ dateHeure: -1 });
 
+    // Récupérer les engins affectés au Vol (via AffectationEnginVol)
+    const volId = crv.vol?._id || crv.vol;
+    const engins = volId
+      ? await AffectationEnginVol.find({ vol: volId }).populate('engin').sort({ heureDebut: 1 })
+      : [];
+
     console.log('[CRV][API_SUCCESS][OBTENIR_CRV]', {
       crvId: crv._id,
       userId: req.user?._id || null,
@@ -478,7 +485,7 @@ export const obtenirCRV = async (req, res, next) => {
       input: { id: req.params.id },
       decision: true,
       reason: 'CRV récupéré',
-      output: { statut: crv.statut, completude: crv.completude, nbPhases: phases.length, nbCharges: charges.length },
+      output: { statut: crv.statut, completude: crv.completude, nbPhases: phases.length, nbCharges: charges.length, nbEngins: engins.length },
       timestamp: new Date().toISOString()
     });
 
@@ -490,7 +497,7 @@ export const obtenirCRV = async (req, res, next) => {
         charges,
         evenements,
         observations,
-        engins: crv.materielUtilise || []
+        engins
       }
     });
   } catch (error) {
@@ -2565,7 +2572,13 @@ export const mettreAJourPersonnel = async (req, res, next) => {
       personne.fonction = personne.fonction.toUpperCase();
     }
 
-    const crv = await CRV.findById(req.params.id);
+    // Utiliser findByIdAndUpdate atomique pour éviter VersionError
+    // sur modifications concurrentes du tableau personnelAffecte
+    const crv = await CRV.findByIdAndUpdate(
+      req.params.id,
+      { $set: { personnelAffecte, modifiePar: req.user._id } },
+      { new: true, runValidators: true }
+    );
 
     if (!crv) {
       console.warn('[CRV][API_REJECT][CRV_NOT_FOUND]', {
@@ -2584,28 +2597,13 @@ export const mettreAJourPersonnel = async (req, res, next) => {
       });
     }
 
-    console.log('[CRV][PERSONNEL_UPDATE]', {
-      crvId: crv._id,
-      userId: req.user?._id || null,
-      role: req.user?.fonction || null,
-      input: { ancienCount: crv.personnelAffecte.length, nouveauCount: personnelAffecte.length },
-      decision: true,
-      reason: 'Mise à jour personnel (écrasement)',
-      output: null,
-      timestamp: new Date().toISOString()
-    });
-
-    crv.personnelAffecte = personnelAffecte;
-    crv.modifiePar = req.user._id;
-    await crv.save();
-
     console.log('[CRV][API_SUCCESS][METTRE_A_JOUR_PERSONNEL]', {
       crvId: crv._id,
       userId: req.user?._id || null,
       role: req.user?.fonction || null,
       input: { count: personnelAffecte.length },
       decision: true,
-      reason: 'Personnel mis à jour',
+      reason: 'Personnel mis à jour (atomique)',
       output: { nbPersonnes: crv.personnelAffecte.length },
       timestamp: new Date().toISOString()
     });
@@ -2668,7 +2666,17 @@ export const ajouterPersonnel = async (req, res, next) => {
       });
     }
 
-    const crv = await CRV.findById(req.params.id);
+    const nouvellePersonne = { nom, prenom, fonction, matricule, telephone, remarques };
+
+    // Utiliser $push atomique pour éviter VersionError sur concurrence
+    const crv = await CRV.findByIdAndUpdate(
+      req.params.id,
+      {
+        $push: { personnelAffecte: nouvellePersonne },
+        $set: { modifiePar: req.user._id }
+      },
+      { new: true, runValidators: true }
+    );
 
     if (!crv) {
       console.warn('[CRV][API_REJECT][CRV_NOT_FOUND]', {
@@ -2687,18 +2695,13 @@ export const ajouterPersonnel = async (req, res, next) => {
       });
     }
 
-    const nouvellePersonne = { nom, prenom, fonction, matricule, telephone, remarques };
-    crv.personnelAffecte.push(nouvellePersonne);
-    crv.modifiePar = req.user._id;
-    await crv.save();
-
     console.log('[CRV][API_SUCCESS][AJOUTER_PERSONNEL]', {
       crvId: crv._id,
       userId: req.user?._id || null,
       role: req.user?.fonction || null,
       input: nouvellePersonne,
       decision: true,
-      reason: 'Personne ajoutée',
+      reason: 'Personne ajoutée (atomique)',
       output: { nbPersonnes: crv.personnelAffecte.length },
       timestamp: new Date().toISOString()
     });
@@ -2744,7 +2747,15 @@ export const supprimerPersonnel = async (req, res, next) => {
   try {
     const { id, personneId } = req.params;
 
-    const crv = await CRV.findById(id);
+    // Utiliser $pull atomique pour éviter VersionError sur concurrence
+    const crv = await CRV.findByIdAndUpdate(
+      id,
+      {
+        $pull: { personnelAffecte: { _id: personneId } },
+        $set: { modifiePar: req.user._id }
+      },
+      { new: true }
+    );
 
     if (!crv) {
       console.warn('[CRV][API_REJECT][CRV_NOT_FOUND]', {
@@ -2763,38 +2774,13 @@ export const supprimerPersonnel = async (req, res, next) => {
       });
     }
 
-    const indexPersonne = crv.personnelAffecte.findIndex(
-      p => p._id.toString() === personneId
-    );
-
-    if (indexPersonne === -1) {
-      console.warn('[CRV][API_REJECT][PERSONNE_NOT_FOUND]', {
-        crvId: crv._id,
-        userId: req.user?._id || null,
-        role: req.user?.fonction || null,
-        input: { personneId },
-        decision: false,
-        reason: 'Personne non trouvée',
-        output: null,
-        timestamp: new Date().toISOString()
-      });
-      return res.status(404).json({
-        success: false,
-        message: 'Personne non trouvée dans le personnel affecté'
-      });
-    }
-
-    crv.personnelAffecte.splice(indexPersonne, 1);
-    crv.modifiePar = req.user._id;
-    await crv.save();
-
     console.log('[CRV][API_SUCCESS][SUPPRIMER_PERSONNEL]', {
       crvId: crv._id,
       userId: req.user?._id || null,
       role: req.user?.fonction || null,
       input: { personneId },
       decision: true,
-      reason: 'Personne supprimée',
+      reason: 'Personne supprimée (atomique)',
       output: { nbPersonnesRestantes: crv.personnelAffecte.length },
       timestamp: new Date().toISOString()
     });
