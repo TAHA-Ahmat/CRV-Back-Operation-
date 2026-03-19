@@ -145,6 +145,11 @@ const crvSchema = new mongoose.Schema({
     remarques: {
       type: String,
       trim: true
+    },
+    // STAB-2: flag responsable du vol (facultatif, un seul par CRV)
+    isResponsable: {
+      type: Boolean,
+      default: false
     }
   }],
 
