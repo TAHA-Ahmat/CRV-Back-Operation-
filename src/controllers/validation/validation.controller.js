@@ -150,11 +150,13 @@ export const rejeterCRVController = async (req, res, next) => {
 
     const ancienStatut = crv.statut;
     crv.statut = 'EN_COURS';
-    crv.dernierRejet = {
+    // STAB-4: historiqueRejets (array) au lieu de dernierRejet (non déclaré dans le schéma, ignoré par Mongoose strict)
+    if (!crv.historiqueRejets) crv.historiqueRejets = [];
+    crv.historiqueRejets.push({
       date: new Date(),
       par: req.user._id,
       raison: raison.trim()
-    };
+    });
     await crv.save();
 
     console.log('[CRV][VALIDATION][REJET]', {
