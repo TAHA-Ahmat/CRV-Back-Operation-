@@ -267,6 +267,18 @@ const crvSchema = new mongoose.Schema({
   }
 
   // FIN EXTENSION 8
+
+  // ========== EXTENSION 9 - Historique des rejets ==========
+  // NON-REGRESSION: Champ OPTIONNEL, array vide par défaut
+  // Permet de tracer chaque rejet superviseur (date, auteur, motif)
+  // Utilisé par rejeterCRVController dans validation.controller.js
+  historiqueRejets: [{
+    date: { type: Date, required: true },
+    par: { type: mongoose.Schema.Types.ObjectId, ref: 'Personne', required: true },
+    raison: { type: String, required: true, trim: true }
+  }]
+
+  // FIN EXTENSION 9
 }, {
   timestamps: true
 });
