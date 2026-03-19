@@ -269,7 +269,7 @@ const crvSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
     description: 'CRV cree en forcant un doublon (confirmation explicite utilisateur)'
-  }
+  },
 
   // FIN EXTENSION 8
 
