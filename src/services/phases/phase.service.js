@@ -1,6 +1,8 @@
+import mongoose from 'mongoose';
 import Phase from '../../models/phases/Phase.js';
 import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
 import Horaire from '../../models/phases/Horaire.js';
+import SLAConfig from '../../models/sla/SLAConfig.js';
 import { creerHorodatageTempsReel } from '../../utils/horodatage.js';
 
 /**
@@ -64,11 +66,14 @@ export const initialiserPhasesVol = async (crvId, typeOperation = null, horaireI
     // ========== EXTENSION 9 - Calcul temps prévus par cascade ==========
     // NON-REGRESSION: horaireId = null par défaut, try/catch non-bloquant
     // Si horaire disponible, on calcule heureDebutPrevue/heureFinPrevue pour chaque phase
-    // Cascade : fin phase N = début phase N+1
+    // Cascade : fin phase N = début phase N+1 (pour phases DUREE)
+    // EXTENSION PALIER 2 : phases DEADLINE = calcul depuis ETD/ETA + config SLA
     let tempsReference = null;
+    let horaire = null;
+    let slaConfig = null;
     if (horaireId) {
       try {
-        const horaire = await Horaire.findById(horaireId);
+        horaire = await Horaire.findById(horaireId);
         if (horaire) {
           if (typeOperation === 'ARRIVEE' || typeOperation === 'TURN_AROUND') {
             tempsReference = horaire.heureAtterrisagePrevue;
@@ -92,8 +97,57 @@ export const initialiserPhasesVol = async (crvId, typeOperation = null, horaireI
         statut: 'NON_COMMENCE'
       };
 
-      // Ajout temps prévus si référence temporelle disponible
-      if (tempsReference) {
+      // EXTENSION PALIER 2 : Phases DEADLINE (boarding, check-in)
+      // heureDebutPrevue/heureFinPrevue calculées depuis ETD + config SLA compagnie
+      if (phase.slaMode === 'DEADLINE' && horaire) {
+        try {
+          const etd = horaire.heureDecollagePrevue;
+          const eta = horaire.heureAtterrisagePrevue;
+          const ref = phase.referenceTemporelle === 'ETA' ? eta : etd;
+
+          if (ref) {
+            // Charger la config SLA compagnie si pas encore fait (lazy, une seule fois)
+            if (!slaConfig && horaire.vol) {
+              try {
+                const vol = await mongoose.model('Vol').findById(horaire.vol).select('codeIATA').lean();
+                if (vol?.codeIATA) {
+                  slaConfig = await SLAConfig.findOne({ codeIATA: vol.codeIATA, actif: true }).lean();
+                }
+              } catch (_) { /* non-bloquant */ }
+              if (!slaConfig) slaConfig = {}; // éviter de recharger
+            }
+
+            // Résoudre les minutes depuis la config SLA (ex: 'checkin.ouverture' → 120 min)
+            const resolveMinutes = (key, fallback) => {
+              if (!key) return fallback;
+              const parts = key.split('.');
+              let val = slaConfig;
+              for (const p of parts) { val = val?.[p]; }
+              return val ?? fallback;
+            };
+
+            // Defaults SLA (identiques à useSLA.js côté front)
+            const DEFAULTS = {
+              'checkin.ouverture': 120, 'checkin.fermeture': 45,
+              'boarding.debut': 40, 'boarding.fermetureGate': 15
+            };
+
+            const minutesDebut = resolveMinutes(phase.slaConfigKeyDebut, DEFAULTS[phase.slaConfigKeyDebut] || 0);
+            const minutesFin = resolveMinutes(phase.slaConfigKeyFin, DEFAULTS[phase.slaConfigKeyFin] || 0);
+
+            // DEADLINE = minutes AVANT la référence (ETD/ETA)
+            createData.heureDebutPrevue = new Date(ref.getTime() - minutesDebut * 60000);
+            createData.heureFinPrevue = new Date(ref.getTime() - minutesFin * 60000);
+          }
+        } catch (err) {
+          console.warn('[CRV][SERVICE][INIT_PHASES_DEADLINE_WARN]', {
+            crvId, phaseCode: phase.code,
+            reason: 'Calcul deadline échoué (non-bloquant)',
+            error: err.message
+          });
+        }
+      } else if (tempsReference) {
+        // Phases DUREE classiques : cascade séquentielle
         createData.heureDebutPrevue = tempsReference;
         const fin = new Date(tempsReference.getTime() + (phase.dureeStandardMinutes || 0) * 60000);
         createData.heureFinPrevue = fin;
@@ -246,6 +300,9 @@ export const demarrerPhase = async (chronoPhaseId, userId) => {
       { new: true }
     ).populate('phase');
 
+    // Synchronisation Horaire pour phases DEADLINE (boarding/check-in)
+    await syncPhaseDeadlineToHoraire(chronoPhase, 'debut');
+
     console.log('[CRV][SERVICE][PHASE_STATUS_TRANSITION]', {
       crvId: chronoPhase.crv,
       userId,
@@ -334,6 +391,9 @@ export const terminerPhase = async (chronoPhaseId) => {
 
     await chronoPhase.save();
 
+    // Synchronisation Horaire pour phases DEADLINE (boarding/check-in)
+    await syncPhaseDeadlineToHoraire(chronoPhase, 'fin');
+
     // Calcul durée
     let dureeMinutes = null;
     if (chronoPhase.heureDebutReelle) {
@@ -372,3 +432,54 @@ export const terminerPhase = async (chronoPhaseId) => {
     throw error;
   }
 };
+
+/**
+ * Synchronise les heures réelles d'une phase DEADLINE avec l'Horaire du CRV.
+ * Ex: quand DEP_BOARDING démarre → Horaire.debutBoardingAt = heureDebutReelle
+ *     quand DEP_BOARDING termine → Horaire.fermetureGateAt = heureFinReelle
+ *
+ * Mapping phase code → champ Horaire :
+ *   DEP_CHECKIN / TA_CHECKIN : debut → ouvertureComptoirAt, fin → fermetureComptoirAt
+ *   DEP_BOARDING / TA_BOARDING : debut → debutBoardingAt, fin → fermetureGateAt
+ *
+ * Non-bloquant : échec silencieux (log warning, pas d'exception)
+ */
+const PHASE_HORAIRE_MAP = {
+  DEP_CHECKIN:  { debut: 'ouvertureComptoirAt', fin: 'fermetureComptoirAt' },
+  TA_CHECKIN:   { debut: 'ouvertureComptoirAt', fin: 'fermetureComptoirAt' },
+  DEP_BOARDING: { debut: 'debutBoardingAt',     fin: 'fermetureGateAt' },
+  TA_BOARDING:  { debut: 'debutBoardingAt',     fin: 'fermetureGateAt' }
+};
+
+async function syncPhaseDeadlineToHoraire(chronoPhase, moment) {
+  try {
+    if (!chronoPhase?.phase?.slaMode || chronoPhase.phase.slaMode !== 'DEADLINE') return;
+
+    const phaseCode = chronoPhase.phase.code;
+    const mapping = PHASE_HORAIRE_MAP[phaseCode];
+    if (!mapping) return;
+
+    const fieldName = mapping[moment];
+    if (!fieldName) return;
+
+    const value = moment === 'debut' ? chronoPhase.heureDebutReelle : chronoPhase.heureFinReelle;
+    if (!value) return;
+
+    // Trouver l'horaire du CRV
+    const CRV = mongoose.model('CRV');
+    const crv = await CRV.findById(chronoPhase.crv).select('horaire').lean();
+    if (!crv?.horaire) return;
+
+    await Horaire.findByIdAndUpdate(crv.horaire, { [fieldName]: value });
+
+    console.log('[CRV][SERVICE][SYNC_PHASE_HORAIRE]', {
+      crvId: chronoPhase.crv, phaseCode, moment, fieldName,
+      value: value.toISOString()
+    });
+  } catch (err) {
+    console.warn('[CRV][SERVICE][SYNC_PHASE_HORAIRE_WARN]', {
+      crvId: chronoPhase?.crv, phaseCode: chronoPhase?.phase?.code,
+      error: err.message
+    });
+  }
+}
