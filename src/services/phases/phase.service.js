@@ -3,6 +3,8 @@ import Phase from '../../models/phases/Phase.js';
 import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
 import Horaire from '../../models/phases/Horaire.js';
 import SLAConfig from '../../models/sla/SLAConfig.js';
+import CRVModel from '../../models/crv/CRV.js';
+import Vol from '../../models/flights/Vol.js';
 import { creerHorodatageTempsReel } from '../../utils/horodatage.js';
 
 /**
@@ -109,7 +111,7 @@ export const initialiserPhasesVol = async (crvId, typeOperation = null, horaireI
             // Charger la config SLA compagnie si pas encore fait (lazy, une seule fois)
             if (!slaConfig && horaire.vol) {
               try {
-                const vol = await mongoose.model('Vol').findById(horaire.vol).select('codeIATA').lean();
+                const vol = await Vol.findById(horaire.vol).select('codeIATA').lean();
                 if (vol?.codeIATA) {
                   slaConfig = await SLAConfig.findOne({ codeIATA: vol.codeIATA, actif: true }).lean();
                 }
@@ -483,9 +485,18 @@ const PHASE_HORAIRE_MAP = {
 
 async function syncPhaseDeadlineToHoraire(chronoPhase, moment) {
   try {
-    if (!chronoPhase?.phase?.slaMode || chronoPhase.phase.slaMode !== 'DEADLINE') return;
+    const phase = chronoPhase?.phase;
+    if (!phase) {
+      console.warn('[SYNC_HORAIRE] phase non peuplée, skip');
+      return;
+    }
 
-    const phaseCode = chronoPhase.phase.code;
+    // Vérifier si c'est une phase DEADLINE (boarding/check-in)
+    // Accepter aussi par code si slaMode n'est pas peuplé (rétrocompatibilité)
+    const isDeadline = phase.slaMode === 'DEADLINE' || PHASE_HORAIRE_MAP[phase.code];
+    if (!isDeadline) return;
+
+    const phaseCode = phase.code;
     const mapping = PHASE_HORAIRE_MAP[phaseCode];
     if (!mapping) return;
 
@@ -495,21 +506,27 @@ async function syncPhaseDeadlineToHoraire(chronoPhase, moment) {
     const value = moment === 'debut' ? chronoPhase.heureDebutReelle : chronoPhase.heureFinReelle;
     if (!value) return;
 
-    // Trouver l'horaire du CRV
-    const CRV = mongoose.model('CRV');
-    const crv = await CRV.findById(chronoPhase.crv).select('horaire').lean();
-    if (!crv?.horaire) return;
+    // Trouver l'horaire du CRV via import direct (pas mongoose.model)
+    const crv = await CRVModel.findById(chronoPhase.crv).select('horaire').lean();
+    if (!crv?.horaire) {
+      console.warn('[SYNC_HORAIRE] CRV ou horaire introuvable', { crvId: chronoPhase.crv });
+      return;
+    }
 
-    await Horaire.findByIdAndUpdate(crv.horaire, { [fieldName]: value });
+    const result = await Horaire.findByIdAndUpdate(crv.horaire, { [fieldName]: value }, { new: true });
 
     console.log('[CRV][SERVICE][SYNC_PHASE_HORAIRE]', {
       crvId: chronoPhase.crv, phaseCode, moment, fieldName,
-      value: value.toISOString()
+      value: value.toISOString(),
+      horaireId: crv.horaire,
+      updated: !!result
     });
   } catch (err) {
-    console.warn('[CRV][SERVICE][SYNC_PHASE_HORAIRE_WARN]', {
+    console.error('[CRV][SERVICE][SYNC_PHASE_HORAIRE_ERROR]', {
       crvId: chronoPhase?.crv, phaseCode: chronoPhase?.phase?.code,
-      error: err.message
+      moment,
+      error: err.message,
+      stack: err.stack?.split('\n').slice(0, 3).join(' | ')
     });
   }
 }
