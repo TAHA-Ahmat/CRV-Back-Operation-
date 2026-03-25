@@ -25,6 +25,8 @@ const phasesArrivee = [
     ordre: 1,
     dureeStandardMinutes: 10,
     obligatoire: true,
+    referenceTemporelle: 'ETA',
+    offsetMinutesDefaut: 120,
     description: 'Briefing avec les équipes KI, KU, KF, manutentionnaires et chauffeurs avant arrivée avion'
   },
   {
@@ -37,6 +39,8 @@ const phasesArrivee = [
     ordre: 2,
     dureeStandardMinutes: 15,
     obligatoire: true,
+    referenceTemporelle: 'ETA',
+    offsetMinutesDefaut: 0,
     description: 'Arrivée de l\'avion : atterrissage, roulage vers parking et calage/sécurisation'
   },
   {
@@ -49,6 +53,8 @@ const phasesArrivee = [
     ordre: 3,
     dureeStandardMinutes: 5,
     obligatoire: true,
+    referenceTemporelle: 'CALAGE',
+    offsetMinutesDefaut: -3,
     description: 'Ouverture des soutes de l\'avion pour préparer le déchargement'
   },
   {
@@ -60,6 +66,8 @@ const phasesArrivee = [
     ordre: 4,
     dureeStandardMinutes: 25,
     obligatoire: true,
+    referenceTemporelle: 'CALAGE',
+    offsetMinutesDefaut: -5,
     description: 'Déchargement des bagages et fret des soutes vers les chariots'
   },
   {

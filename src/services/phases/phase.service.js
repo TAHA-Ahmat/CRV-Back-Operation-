@@ -146,12 +146,42 @@ export const initialiserPhasesVol = async (crvId, typeOperation = null, horaireI
             error: err.message
           });
         }
+      } else if (horaire) {
+        // PALIER 4 : Positionnement temporel par offset
+        // Priorité : SLAConfig.phaseOffsets[code] > Phase.offsetMinutesDefaut > cascade séquentielle
+        const phaseCode = phase.code;
+        const offset = slaConfig?.phaseOffsets?.get?.(phaseCode)
+          ?? (slaConfig?.phaseOffsets?.[phaseCode])
+          ?? phase.offsetMinutesDefaut;
+
+        if (offset != null && phase.referenceTemporelle) {
+          const etd = horaire.heureDecollagePrevue;
+          const eta = horaire.heureAtterrisagePrevue;
+          const calage = horaire.heureArriveeAuParcPrevue || eta;
+          const refMap = { ETA: eta, ETD: etd, CALAGE: calage };
+          const ref = refMap[phase.referenceTemporelle];
+
+          if (ref) {
+            // offset positif = AVANT la référence, négatif = APRÈS la référence
+            createData.heureDebutPrevue = new Date(ref.getTime() - offset * 60000);
+            const duree = phase.dureeStandardMinutes || 0;
+            createData.heureFinPrevue = new Date(ref.getTime() - offset * 60000 + duree * 60000);
+          }
+        }
+
+        // Fallback : cascade séquentielle si pas d'offset et tempsReference dispo
+        if (!createData.heureDebutPrevue && tempsReference) {
+          createData.heureDebutPrevue = tempsReference;
+          const fin = new Date(tempsReference.getTime() + (phase.dureeStandardMinutes || 0) * 60000);
+          createData.heureFinPrevue = fin;
+          tempsReference = fin; // Cascade : fin phase N = début phase N+1
+        }
       } else if (tempsReference) {
-        // Phases DUREE classiques : cascade séquentielle
+        // Pas d'horaire du tout : cascade séquentielle pure
         createData.heureDebutPrevue = tempsReference;
         const fin = new Date(tempsReference.getTime() + (phase.dureeStandardMinutes || 0) * 60000);
         createData.heureFinPrevue = fin;
-        tempsReference = fin; // Cascade : fin phase N = début phase N+1
+        tempsReference = fin;
       }
 
       const chrono = await ChronologiePhase.create(createData);

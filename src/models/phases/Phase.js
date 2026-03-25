@@ -73,6 +73,14 @@ const phaseSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  // Offset temporel par défaut (minutes avant/après la référence)
+  // Positif = AVANT la référence (ex: 180 = 3h avant ETD pour DEP_INSPECTION)
+  // Utilisé pour calculer heureDebutPrevue si SLAConfig.phaseOffsets n'a pas de valeur
+  // null = pas de positionnement (cascade séquentielle classique)
+  offsetMinutesDefaut: {
+    type: Number,
+    default: null
+  },
   description: String,
   prerequis: [{
     type: mongoose.Schema.Types.ObjectId,

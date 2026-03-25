@@ -17,6 +17,7 @@ import opsStream from '../ops/opsStream.service.js';
 let _initialized = false;
 let _cleanupInterval = null;
 let _slaInterval = null;
+let _volsSansCRVInterval = null;
 
 /**
  * Initialise le module de notification.
@@ -74,7 +75,62 @@ export async function initNotificationEngine() {
       console.log('[SLA] Cron surveillance actif (toutes les 5min)');
     }
 
-    // 6. Log diagnostic démarrage
+    // 6. Cron détection vols sans CRV (toutes les 15 min)
+    if (!_volsSansCRVInterval) {
+      _volsSansCRVInterval = setInterval(async () => {
+        try {
+          const Vol = (await import('../../models/flights/Vol.js')).default;
+          const CRV = (await import('../../models/crv/CRV.js')).default;
+          const Personne = (await import('../../models/security/Personne.js')).default;
+          const { envoyerAlerteSLA } = await import('./notification.service.js');
+
+          const now = new Date();
+          const dans3h = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+
+          // Vols du jour avec bulletin, départ/arrivée dans les 3 prochaines heures
+          const vols = await Vol.find({
+            dateVol: { $gte: new Date(now.toISOString().split('T')[0]), $lte: dans3h },
+            bulletinMouvementReference: { $ne: null }
+          }).lean();
+
+          let alertesEnvoyees = 0;
+          for (const vol of vols) {
+            const crvExiste = await CRV.findOne({ vol: vol._id }).select('_id').lean();
+            if (!crvExiste) {
+              // Trouver les superviseurs pour alerter
+              const superviseurs = await Personne.find({
+                fonction: { $in: ['SUPERVISEUR', 'MANAGER'] },
+                statutCompte: 'VALIDE',
+                statut: 'ACTIF'
+              }).select('_id').lean();
+
+              for (const sup of superviseurs) {
+                await envoyerAlerteSLA(sup._id, {
+                  titre: `Vol ${vol.numeroVol} sans CRV`,
+                  message: `Le vol ${vol.numeroVol} (${vol.typeOperation || 'N/A'}) prévu aujourd'hui n'a pas encore de CRV créé.`,
+                  niveau: 'CRITICAL',
+                  priorite: 'HAUTE',
+                  referenceModele: 'Vol',
+                  referenceId: vol._id,
+                  lien: `/crv/nouveau`
+                });
+                alertesEnvoyees++;
+              }
+            }
+          }
+
+          if (alertesEnvoyees > 0) {
+            console.log(`[Cron VolsSansCRV] ${alertesEnvoyees} alerte(s) envoyée(s)`);
+          }
+        } catch (err) {
+          console.error('[Cron VolsSansCRV] Erreur:', err.message);
+        }
+      }, 15 * 60 * 1000); // 15min
+      _volsSansCRVInterval.unref();
+      console.log('[VolsSansCRV] Cron détection actif (toutes les 15min)');
+    }
+
+    // 7. Log diagnostic démarrage
     try {
       const NotificationRule = (await import('../../models/notifications/NotificationRule.js')).default;
       const emailRuleCount = await NotificationRule.countDocuments({ enabled: true, 'channels.email': true });
