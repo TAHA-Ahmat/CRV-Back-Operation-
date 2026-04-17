@@ -510,6 +510,101 @@ function shouldSendTacheAlert(crvId, phaseCode, niveau) {
   return true;
 }
 
+// ─── BUX-2 — ESCALADE SLA (3 alertes successives non acquittées) ─────────────
+// Tracker par clé `crvId:phaseCode` :
+//   { count, lastLevel, niveauxVus:Set, firstTs, lastTs }
+// Règle :
+//   - Chaque alerte envoyée (non supprimée par anti-spam) incrémente count
+//   - Si count >= 3 ET que les 3 niveaux successifs (WARNING→CRITIQUE→DEPASSE)
+//     ont été vus ET que la fenêtre firstTs→lastTs est dans les 30 min ET
+//     que la phase n'a pas bougé → émettre SLA_TACHE_ESCALADE
+//   - Reset du tracker dès que la phase progresse (heureDebutReelle/heureFinReelle posés)
+//   - Anti-spam escalade : cooldown 6h sur la même clé crvId:phaseCode
+const _slaEscaladeTracker = new Map();  // key → { count, niveauxVus:Set, firstTs, lastTs }
+const _slaEscaladeSent = new Map();     // key → timestamp dernière escalade émise
+const ESCALADE_WINDOW_MS = 30 * 60 * 1000;  // 30 min
+const ESCALADE_COOLDOWN_MS = 6 * 60 * 60 * 1000; // 6h anti-spam
+
+/**
+ * Enregistre une alerte tâche pour le tracking d'escalade.
+ * Retourne true si une escalade doit être émise maintenant.
+ *
+ * @param {string} crvId
+ * @param {string} phaseCode
+ * @param {string} niveau - WARNING | CRITIQUE | DEPASSE
+ * @returns {boolean} true si escalade à émettre
+ */
+function trackerEscaladeAlerte(crvId, phaseCode, niveau) {
+  const key = `${crvId}:${phaseCode}`;
+  const now = Date.now();
+
+  // Anti-spam escalade : si déjà escaladé <6h → bloqué
+  const lastSent = _slaEscaladeSent.get(key);
+  if (lastSent && (now - lastSent) < ESCALADE_COOLDOWN_MS) return false;
+
+  let entry = _slaEscaladeTracker.get(key);
+  if (!entry) {
+    entry = { count: 0, niveauxVus: new Set(), firstTs: now, lastTs: now };
+    _slaEscaladeTracker.set(key, entry);
+  }
+
+  // Si la fenêtre 30 min est dépassée → on reset le compteur (repart à zéro)
+  if (now - entry.firstTs > ESCALADE_WINDOW_MS) {
+    entry.count = 0;
+    entry.niveauxVus = new Set();
+    entry.firstTs = now;
+  }
+
+  entry.count++;
+  entry.niveauxVus.add(niveau);
+  entry.lastTs = now;
+
+  // Condition d'escalade : 3 alertes successives ET 3 niveaux distincts vus
+  // (WARNING + CRITIQUE + DEPASSE) dans la fenêtre 30 min
+  const aLesTroisNiveaux =
+    entry.niveauxVus.has('WARNING') &&
+    entry.niveauxVus.has('CRITIQUE') &&
+    entry.niveauxVus.has('DEPASSE');
+
+  if (entry.count >= 3 && aLesTroisNiveaux) {
+    _slaEscaladeSent.set(key, now);
+    // Reset le tracker après escalade pour éviter les ré-émissions dans la fenêtre
+    _slaEscaladeTracker.delete(key);
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Reset du tracker d'escalade quand la phase progresse
+ * (heureDebutReelle ou heureFinReelle renseignées → l'agent a bougé).
+ *
+ * @param {string} crvId
+ * @param {string} phaseCode
+ */
+function resetEscaladeTracker(crvId, phaseCode) {
+  const key = `${crvId}:${phaseCode}`;
+  _slaEscaladeTracker.delete(key);
+  // On ne reset pas _slaEscaladeSent : si l'escalade a déjà été émise, on garde
+  // le cooldown pour éviter les doublons sur le même problème.
+}
+
+/**
+ * Expose une vue du tracker (tests / diagnostic).
+ */
+export function _getEscaladeTrackerSnapshot() {
+  return {
+    tracker: Array.from(_slaEscaladeTracker.entries()).map(([k, v]) => ({
+      key: k,
+      count: v.count,
+      niveauxVus: Array.from(v.niveauxVus),
+      firstTs: v.firstTs,
+      lastTs: v.lastTs
+    })),
+    sent: Array.from(_slaEscaladeSent.entries()).map(([k, ts]) => ({ key: k, lastSent: ts }))
+  };
+}
+
 /**
  * Calcule le niveau SLA pour une tâche fine à partir de heureDebutPrevue / heureFinPrevue.
  *
@@ -625,24 +720,33 @@ export const surveillerTachesFines = async () => {
       enAlerte: 0,
       parNiveau: { WARNING: 0, CRITIQUE: 0, DEPASSE: 0 },
       alertesEnvoyees: 0,
-      alertesSupprimees: 0
+      alertesSupprimees: 0,
+      escaladesEmises: 0
     };
 
     for (const cp of chronoPhases) {
+      const phaseCode = cp.phase?.code;
+      const crvIdStr = cp.crv.toString();
+
+      // BUX-2 — Reset tracker si la phase a progressé
+      // (heureDebutReelle ou heureFinReelle renseignées → agent a acquitté)
+      if (cp.heureDebutReelle || cp.heureFinReelle) {
+        if (phaseCode) resetEscaladeTracker(crvIdStr, phaseCode);
+      }
+
       const alerte = calculerNiveauTacheFine(cp);
       if (!alerte) continue;
 
       stats.enAlerte++;
       stats.parNiveau[alerte.niveau] = (stats.parNiveau[alerte.niveau] || 0) + 1;
 
-      const crv = crvMap.get(cp.crv.toString());
+      const crv = crvMap.get(crvIdStr);
       if (!crv) continue;
 
-      const phaseCode = cp.phase.code;
       const domaineSLA = extraireDomaineSLA(phaseCode);
 
       // Anti-spam
-      if (!shouldSendTacheAlert(cp.crv.toString(), phaseCode, alerte.niveau)) {
+      if (!shouldSendTacheAlert(crvIdStr, phaseCode, alerte.niveau)) {
         stats.alertesSupprimees++;
         alertes.push({ crvId: cp.crv, phaseCode, niveau: alerte.niveau, pourcentage: alerte.pourcentage, suppressed: true });
         continue;
@@ -673,6 +777,28 @@ export const surveillerTachesFines = async () => {
         console.error('[SLA_TACHE] erreur emit event:', err.message);
       }
 
+      // BUX-2 — Tracker escalade (après envoi alerte individuelle)
+      const doitEscalader = trackerEscaladeAlerte(crvIdStr, phaseCode, alerte.niveau);
+      if (doitEscalader) {
+        try {
+          eventBus.emitAsync(EVENTS.SLA_TACHE_ESCALADE, {
+            crvId: cp.crv,
+            numeroCRV: crv.numeroCRV,
+            phaseId: cp.phase._id,
+            phaseCode,
+            phaseLibelle: cp.phase.libelle,
+            domaineSLA,
+            niveau: 'ESCALADE',
+            priorite: 'CRITIQUE',
+            raison: '3 alertes successives non acquittées en 30 min'
+          });
+          stats.escaladesEmises++;
+          console.log(`[SLA_ESCALADE] Escalade émise pour CRV ${crv.numeroCRV} / ${phaseCode}`);
+        } catch (err) {
+          console.error('[SLA_ESCALADE] erreur emit event:', err.message);
+        }
+      }
+
       alertes.push({
         crvId: cp.crv,
         numeroCRV: crv.numeroCRV,
@@ -680,12 +806,16 @@ export const surveillerTachesFines = async () => {
         phaseLibelle: cp.phase.libelle,
         domaineSLA,
         niveau: alerte.niveau,
-        pourcentage: alerte.pourcentage
+        pourcentage: alerte.pourcentage,
+        escalade: doitEscalader
       });
     }
 
     if (stats.alertesSupprimees > 0) {
       console.log(`[SLA_TACHE Cron] ${stats.alertesSupprimees} alertes tâches supprimées (déjà envoyées <6h)`);
+    }
+    if (stats.escaladesEmises > 0) {
+      console.log(`[SLA_ESCALADE Cron] ${stats.escaladesEmises} escalade(s) émise(s)`);
     }
 
     return { success: true, statistiques: stats, alertes };

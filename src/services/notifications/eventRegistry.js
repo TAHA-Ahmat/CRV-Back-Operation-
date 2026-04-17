@@ -118,6 +118,8 @@ export const EVENTS = Object.freeze({
   SLA_TACHE_WARNING: 'SLA_TACHE_WARNING',
   SLA_TACHE_CRITIQUE: 'SLA_TACHE_CRITIQUE',
   SLA_TACHE_DEPASSE: 'SLA_TACHE_DEPASSE',
+  // Escalade SLA (3 alertes successives non acquittées) — BUX-2
+  SLA_TACHE_ESCALADE: 'SLA_TACHE_ESCALADE',
 
   // Auth (5)
   AUTH_CONNEXION: 'AUTH_CONNEXION',
@@ -501,6 +503,14 @@ export const EVENT_METADATA = Object.freeze({
     description: 'SLA tâche fine dépassé — 100%',
     messageTemplate: { titre: '🚨 SLA tâche DÉPASSÉ — {{phaseLibelle}} / CRV {{numeroCRV}}', message: 'Le SLA de la tâche {{phaseLibelle}} du CRV {{numeroCRV}} est DÉPASSÉ ({{domaineSLA}}). Escalade immédiate.' }
   },
+  [EVENTS.SLA_TACHE_ESCALADE]: {
+    domain: D.SLA, priority: P.CRITIQUE,
+    description: 'Escalade SLA — tâche non acquittée après 3 alertes successives',
+    messageTemplate: {
+      titre: '🆘 Escalade SLA — {{phaseLibelle}} / CRV {{numeroCRV}}',
+      message: 'Escalade SLA — tâche {{phaseCode}} non acquittée sur CRV {{numeroCRV}} après 3 alertes. Action hiérarchique requise.'
+    }
+  },
 
   // ── AUTH ──
   [EVENTS.AUTH_CONNEXION]: {
@@ -623,4 +633,4 @@ export function isValidEvent(eventName) {
   return eventName in EVENTS;
 }
 
-export const TOTAL_EVENTS = Object.keys(EVENTS).length; // 85 (82 + 3 SLA_TACHE_*)
+export const TOTAL_EVENTS = Object.keys(EVENTS).length; // 86 (82 + 3 SLA_TACHE_* + 1 SLA_TACHE_ESCALADE)

@@ -25,8 +25,9 @@
  * - v1.1.0 : 112 rules fantômes désactivées (21 events réellement émis)
  * - v1.2.0 : ajout versionning + champ source
  * - v1.3.0 : ajout SLA_TACHE_WARNING / CRITIQUE / DEPASSE (Mission SLA_FULL_COVERAGE_BACK / M5)
+ * - v1.4.0 : ajout SLA_TACHE_ESCALADE (BUX-2 — escalade auto après 3 alertes non acquittées)
  */
-export const SEED_VERSION = '1.3.0';
+export const SEED_VERSION = '1.4.0';
 
 // Shorthand helpers
 const ON = (inApp = true, email = false, whatsapp = false) => ({ enabled: true, inApp, email, whatsapp });
@@ -140,6 +141,8 @@ export const DEFAULT_RULES = {
   SLA_TACHE_WARNING:        { AGENT_ESCALE: I(),  CHEF_EQUIPE: I(),  SUPERVISEUR: IE(), MANAGER: IE(),  QUALITE: OFF(), ADMIN: OFF() },
   SLA_TACHE_CRITIQUE:       { AGENT_ESCALE: I(),  CHEF_EQUIPE: I(),  SUPERVISEUR: IE(), MANAGER: IE(),  QUALITE: I(),   ADMIN: OFF() },
   SLA_TACHE_DEPASSE:        { AGENT_ESCALE: IE(), CHEF_EQUIPE: IE(), SUPERVISEUR: IE(), MANAGER: IE(),  QUALITE: IE(),  ADMIN: OFF() },
+  // ── Escalade SLA (BUX-2) — MANAGER inApp+email, SUPERVISEUR inApp+email, CHEF_EQUIPE inApp ──
+  SLA_TACHE_ESCALADE:       { AGENT_ESCALE: OFF(),CHEF_EQUIPE: I(),  SUPERVISEUR: IE(), MANAGER: IE(),  QUALITE: I(),   ADMIN: OFF() },
 
   // ═══════════════════════════════════════════════════════════
   // AUTH (5 événements)
