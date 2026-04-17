@@ -16,6 +16,18 @@
  *   - QUALITE  → reçoit les incidents critiques, validations, SLA
  */
 
+/**
+ * SEED_VERSION — Incrémenter à chaque modification de la matrice DEFAULT_RULES.
+ * Le système compare cette version à celle en base pour décider si une migration est nécessaire.
+ *
+ * Historique :
+ * - v1.0.0 : 492 rules initiales (82 events × 6 rôles)
+ * - v1.1.0 : 112 rules fantômes désactivées (21 events réellement émis)
+ * - v1.2.0 : ajout versionning + champ source
+ * - v1.3.0 : ajout SLA_TACHE_WARNING / CRITIQUE / DEPASSE (Mission SLA_FULL_COVERAGE_BACK / M5)
+ */
+export const SEED_VERSION = '1.3.0';
+
 // Shorthand helpers
 const ON = (inApp = true, email = false, whatsapp = false) => ({ enabled: true, inApp, email, whatsapp });
 const IE = () => ON(true, true, false);  // inApp + email
@@ -124,6 +136,10 @@ export const DEFAULT_RULES = {
   SLA_PHASE_CRITIQUE:       { AGENT_ESCALE: I(),  CHEF_EQUIPE: I(),  SUPERVISEUR: IE(), MANAGER: IE(),  QUALITE: I(),   ADMIN: OFF() },
   SLA_PHASE_DEPASSE:        { AGENT_ESCALE: IE(), CHEF_EQUIPE: IE(), SUPERVISEUR: IE(), MANAGER: IE(),  QUALITE: IE(),  ADMIN: OFF() },
   SLA_CONFIG_MODIFIEE:      { AGENT_ESCALE: OFF(),CHEF_EQUIPE: OFF(),SUPERVISEUR: I(),  MANAGER: I(),   QUALITE: OFF(), ADMIN: I()   },
+  // ── Tâches fines SLA (M5) — AGENT inApp, CHEF_EQUIPE inApp, SUP inApp+email, MGR inApp+email ──
+  SLA_TACHE_WARNING:        { AGENT_ESCALE: I(),  CHEF_EQUIPE: I(),  SUPERVISEUR: IE(), MANAGER: IE(),  QUALITE: OFF(), ADMIN: OFF() },
+  SLA_TACHE_CRITIQUE:       { AGENT_ESCALE: I(),  CHEF_EQUIPE: I(),  SUPERVISEUR: IE(), MANAGER: IE(),  QUALITE: I(),   ADMIN: OFF() },
+  SLA_TACHE_DEPASSE:        { AGENT_ESCALE: IE(), CHEF_EQUIPE: IE(), SUPERVISEUR: IE(), MANAGER: IE(),  QUALITE: IE(),  ADMIN: OFF() },
 
   // ═══════════════════════════════════════════════════════════
   // AUTH (5 événements)

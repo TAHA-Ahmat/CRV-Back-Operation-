@@ -106,7 +106,7 @@ export const EVENTS = Object.freeze({
   PASSAGERS_BESOINS_MEDICAUX: 'PASSAGERS_BESOINS_MEDICAUX',
   PASSAGERS_MINEURS_MAJ: 'PASSAGERS_MINEURS_MAJ',
 
-  // SLA (7)
+  // SLA (10)
   SLA_CRV_WARNING: 'SLA_CRV_WARNING',
   SLA_CRV_CRITIQUE: 'SLA_CRV_CRITIQUE',
   SLA_CRV_DEPASSE: 'SLA_CRV_DEPASSE',
@@ -114,6 +114,10 @@ export const EVENTS = Object.freeze({
   SLA_PHASE_CRITIQUE: 'SLA_PHASE_CRITIQUE',
   SLA_PHASE_DEPASSE: 'SLA_PHASE_DEPASSE',
   SLA_CONFIG_MODIFIEE: 'SLA_CONFIG_MODIFIEE',
+  // Tâches fines SLA (phases fines) — Mission SLA_FULL_COVERAGE_BACK / M5
+  SLA_TACHE_WARNING: 'SLA_TACHE_WARNING',
+  SLA_TACHE_CRITIQUE: 'SLA_TACHE_CRITIQUE',
+  SLA_TACHE_DEPASSE: 'SLA_TACHE_DEPASSE',
 
   // Auth (5)
   AUTH_CONNEXION: 'AUTH_CONNEXION',
@@ -481,6 +485,22 @@ export const EVENT_METADATA = Object.freeze({
     description: 'Configuration SLA modifiée',
     messageTemplate: { titre: 'Configuration SLA modifiée', message: 'La configuration SLA a été modifiée par {{userName}}.' }
   },
+  // ── Tâches fines SLA (M5) ──
+  [EVENTS.SLA_TACHE_WARNING]: {
+    domain: D.SLA, priority: P.HAUTE,
+    description: 'SLA tâche fine à 75% — alerte',
+    messageTemplate: { titre: '⚠️ SLA tâche {{phaseLibelle}} — CRV {{numeroCRV}}', message: 'La tâche {{phaseLibelle}} du CRV {{numeroCRV}} a consommé 75% de son SLA ({{domaineSLA}}).' }
+  },
+  [EVENTS.SLA_TACHE_CRITIQUE]: {
+    domain: D.SLA, priority: P.CRITIQUE,
+    description: 'SLA tâche fine à 90% — critique',
+    messageTemplate: { titre: '🔴 SLA tâche CRITIQUE — {{phaseLibelle}} / CRV {{numeroCRV}}', message: 'La tâche {{phaseLibelle}} du CRV {{numeroCRV}} a consommé 90% de son SLA ({{domaineSLA}}). Action urgente requise.' }
+  },
+  [EVENTS.SLA_TACHE_DEPASSE]: {
+    domain: D.SLA, priority: P.CRITIQUE,
+    description: 'SLA tâche fine dépassé — 100%',
+    messageTemplate: { titre: '🚨 SLA tâche DÉPASSÉ — {{phaseLibelle}} / CRV {{numeroCRV}}', message: 'Le SLA de la tâche {{phaseLibelle}} du CRV {{numeroCRV}} est DÉPASSÉ ({{domaineSLA}}). Escalade immédiate.' }
+  },
 
   // ── AUTH ──
   [EVENTS.AUTH_CONNEXION]: {
@@ -603,4 +623,4 @@ export function isValidEvent(eventName) {
   return eventName in EVENTS;
 }
 
-export const TOTAL_EVENTS = Object.keys(EVENTS).length; // 82
+export const TOTAL_EVENTS = Object.keys(EVENTS).length; // 85 (82 + 3 SLA_TACHE_*)
