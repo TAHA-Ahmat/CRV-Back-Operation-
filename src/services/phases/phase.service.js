@@ -19,7 +19,7 @@ import { creerHorodatageTempsReel } from '../../utils/horodatage.js';
  * @param {string} typeOperation - Type d'opération du vol (ARRIVEE, DEPART, TURN_AROUND)
  * @param {string} horaireId - ID de l'horaire associé (pour calcul temps prévus, optionnel)
  */
-export const initialiserPhasesVol = async (crvId, typeOperation = null, horaireId = null) => {
+export const initialiserPhasesVol = async (crvId, typeOperation = null, horaireId = null, options = {}) => {
   const timestamp = new Date().toISOString();
 
   console.log('[CRV][SERVICE][INIT_PHASES_START]', {
@@ -186,7 +186,9 @@ export const initialiserPhasesVol = async (crvId, typeOperation = null, horaireI
         tempsReference = fin;
       }
 
-      const chrono = await ChronologiePhase.create(createData);
+      // Support session transactionnelle (optionnel, rétro-compatible)
+      const createOpts = options.session ? { session: options.session } : {};
+      const [chrono] = await ChronologiePhase.create([createData], createOpts);
       chronologies.push(chrono);
     }
 
@@ -466,24 +468,49 @@ export const terminerPhase = async (chronoPhaseId) => {
 };
 
 /**
- * Synchronise les heures réelles d'une phase DEADLINE avec l'Horaire du CRV.
- * Ex: quand DEP_BOARDING démarre → Horaire.debutBoardingAt = heureDebutReelle
- *     quand DEP_BOARDING termine → Horaire.fermetureGateAt = heureFinReelle
+ * Synchronise les heures réelles d'une phase DEADLINE (ou phase fine SLA)
+ * avec l'Horaire et éventuellement la ChargeOperationnelle du CRV.
  *
- * Mapping phase code → champ Horaire :
- *   DEP_CHECKIN / TA_CHECKIN : debut → ouvertureComptoirAt, fin → fermetureComptoirAt
- *   DEP_BOARDING / TA_BOARDING : debut → debutBoardingAt, fin → fermetureGateAt
+ * Mapping phase code → cible (modèle + champ) :
+ *   DEP_CHECKIN / TA_CHECKIN / SLA_CHECKIN_OUVERTURE / SLA_CHECKIN_FERMETURE
+ *     → Horaire.ouvertureComptoirAt / fermetureComptoirAt
+ *   DEP_BOARDING / TA_BOARDING / SLA_BOARDING_DEBUT / SLA_BOARDING_FERMETURE_GATE
+ *     → Horaire.debutBoardingAt / fermetureGateAt
+ *   SLA_BAGAGES_PREMIER / SLA_BAGAGES_DERNIER
+ *     → Horaire.heureLivraisonBagagesDebut / heureLivraisonBagagesFin
+ *     → ChargeOperationnelle.premierBagageAt / dernierBagageAt (si charge BAGAGES existe)
  *
- * Non-bloquant : échec silencieux (log warning, pas d'exception)
+ * Tolérance : on n'écrase JAMAIS une valeur existante dans Horaire avec null/undefined.
+ * Non-bloquant : échec silencieux (log warning, pas d'exception).
+ *
+ * Entrées :
+ *   chronoPhase : ChronologiePhase populée (phase)
+ *   moment      : 'debut' | 'fin'
  */
 const PHASE_HORAIRE_MAP = {
+  // ── Phases historiques ──
   DEP_CHECKIN:  { debut: 'ouvertureComptoirAt', fin: 'fermetureComptoirAt' },
   TA_CHECKIN:   { debut: 'ouvertureComptoirAt', fin: 'fermetureComptoirAt' },
   DEP_BOARDING: { debut: 'debutBoardingAt',     fin: 'fermetureGateAt' },
-  TA_BOARDING:  { debut: 'debutBoardingAt',     fin: 'fermetureGateAt' }
+  TA_BOARDING:  { debut: 'debutBoardingAt',     fin: 'fermetureGateAt' },
+
+  // ── Phases fines SLA (Mission SLA_FULL_COVERAGE_BACK) ──
+  SLA_CHECKIN_OUVERTURE:       { debut: 'ouvertureComptoirAt' },
+  SLA_CHECKIN_FERMETURE:       { debut: 'fermetureComptoirAt' },
+  SLA_BOARDING_DEBUT:          { debut: 'debutBoardingAt' },
+  SLA_BOARDING_FERMETURE_GATE: { debut: 'fermetureGateAt' },
+  SLA_BAGAGES_PREMIER:         { debut: 'heureLivraisonBagagesDebut' },
+  SLA_BAGAGES_DERNIER:         { debut: 'heureLivraisonBagagesFin' }
 };
 
-async function syncPhaseDeadlineToHoraire(chronoPhase, moment) {
+// Phases fines SLA qui doivent aussi écrire sur ChargeOperationnelle (unification bagages).
+// moment → champ ChargeOperationnelle (filtre: typeCharge='BAGAGES').
+const PHASE_CHARGE_BAGAGES_MAP = {
+  SLA_BAGAGES_PREMIER: { debut: 'premierBagageAt' },
+  SLA_BAGAGES_DERNIER: { debut: 'dernierBagageAt' }
+};
+
+export async function syncPhaseDeadlineToHoraire(chronoPhase, moment) {
   try {
     const phase = chronoPhase?.phase;
     if (!phase) {
@@ -491,36 +518,55 @@ async function syncPhaseDeadlineToHoraire(chronoPhase, moment) {
       return;
     }
 
-    // Vérifier si c'est une phase DEADLINE (boarding/check-in)
-    // Accepter aussi par code si slaMode n'est pas peuplé (rétrocompatibilité)
-    const isDeadline = phase.slaMode === 'DEADLINE' || PHASE_HORAIRE_MAP[phase.code];
-    if (!isDeadline) return;
+    // Accepter si phase DEADLINE OU phase fine SLA (mapping connu)
+    const mapping = PHASE_HORAIRE_MAP[phase.code];
+    const chargeMapping = PHASE_CHARGE_BAGAGES_MAP[phase.code];
+    if (!mapping && !chargeMapping) return;
 
-    const phaseCode = phase.code;
-    const mapping = PHASE_HORAIRE_MAP[phaseCode];
-    if (!mapping) return;
-
-    const fieldName = mapping[moment];
-    if (!fieldName) return;
+    const fieldName = mapping?.[moment];
 
     const value = moment === 'debut' ? chronoPhase.heureDebutReelle : chronoPhase.heureFinReelle;
+    // Tolérance : jamais écraser avec null/undefined
     if (!value) return;
 
-    // Trouver l'horaire du CRV via import direct (pas mongoose.model)
     const crv = await CRVModel.findById(chronoPhase.crv).select('horaire').lean();
     if (!crv?.horaire) {
       console.warn('[SYNC_HORAIRE] CRV ou horaire introuvable', { crvId: chronoPhase.crv });
-      return;
     }
 
-    const result = await Horaire.findByIdAndUpdate(crv.horaire, { [fieldName]: value }, { new: true });
+    // ── 1. Synchro Horaire ──
+    if (fieldName && crv?.horaire) {
+      const result = await Horaire.findByIdAndUpdate(
+        crv.horaire,
+        { [fieldName]: value },
+        { new: true }
+      );
+      console.log('[CRV][SERVICE][SYNC_PHASE_HORAIRE]', {
+        crvId: chronoPhase.crv, phaseCode: phase.code, moment, fieldName,
+        value: value.toISOString(),
+        horaireId: crv.horaire,
+        updated: !!result
+      });
+    }
 
-    console.log('[CRV][SERVICE][SYNC_PHASE_HORAIRE]', {
-      crvId: chronoPhase.crv, phaseCode, moment, fieldName,
-      value: value.toISOString(),
-      horaireId: crv.horaire,
-      updated: !!result
-    });
+    // ── 2. Synchro ChargeOperationnelle (bagages uniquement) ──
+    if (chargeMapping?.[moment]) {
+      try {
+        const ChargeOperationnelle = (await import('../../models/charges/ChargeOperationnelle.js')).default;
+        const chargeFieldName = chargeMapping[moment];
+        const result = await ChargeOperationnelle.updateMany(
+          { crv: chronoPhase.crv, typeCharge: 'BAGAGES' },
+          { [chargeFieldName]: value }
+        );
+        console.log('[CRV][SERVICE][SYNC_PHASE_CHARGE_BAGAGES]', {
+          crvId: chronoPhase.crv, phaseCode: phase.code, moment, chargeFieldName,
+          value: value.toISOString(),
+          modifiedCount: result.modifiedCount
+        });
+      } catch (err) {
+        console.warn('[SYNC_CHARGE_BAGAGES] échec non bloquant:', err.message);
+      }
+    }
   } catch (err) {
     console.error('[CRV][SERVICE][SYNC_PHASE_HORAIRE_ERROR]', {
       crvId: chronoPhase?.crv, phaseCode: chronoPhase?.phase?.code,
