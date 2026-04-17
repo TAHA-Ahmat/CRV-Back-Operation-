@@ -12,6 +12,8 @@ import ChargeOperationnelle from '../../../models/charges/ChargeOperationnelle.j
 import EvenementOperationnel from '../../../models/transversal/EvenementOperationnel.js';
 import Observation from '../../../models/crv/Observation.js';
 import ValidationCRV from '../../../models/validation/ValidationCRV.js';
+import AffectationEnginVol from '../../../models/resources/AffectationEnginVol.js';
+import SLAConfig from '../../../models/sla/SLAConfig.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // DESIGN SYSTEM
@@ -139,12 +141,17 @@ export class CrvGenerator extends DocumentGenerator {
 
     if (!crv) throw new Error('CRV non trouve');
 
-    const [phases, charges, evenements, observations, validation] = await Promise.all([
+    // FIX ENGINS-COHERENCE: charger engins depuis AffectationEnginVol (source canonique)
+    const volId = crv.vol?._id || crv.vol;
+    const codeIATA = crv.vol?.codeIATA || null;
+    const [phases, charges, evenements, observations, validation, engins, slaConfig] = await Promise.all([
       ChronologiePhase.find({ crv: crvId }).populate('phase').populate('responsable', 'nom prenom').sort({ 'phase.ordre': 1 }),
       ChargeOperationnelle.find({ crv: crvId }),
       EvenementOperationnel.find({ crv: crvId }).populate('declarePar', 'nom prenom').sort({ dateHeureDebut: 1 }),
       Observation.find({ crv: crvId }).populate('auteur', 'nom prenom').sort({ dateHeure: -1 }),
       ValidationCRV.findOne({ crv: crvId }).populate('validePar', 'nom prenom'),
+      volId ? AffectationEnginVol.find({ vol: volId }).populate('engin').sort({ heureDebut: 1 }) : [],
+      codeIATA ? SLAConfig.findOne({ codeIATA: codeIATA.toUpperCase(), actif: true }).lean() : null,
     ]);
 
     return {
@@ -153,12 +160,19 @@ export class CrvGenerator extends DocumentGenerator {
         vol: crv.vol,
         horaire: crv.horaire,
         personnel: crv.personnelAffecte || [],
-        materiel: crv.materielUtilise || [],
+        materiel: engins.map(a => ({
+          typeEngin: a.engin?.typeEngin || a.usage || '',
+          identifiant: a.engin?.numeroEngin || '',
+          heureDebutUtilisation: a.heureDebut,
+          heureFinUtilisation: a.heureFin,
+          remarques: a.remarques || ''
+        })),
         phases,
         charges,
         evenements,
         observations,
         validation,
+        slaConfig,
       },
     };
   }
@@ -186,6 +200,10 @@ export class CrvGenerator extends DocumentGenerator {
         // PAGE 3 — TIMELINE + RESSOURCES
         { text: '', pageBreak: 'before' },
         this._page3_timeline(data.phases, data.personnel, data.materiel),
+
+        // PAGE 3-BIS — RESPECT CONTRAT SLA COMPAGNIE (Mission SLA_FULL_COVERAGE_BACK / M6)
+        { text: '', pageBreak: 'before' },
+        this._pageSLA_contrat(crv, data),
 
         // PAGE 4 — EVENEMENTS
         { text: '', pageBreak: 'before' },
@@ -554,6 +572,204 @@ export class CrvGenerator extends DocumentGenerator {
           },
           layout: this._thinTable(),
         } : { text: 'Aucun materiel enregistre', italics: true, color: C.GRAY_400, margin: [0, 0, 0, 8] },
+      ],
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PAGE SLA — RESPECT CONTRAT SLA COMPAGNIE (M6)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Définition des tâches SLA à afficher dans le tableau (ordre figé).
+   * Chaque entrée : { key, libelle, slaKeyPath, refTemps, sensOffset, chronoPhaseCode }
+   * - slaKeyPath : chemin dans SLAConfig (ex: 'checkin.ouverture')
+   * - refTemps : label textuel (ETD, CALAGE...)
+   * - sensOffset : 'AVANT_REF' | 'APRES_REF' | 'DUREE'
+   * - chronoPhaseCode : code de la ChronologiePhase pour retrouver l'horodatage réel
+   */
+  _slaContratTasks() {
+    return [
+      { key: 'checkin_ouverture',  libelle: 'Ouverture comptoir check-in',  slaKeyPath: 'checkin.ouverture',        refTemps: 'ETD',    sensOffset: 'AVANT_REF', chronoPhaseCode: 'SLA_CHECKIN_OUVERTURE' },
+      { key: 'checkin_fermeture',  libelle: 'Fermeture comptoir check-in',  slaKeyPath: 'checkin.fermeture',        refTemps: 'ETD',    sensOffset: 'AVANT_REF', chronoPhaseCode: 'SLA_CHECKIN_FERMETURE' },
+      { key: 'briefing',           libelle: 'Briefing équipe',              slaKeyPath: 'briefing',                 refTemps: 'ETD',    sensOffset: 'AVANT_REF', chronoPhaseCode: 'SLA_BRIEFING_EQUIPE' },
+      { key: 'boarding_debut',     libelle: 'Début embarquement',           slaKeyPath: 'boarding.debut',           refTemps: 'ETD',    sensOffset: 'AVANT_REF', chronoPhaseCode: 'SLA_BOARDING_DEBUT' },
+      { key: 'boarding_ferm',      libelle: 'Fermeture gate',               slaKeyPath: 'boarding.fermetureGate',   refTemps: 'ETD',    sensOffset: 'AVANT_REF', chronoPhaseCode: 'SLA_BOARDING_FERMETURE_GATE' },
+      { key: 'bagages_premier',    libelle: 'Livraison premier bagage',     slaKeyPath: 'bagages.premierBagage',    refTemps: 'CALAGE', sensOffset: 'APRES_REF', chronoPhaseCode: 'SLA_BAGAGES_PREMIER' },
+      { key: 'bagages_dernier',    libelle: 'Livraison dernier bagage',     slaKeyPath: 'bagages.dernierBagage',    refTemps: 'CALAGE', sensOffset: 'APRES_REF', chronoPhaseCode: 'SLA_BAGAGES_DERNIER' },
+      { key: 'ramp_turnaround',    libelle: 'Turnaround (calé-à-calé)',     slaKeyPath: 'ramp.turnaround',          refTemps: 'CALAGE', sensOffset: 'DUREE',      chronoPhaseCode: 'SLA_RAMP_TURNAROUND' },
+      { key: 'msg_mvt',            libelle: 'Message MVT',                  slaKeyPath: 'messages.mvt',             refTemps: 'CALAGE', sensOffset: 'APRES_REF', chronoPhaseCode: 'SLA_MSG_MVT' },
+      { key: 'msg_ldm',            libelle: 'Message LDM',                  slaKeyPath: 'messages.ldm',             refTemps: 'ETD',    sensOffset: 'AVANT_REF', chronoPhaseCode: 'SLA_MSG_LDM' },
+      { key: 'msg_apis',           libelle: 'Message APIS',                 slaKeyPath: 'messages.apis',            refTemps: 'ETD',    sensOffset: 'AVANT_REF', chronoPhaseCode: 'SLA_MSG_APIS' },
+    ];
+  }
+
+  /** Accès sécurisé à un chemin pointé (ex: 'checkin.ouverture') sur un objet */
+  _getPath(obj, path) {
+    if (!obj || !path) return null;
+    return path.split('.').reduce((acc, k) => (acc && acc[k] !== undefined ? acc[k] : null), obj);
+  }
+
+  /**
+   * Calcule l'écart réel vs cible SLA (en minutes). Négatif = en avance, positif = en retard.
+   * Renvoie { ecartMin, cible, realise, verdict }
+   */
+  _evaluerSLATask(task, slaConfig, chronoPhasesByCode, horaire) {
+    // Cible contrat (en minutes)
+    const cibleMin = slaConfig ? this._getPath(slaConfig, task.slaKeyPath) : null;
+    const cp = chronoPhasesByCode[task.chronoPhaseCode];
+
+    // Pas de cible définie dans le contrat
+    if (cibleMin === null || cibleMin === undefined) {
+      return { cible: null, realise: cp?.heureDebutReelle || null, ecartMin: null, verdict: 'NC' };
+    }
+
+    // Pas de réalisation (phase non démarrée)
+    if (!cp || !cp.heureDebutReelle) {
+      return { cible: cibleMin, realise: null, ecartMin: null, verdict: 'ABSENT' };
+    }
+
+    // Calcul de l'écart selon le sens (AVANT_REF, APRES_REF, DUREE)
+    const realise = new Date(cp.heureDebutReelle);
+    let ref = null;
+    if (task.refTemps === 'ETD') ref = horaire?.heureDecollagePrevue ? new Date(horaire.heureDecollagePrevue) : null;
+    if (task.refTemps === 'CALAGE') ref = horaire?.heureArriveeAuParcReelle ? new Date(horaire.heureArriveeAuParcReelle) : (horaire?.heureArriveeAuParcPrevue ? new Date(horaire.heureArriveeAuParcPrevue) : null);
+
+    if (!ref) return { cible: cibleMin, realise, ecartMin: null, verdict: 'NC' };
+
+    let ecartMin = null;
+    if (task.sensOffset === 'AVANT_REF') {
+      // cible = X minutes AVANT ref ; réalisé ideal = ref - X min
+      const ideal = new Date(ref.getTime() - cibleMin * 60000);
+      ecartMin = Math.round((realise - ideal) / 60000); // positif = en retard
+    } else if (task.sensOffset === 'APRES_REF') {
+      // cible = X minutes APRES ref ; réalisé ideal = ref + X min
+      const ideal = new Date(ref.getTime() + cibleMin * 60000);
+      ecartMin = Math.round((realise - ideal) / 60000);
+    } else if (task.sensOffset === 'DUREE') {
+      // pour ramp.turnaround on compare la durée réelle à la cible
+      if (cp.heureFinReelle) {
+        const dureeReelle = Math.round((new Date(cp.heureFinReelle) - realise) / 60000);
+        ecartMin = dureeReelle - cibleMin;
+      } else {
+        return { cible: cibleMin, realise, ecartMin: null, verdict: 'NC' };
+      }
+    }
+
+    // Verdict : OK si <=5min retard, WARN si 5-15, KO sinon
+    let verdict = 'OK';
+    if (ecartMin > 15) verdict = 'KO';
+    else if (ecartMin > 5) verdict = 'WARN';
+
+    return { cible: cibleMin, realise, ecartMin, verdict };
+  }
+
+  _pageSLA_contrat(crv, data) {
+    const vol = data.vol || {};
+    const horaire = data.horaire || {};
+    const slaConfig = data.slaConfig;
+    const phases = data.phases || [];
+    const validation = data.validation;
+
+    const codeIATA = vol.codeIATA || '-';
+    const compagnie = vol.compagnieAerienne || '-';
+    const dateVal = validation?.dateValidation || crv.dateCreation;
+
+    // Index des chronoPhases par code
+    const chronoByCode = {};
+    for (const p of phases) {
+      if (p.phase?.code) chronoByCode[p.phase.code] = p;
+    }
+
+    const tasks = this._slaContratTasks();
+
+    // Construction des lignes
+    let nbRespectees = 0;
+    let nbApplicables = 0;
+    const rows = tasks.map(task => {
+      const eval_ = this._evaluerSLATask(task, slaConfig, chronoByCode, horaire);
+      const cibleTxt = eval_.cible !== null ? `${task.sensOffset === 'AVANT_REF' ? '-' : task.sensOffset === 'APRES_REF' ? '+' : ''}${eval_.cible} min / ${task.refTemps}` : 'Non défini';
+      const realiseTxt = eval_.realise ? fmtTime(eval_.realise) : 'Non réalisé';
+      const ecartTxt = eval_.ecartMin !== null ? ecartText(eval_.ecartMin) : '-';
+      let verdictColor = C.GRAY_500;
+      let verdictTxt = '-';
+      if (eval_.verdict === 'OK') { verdictColor = C.GREEN; verdictTxt = 'CONFORME'; }
+      else if (eval_.verdict === 'WARN') { verdictColor = C.ORANGE; verdictTxt = 'A VERIFIER'; }
+      else if (eval_.verdict === 'KO') { verdictColor = C.RED; verdictTxt = 'NON CONFORME'; }
+      else if (eval_.verdict === 'ABSENT') { verdictColor = C.RED; verdictTxt = 'NON REALISE'; }
+      else if (eval_.verdict === 'NC') { verdictColor = C.GRAY_500; verdictTxt = 'NON CALCULABLE'; }
+
+      if (eval_.verdict === 'OK' || eval_.verdict === 'WARN') nbRespectees++;
+      if (eval_.verdict !== 'NC' && eval_.cible !== null) nbApplicables++;
+
+      return [
+        { text: task.libelle, style: 'tdLeft', fontSize: 7 },
+        { text: cibleTxt, style: 'td', fontSize: 7 },
+        { text: realiseTxt, style: 'td', fontSize: 7 },
+        { text: ecartTxt, style: 'td', fontSize: 7, color: ecartColor(eval_.ecartMin) },
+        { text: verdictTxt, style: 'td', fontSize: 7, color: verdictColor, bold: true },
+      ];
+    });
+
+    const conformiteTxt = nbApplicables > 0
+      ? `${nbRespectees}/${nbApplicables} tâches respectées (${Math.round((nbRespectees / nbApplicables) * 100)}%)`
+      : 'Aucune cible applicable (SLAConfig compagnie absente)';
+
+    const conformiteColor = nbApplicables === 0
+      ? C.GRAY_500
+      : (nbRespectees / nbApplicables) >= 0.9 ? C.GREEN
+      : (nbRespectees / nbApplicables) >= 0.6 ? C.ORANGE : C.RED;
+
+    return {
+      stack: [
+        { text: 'RESPECT DU CONTRAT SLA COMPAGNIE', style: 'pageTitle' },
+        {
+          columns: [
+            { text: `Compagnie : ${compagnie} (${codeIATA})`, fontSize: 9, color: C.GRAY_700 },
+            { text: `Contrat en vigueur au ${fmtDate(dateVal)}`, fontSize: 9, color: C.GRAY_700, alignment: 'right' },
+          ],
+          margin: [0, 0, 0, 10],
+        },
+
+        !slaConfig ? {
+          text: `⚠ Aucune configuration SLA trouvée en base pour la compagnie ${codeIATA}. Les cibles affichées proviennent du contrat standard (fallback).`,
+          fontSize: 7, color: C.ORANGE, italics: true, margin: [0, 0, 0, 8]
+        } : { text: '' },
+
+        this._sectionBar('MESURE TÂCHE PAR TÂCHE'),
+        {
+          table: {
+            headerRows: 1,
+            widths: ['30%', '22%', '14%', '12%', '22%'],
+            body: [
+              [
+                { text: 'Tâche', style: 'th' },
+                { text: 'Cible contrat', style: 'th' },
+                { text: 'Réalisé', style: 'th' },
+                { text: 'Écart', style: 'th' },
+                { text: 'Verdict', style: 'th' },
+              ],
+              ...rows,
+            ],
+          },
+          layout: this._thinTable(),
+        },
+
+        { text: '', margin: [0, 14, 0, 0] },
+        this._sectionBar('CONFORMITÉ GLOBALE'),
+        {
+          table: {
+            widths: ['*'],
+            body: [[{
+              text: conformiteTxt,
+              fontSize: 11, bold: true, color: conformiteColor,
+              alignment: 'center', margin: [0, 8, 0, 8]
+            }]]
+          },
+          layout: 'noBorders',
+        },
+
+        { text: 'Légende verdicts : CONFORME (<=5min de retard) | A VERIFIER (5-15min) | NON CONFORME (>15min) | NON REALISE (tâche non démarrée) | NON CALCULABLE (cible ou référence manquante).', fontSize: 6, color: C.GRAY_500, italics: true, margin: [0, 10, 0, 0] }
       ],
     };
   }
