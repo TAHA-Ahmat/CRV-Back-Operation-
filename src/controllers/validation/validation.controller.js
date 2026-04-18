@@ -1,7 +1,6 @@
 import { validerCRV, deverrouillerCRV, verrouillerCRV } from '../../services/validation/validation.service.js';
 import ValidationCRV from '../../models/validation/ValidationCRV.js';
 import CRV from '../../models/crv/CRV.js';
-import { notifierValidationCRV } from '../../services/notifications/notification.service.js';
 
 export const validerCRVController = async (req, res, next) => {
   try {
@@ -18,19 +17,8 @@ export const validerCRVController = async (req, res, next) => {
       .populate('validePar')
       .populate('ecartsSLA.phase');
 
-    // Envoyer notification au créateur du CRV
-    try {
-      const crv = await CRV.findById(req.params.id)
-        .populate('vol')
-        .populate('creePar');
-
-      if (crv && crv.creePar && crv.creePar.email) {
-        await notifierValidationCRV(crv, req.user, crv.creePar);
-      }
-    } catch (notifError) {
-      // Ne pas bloquer la validation si l'email échoue
-      console.error('Erreur notification email:', notifError);
-    }
+    // Notification : pipeline moderne via eventBus dans validation.service.js
+    // (ex-notifierValidationCRV supprimé par EMAIL_PIPELINE_PROOF_LEGACY_CLEANUP)
 
     req.crvId = req.params.id;
 
