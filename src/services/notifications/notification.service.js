@@ -1,319 +1,12 @@
-import nodemailer from 'nodemailer';
-import { config } from '../../config/env.js';
-// EXTENSION 7 - Service notification in-app (NON-RÉGRESSION: import NOUVEAU)
+// EXTENSION 7 - Service notification in-app
+// LEGACY EMAIL SUPPRIMÉ: nodemailer, createTransporter, notifierCRVPretValidation,
+// notifierIncidentCritique, notifierValidationCRV, testerConfigurationEmail
+// → Tout le canal email passe désormais par channels/emailChannel.js via le pipeline EventBus
 import Notification from '../../models/notifications/Notification.js';
 
-/**
- * Configuration du transporteur email
- * Utilise les variables d'environnement pour SMTP
- */
-const createTransporter = () => {
-  // Configuration SMTP depuis .env
-  if (process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    return nodemailer.createTransporter({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT),
-      secure: process.env.SMTP_SECURE === 'true', // true pour port 465, false pour autres ports
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
-    });
-  }
-
-  // Configuration de test avec Ethereal (si pas de SMTP configuré)
-  // Ethereal est un service gratuit pour tester les emails
-  console.warn('⚠️  Aucune configuration SMTP trouvée. Utilisation du mode test (emails non envoyés).');
-  return null;
-};
-
-/**
- * Envoyer notification de CRV prêt pour validation
- * @param {Object} crv - Document CRV
- * @param {Object} superviseur - Document Personne (superviseur)
- */
-export const notifierCRVPretValidation = async (crv, superviseur) => {
-  try {
-    const transporter = createTransporter();
-
-    if (!transporter) {
-      console.log(`📧 [MODE TEST] Notification CRV ${crv.numeroCRV} pour ${superviseur.email}`);
-      return {
-        success: true,
-        mode: 'test',
-        message: 'Email non envoyé (mode test - pas de configuration SMTP)'
-      };
-    }
-
-    const mailOptions = {
-      from: process.env.SMTP_FROM || 'noreply@ths.com',
-      to: superviseur.email,
-      subject: `CRV ${crv.numeroCRV} prêt pour validation`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #4472C4;">CRV Prêt pour Validation</h2>
-
-          <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <p><strong>Numéro CRV :</strong> ${crv.numeroCRV}</p>
-            <p><strong>Vol :</strong> ${crv.vol.numeroVol}</p>
-            <p><strong>Compagnie :</strong> ${crv.vol.compagnieAerienne}</p>
-            <p><strong>Date vol :</strong> ${new Date(crv.vol.dateVol).toLocaleDateString('fr-FR')}</p>
-            <p><strong>Complétude :</strong> ${crv.completude}%</p>
-          </div>
-
-          <p>Ce CRV est maintenant complété et prêt pour validation.</p>
-
-          <p style="margin-top: 30px;">
-            <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/crv/${crv._id}"
-               style="background-color: #4472C4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              Voir le CRV
-            </a>
-          </p>
-
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-
-          <p style="font-size: 12px; color: #666;">
-            Cet email a été envoyé automatiquement par le système THS CRV Operations.<br>
-            Merci de ne pas répondre à cet email.
-          </p>
-        </div>
-      `
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-
-    console.log(`✅ Email envoyé : ${info.messageId}`);
-
-    return {
-      success: true,
-      mode: 'production',
-      messageId: info.messageId,
-      to: superviseur.email
-    };
-  } catch (error) {
-    console.error('❌ Erreur envoi email:', error);
-    return {
-      success: false,
-      error: error.message
-    };
-  }
-};
-
-/**
- * Envoyer notification d'incident critique
- * @param {Object} evenement - Document EvenementOperationnel
- * @param {Object} crv - Document CRV
- * @param {Array} managers - Liste des managers à notifier
- */
-export const notifierIncidentCritique = async (evenement, crv, managers) => {
-  try {
-    const transporter = createTransporter();
-
-    if (!transporter) {
-      console.log(`📧 [MODE TEST] Notification incident critique sur CRV ${crv.numeroCRV}`);
-      return {
-        success: true,
-        mode: 'test',
-        message: 'Email non envoyé (mode test)'
-      };
-    }
-
-    const destinataires = managers.map(m => m.email).join(', ');
-
-    const mailOptions = {
-      from: process.env.SMTP_FROM || 'noreply@ths.com',
-      to: destinataires,
-      subject: `🚨 Incident CRITIQUE - CRV ${crv.numeroCRV}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #d32f2f; color: white; padding: 20px; border-radius: 5px 5px 0 0;">
-            <h2 style="margin: 0;">🚨 INCIDENT CRITIQUE</h2>
-          </div>
-
-          <div style="border: 2px solid #d32f2f; border-top: none; padding: 20px; border-radius: 0 0 5px 5px;">
-            <p><strong>CRV :</strong> ${crv.numeroCRV}</p>
-            <p><strong>Vol :</strong> ${crv.vol.numeroVol} - ${crv.vol.compagnieAerienne}</p>
-
-            <div style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;">
-              <p><strong>Type d'événement :</strong> ${evenement.typeEvenement}</p>
-              <p><strong>Gravité :</strong> ${evenement.gravite}</p>
-              <p><strong>Description :</strong></p>
-              <p>${evenement.description}</p>
-            </div>
-
-            <p><strong>Date/Heure :</strong> ${new Date(evenement.dateHeureDebut).toLocaleString('fr-FR')}</p>
-
-            ${evenement.actionsCorrectives ? `
-              <p><strong>Actions correctives :</strong></p>
-              <p>${evenement.actionsCorrectives}</p>
-            ` : ''}
-
-            <p style="margin-top: 30px;">
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/crv/${crv._id}"
-                 style="background-color: #d32f2f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Voir le CRV
-              </a>
-            </p>
-          </div>
-
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-
-          <p style="font-size: 12px; color: #666;">
-            Notification automatique - Incident critique détecté<br>
-            Système THS CRV Operations
-          </p>
-        </div>
-      `
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-
-    console.log(`✅ Email incident critique envoyé : ${info.messageId}`);
-
-    return {
-      success: true,
-      mode: 'production',
-      messageId: info.messageId,
-      destinataires
-    };
-  } catch (error) {
-    console.error('❌ Erreur envoi email incident:', error);
-    return {
-      success: false,
-      error: error.message
-    };
-  }
-};
-
-/**
- * Envoyer notification de validation CRV
- * @param {Object} crv - Document CRV validé
- * @param {Object} validateur - Personne qui a validé
- * @param {Object} createur - Personne qui a créé le CRV
- */
-export const notifierValidationCRV = async (crv, validateur, createur) => {
-  try {
-    const transporter = createTransporter();
-
-    if (!transporter) {
-      console.log(`📧 [MODE TEST] Notification validation CRV ${crv.numeroCRV} pour ${createur.email}`);
-      return {
-        success: true,
-        mode: 'test',
-        message: 'Email non envoyé (mode test)'
-      };
-    }
-
-    const mailOptions = {
-      from: process.env.SMTP_FROM || 'noreply@ths.com',
-      to: createur.email,
-      subject: `✅ CRV ${crv.numeroCRV} validé`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #4caf50; color: white; padding: 20px; border-radius: 5px 5px 0 0;">
-            <h2 style="margin: 0;">✅ CRV Validé</h2>
-          </div>
-
-          <div style="border: 2px solid #4caf50; border-top: none; padding: 20px; border-radius: 0 0 5px 5px;">
-            <p>Bonjour ${createur.prenom},</p>
-
-            <p>Le CRV <strong>${crv.numeroCRV}</strong> a été validé avec succès.</p>
-
-            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <p><strong>Vol :</strong> ${crv.vol.numeroVol} - ${crv.vol.compagnieAerienne}</p>
-              <p><strong>Validé par :</strong> ${validateur.prenom} ${validateur.nom}</p>
-              <p><strong>Date validation :</strong> ${new Date().toLocaleString('fr-FR')}</p>
-            </div>
-
-            <p>Le CRV est maintenant verrouillé et prêt pour l'archivage.</p>
-
-            <p style="margin-top: 30px;">
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/crv/${crv._id}"
-                 style="background-color: #4caf50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Voir le CRV
-              </a>
-            </p>
-          </div>
-
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-
-          <p style="font-size: 12px; color: #666;">
-            Notification automatique - Validation CRV<br>
-            Système THS CRV Operations
-          </p>
-        </div>
-      `
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-
-    console.log(`✅ Email validation envoyé : ${info.messageId}`);
-
-    return {
-      success: true,
-      mode: 'production',
-      messageId: info.messageId,
-      to: createur.email
-    };
-  } catch (error) {
-    console.error('❌ Erreur envoi email validation:', error);
-    return {
-      success: false,
-      error: error.message
-    };
-  }
-};
-
-/**
- * Tester la configuration email
- */
-export const testerConfigurationEmail = async () => {
-  try {
-    const transporter = createTransporter();
-
-    if (!transporter) {
-      return {
-        success: false,
-        mode: 'test',
-        message: 'Aucune configuration SMTP trouvée. Ajoutez SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS dans .env'
-      };
-    }
-
-    // Vérifier la connexion
-    await transporter.verify();
-
-    return {
-      success: true,
-      mode: 'production',
-      message: 'Configuration SMTP valide',
-      config: {
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        user: process.env.SMTP_USER
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      mode: 'production',
-      message: 'Erreur de configuration SMTP',
-      error: error.message
-    };
-  }
-};
-
 // ============================================================
-// EXTENSION 7 - NOTIFICATIONS IN-APP
+// NOTIFICATIONS IN-APP (seul rôle restant de ce fichier)
 // ============================================================
-
-/**
- * EXTENSION 7 - Fonctions NOUVELLES pour notifications in-app
- *
- * NON-RÉGRESSION: Ces fonctions sont ENTIÈREMENT NOUVELLES et OPTIONNELLES.
- * - Les fonctions email existantes (ci-dessus) ne sont PAS modifiées
- * - Ces fonctions ajoutent la gestion de notifications in-app
- * - Peuvent être utilisées en complément ou indépendamment des emails
- */
 
 /**
  * Crée une notification in-app
@@ -589,6 +282,7 @@ export const obtenirStatistiquesNotifications = async (userId = null) => {
  */
 export const envoyerAlerteSLA = async (destinataireId, alerteData) => {
   try {
+    // 1. Notification in-app (existant)
     const notification = await creerNotificationInApp({
       destinataire: destinataireId,
       type: 'ALERTE_SLA',
@@ -601,6 +295,31 @@ export const envoyerAlerteSLA = async (destinataireId, alerteData) => {
       referenceModele: alerteData.referenceModele || null,
       referenceId: alerteData.referenceId || null
     });
+
+    // 2. Email proactif pour alertes CRITICAL et EXCEEDED (Palier 3)
+    const niveau = alerteData.niveau || alerteData.priorite || '';
+    const shouldEmail = ['CRITICAL', 'EXCEEDED', 'CRITIQUE', 'URGENTE'].includes(niveau.toUpperCase?.() || '');
+
+    if (shouldEmail) {
+      try {
+        const Personne = (await import('../../models/security/Personne.js')).default;
+        const destinataire = await Personne.findById(destinataireId).select('email nom prenom').lean();
+
+        if (destinataire?.email) {
+          const { send } = await import('./channels/emailChannel.js');
+          await send(
+            destinataire.email,
+            alerteData.titre || 'Alerte SLA CRV',
+            alerteData.message,
+            { priority: 'high' }
+          );
+          console.log(`[SLA][EMAIL] Alerte ${niveau} envoyée à ${destinataire.email}`);
+        }
+      } catch (emailErr) {
+        // Non-bloquant : l'email est un bonus, la notification in-app reste
+        console.warn('[SLA][EMAIL] Envoi email échoué (non-bloquant):', emailErr.message);
+      }
+    }
 
     return notification;
   } catch (error) {

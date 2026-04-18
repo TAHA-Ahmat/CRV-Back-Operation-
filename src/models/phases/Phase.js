@@ -28,6 +28,14 @@ const phaseSchema = new mongoose.Schema({
     enum: ['DEBUT', 'REALISATION', 'FIN'],
     required: true
   },
+  // EXTENSION 11 — Typologie temporelle
+  // INSTANT = un seul horodatage (calage, ouverture soutes, repoussage...)
+  // DEBUT_FIN = deux horodatages début + fin (briefing, déchargement, embarquement...)
+  typeTemporel: {
+    type: String,
+    enum: ['INSTANT', 'DEBUT_FIN'],
+    default: 'DEBUT_FIN'
+  },
   ordre: {
     type: Number,
     required: true
@@ -40,6 +48,38 @@ const phaseSchema = new mongoose.Schema({
   obligatoire: {
     type: Boolean,
     default: true
+  },
+  // EXTENSION — Mode SLA
+  // DUREE = SLA basé sur la durée de la phase (ex: nettoyage max 30 min)
+  // DEADLINE = SLA basé sur un horaire calculé depuis ETD/ETA (ex: boarding 40 min avant ETD)
+  slaMode: {
+    type: String,
+    enum: ['DUREE', 'DEADLINE'],
+    default: 'DUREE'
+  },
+  // Événement de référence pour les phases DEADLINE
+  // ETA = heure d'atterrissage prévue, ETD = heure de décollage prévue, CALAGE = chocks on
+  referenceTemporelle: {
+    type: String,
+    enum: ['ETA', 'ETD', 'CALAGE', null],
+    default: null
+  },
+  // Clés SLA dans SLAConfig pour les phases DEADLINE (ex: 'boarding.debut', 'checkin.ouverture')
+  slaConfigKeyDebut: {
+    type: String,
+    default: null
+  },
+  slaConfigKeyFin: {
+    type: String,
+    default: null
+  },
+  // Offset temporel par défaut (minutes avant/après la référence)
+  // Positif = AVANT la référence (ex: 180 = 3h avant ETD pour DEP_INSPECTION)
+  // Utilisé pour calculer heureDebutPrevue si SLAConfig.phaseOffsets n'a pas de valeur
+  // null = pas de positionnement (cascade séquentielle classique)
+  offsetMinutesDefaut: {
+    type: Number,
+    default: null
   },
   description: String,
   prerequis: [{

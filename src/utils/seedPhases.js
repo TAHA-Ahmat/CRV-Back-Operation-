@@ -25,6 +25,8 @@ const phasesArrivee = [
     ordre: 1,
     dureeStandardMinutes: 10,
     obligatoire: true,
+    referenceTemporelle: 'ETA',
+    offsetMinutesDefaut: 120,
     description: 'Briefing avec les équipes KI, KU, KF, manutentionnaires et chauffeurs avant arrivée avion'
   },
   {
@@ -33,9 +35,12 @@ const phasesArrivee = [
     typeOperation: 'ARRIVEE',
     categorie: 'PISTE',
     macroPhase: 'DEBUT',
+    typeTemporel: 'INSTANT',
     ordre: 2,
     dureeStandardMinutes: 15,
     obligatoire: true,
+    referenceTemporelle: 'ETA',
+    offsetMinutesDefaut: 0,
     description: 'Arrivée de l\'avion : atterrissage, roulage vers parking et calage/sécurisation'
   },
   {
@@ -44,9 +49,12 @@ const phasesArrivee = [
     typeOperation: 'ARRIVEE',
     categorie: 'BAGAGE',
     macroPhase: 'REALISATION',
+    typeTemporel: 'INSTANT',
     ordre: 3,
     dureeStandardMinutes: 5,
     obligatoire: true,
+    referenceTemporelle: 'CALAGE',
+    offsetMinutesDefaut: -3,
     description: 'Ouverture des soutes de l\'avion pour préparer le déchargement'
   },
   {
@@ -58,6 +66,8 @@ const phasesArrivee = [
     ordre: 4,
     dureeStandardMinutes: 25,
     obligatoire: true,
+    referenceTemporelle: 'CALAGE',
+    offsetMinutesDefaut: -5,
     description: 'Déchargement des bagages et fret des soutes vers les chariots'
   },
   {
@@ -141,26 +151,45 @@ const phasesDepart = [
     description: 'Nettoyage et préparation cabine'
   },
   {
+    code: 'DEP_CHECKIN',
+    libelle: 'Enregistrement passagers',
+    typeOperation: 'DEPART',
+    categorie: 'PASSAGERS',
+    macroPhase: 'REALISATION',
+    ordre: 4,
+    dureeStandardMinutes: 75,
+    obligatoire: true,
+    slaMode: 'DEADLINE',
+    referenceTemporelle: 'ETD',
+    slaConfigKeyDebut: 'checkin.ouverture',
+    slaConfigKeyFin: 'checkin.fermeture',
+    description: 'Ouverture et fermeture des comptoirs d\'enregistrement (SLA: réf. STD/ETD, configuré par compagnie)'
+  },
+  {
     code: 'DEP_CHARG_SOUTE',
     libelle: 'Chargement soute',
     typeOperation: 'DEPART',
     categorie: 'BAGAGE',
     macroPhase: 'REALISATION',
-    ordre: 4,
+    ordre: 5,
     dureeStandardMinutes: 25,
     obligatoire: true,
     description: 'Chargement bagages et fret'
   },
   {
-    code: 'DEP_EMBARQ_PAX',
-    libelle: 'Embarquement passagers',
+    code: 'DEP_BOARDING',
+    libelle: 'Embarquement & fermeture gate',
     typeOperation: 'DEPART',
     categorie: 'PASSAGERS',
     macroPhase: 'REALISATION',
-    ordre: 5,
+    ordre: 6,
     dureeStandardMinutes: 25,
     obligatoire: true,
-    description: 'Embarquement de tous les passagers'
+    slaMode: 'DEADLINE',
+    referenceTemporelle: 'ETD',
+    slaConfigKeyDebut: 'boarding.debut',
+    slaConfigKeyFin: 'boarding.fermetureGate',
+    description: 'Embarquement passagers et fermeture porte d\'embarquement (SLA: réf. ETD, configuré par compagnie)'
   },
   {
     code: 'DEP_FERMETURE',
@@ -168,7 +197,8 @@ const phasesDepart = [
     typeOperation: 'DEPART',
     categorie: 'PASSAGERS',
     macroPhase: 'FIN',
-    ordre: 6,
+    typeTemporel: 'INSTANT',
+    ordre: 7,
     dureeStandardMinutes: 3,
     obligatoire: true,
     description: 'Fermeture et sécurisation des portes'
@@ -179,7 +209,8 @@ const phasesDepart = [
     typeOperation: 'DEPART',
     categorie: 'PISTE',
     macroPhase: 'FIN',
-    ordre: 7,
+    typeTemporel: 'INSTANT',
+    ordre: 8,
     dureeStandardMinutes: 5,
     obligatoire: true,
     description: 'Repoussage de l\'avion'
@@ -190,7 +221,8 @@ const phasesDepart = [
     typeOperation: 'DEPART',
     categorie: 'PISTE',
     macroPhase: 'FIN',
-    ordre: 8,
+    typeTemporel: 'DEBUT_FIN',
+    ordre: 9,
     dureeStandardMinutes: 10,
     obligatoire: true,
     description: 'Roulage vers la piste de décollage'
@@ -201,7 +233,8 @@ const phasesDepart = [
     typeOperation: 'DEPART',
     categorie: 'PISTE',
     macroPhase: 'FIN',
-    ordre: 9,
+    typeTemporel: 'INSTANT',
+    ordre: 10,
     dureeStandardMinutes: 5,
     obligatoire: true,
     description: 'Décollage de l\'avion'
@@ -215,6 +248,7 @@ const phasesTurnAround = [
     typeOperation: 'TURN_AROUND',
     categorie: 'PISTE',
     macroPhase: 'DEBUT',
+    typeTemporel: 'INSTANT',
     ordre: 1,
     dureeStandardMinutes: 5,
     obligatoire: true,
@@ -226,6 +260,7 @@ const phasesTurnAround = [
     typeOperation: 'TURN_AROUND',
     categorie: 'PISTE',
     macroPhase: 'DEBUT',
+    typeTemporel: 'DEBUT_FIN',
     ordre: 2,
     dureeStandardMinutes: 10,
     obligatoire: true,
@@ -237,6 +272,7 @@ const phasesTurnAround = [
     typeOperation: 'TURN_AROUND',
     categorie: 'PISTE',
     macroPhase: 'DEBUT',
+    typeTemporel: 'INSTANT',
     ordre: 3,
     dureeStandardMinutes: 5,
     obligatoire: true,
@@ -248,6 +284,7 @@ const phasesTurnAround = [
     typeOperation: 'TURN_AROUND',
     categorie: 'PASSAGERS',
     macroPhase: 'DEBUT',
+    typeTemporel: 'DEBUT_FIN',
     ordre: 4,
     dureeStandardMinutes: 3,
     obligatoire: true,
@@ -309,26 +346,45 @@ const phasesTurnAround = [
     description: 'Ravitaillement en carburant'
   },
   {
+    code: 'TA_CHECKIN',
+    libelle: 'Enregistrement passagers',
+    typeOperation: 'TURN_AROUND',
+    categorie: 'PASSAGERS',
+    macroPhase: 'REALISATION',
+    ordre: 10,
+    dureeStandardMinutes: 75,
+    obligatoire: true,
+    slaMode: 'DEADLINE',
+    referenceTemporelle: 'ETD',
+    slaConfigKeyDebut: 'checkin.ouverture',
+    slaConfigKeyFin: 'checkin.fermeture',
+    description: 'Ouverture et fermeture des comptoirs d\'enregistrement (SLA: réf. STD/ETD, configuré par compagnie)'
+  },
+  {
     code: 'TA_CHARG_SOUTE',
     libelle: 'Chargement soute',
     typeOperation: 'TURN_AROUND',
     categorie: 'BAGAGE',
     macroPhase: 'REALISATION',
-    ordre: 10,
+    ordre: 11,
     dureeStandardMinutes: 25,
     obligatoire: true,
     description: 'Chargement bagages et fret'
   },
   {
-    code: 'TA_EMBARQ_PAX',
-    libelle: 'Embarquement passagers',
+    code: 'TA_BOARDING',
+    libelle: 'Embarquement & fermeture gate',
     typeOperation: 'TURN_AROUND',
     categorie: 'PASSAGERS',
     macroPhase: 'REALISATION',
-    ordre: 11,
+    ordre: 12,
     dureeStandardMinutes: 25,
     obligatoire: true,
-    description: 'Embarquement de tous les passagers'
+    slaMode: 'DEADLINE',
+    referenceTemporelle: 'ETD',
+    slaConfigKeyDebut: 'boarding.debut',
+    slaConfigKeyFin: 'boarding.fermetureGate',
+    description: 'Embarquement passagers et fermeture porte d\'embarquement (SLA: réf. ETD, configuré par compagnie)'
   },
   {
     code: 'TA_FERMETURE',
@@ -336,7 +392,8 @@ const phasesTurnAround = [
     typeOperation: 'TURN_AROUND',
     categorie: 'PASSAGERS',
     macroPhase: 'FIN',
-    ordre: 12,
+    typeTemporel: 'INSTANT',
+    ordre: 13,
     dureeStandardMinutes: 3,
     obligatoire: true,
     description: 'Fermeture et sécurisation des portes'
@@ -347,7 +404,8 @@ const phasesTurnAround = [
     typeOperation: 'TURN_AROUND',
     categorie: 'PISTE',
     macroPhase: 'FIN',
-    ordre: 13,
+    typeTemporel: 'INSTANT',
+    ordre: 14,
     dureeStandardMinutes: 5,
     obligatoire: true,
     description: 'Repoussage de l\'avion'

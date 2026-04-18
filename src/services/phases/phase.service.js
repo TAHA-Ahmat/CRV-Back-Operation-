@@ -1,6 +1,10 @@
+import mongoose from 'mongoose';
 import Phase from '../../models/phases/Phase.js';
 import ChronologiePhase from '../../models/phases/ChronologiePhase.js';
 import Horaire from '../../models/phases/Horaire.js';
+import SLAConfig from '../../models/sla/SLAConfig.js';
+import CRVModel from '../../models/crv/CRV.js';
+import Vol from '../../models/flights/Vol.js';
 import { creerHorodatageTempsReel } from '../../utils/horodatage.js';
 
 /**
@@ -15,7 +19,7 @@ import { creerHorodatageTempsReel } from '../../utils/horodatage.js';
  * @param {string} typeOperation - Type d'opération du vol (ARRIVEE, DEPART, TURN_AROUND)
  * @param {string} horaireId - ID de l'horaire associé (pour calcul temps prévus, optionnel)
  */
-export const initialiserPhasesVol = async (crvId, typeOperation = null, horaireId = null) => {
+export const initialiserPhasesVol = async (crvId, typeOperation = null, horaireId = null, options = {}) => {
   const timestamp = new Date().toISOString();
 
   console.log('[CRV][SERVICE][INIT_PHASES_START]', {
@@ -64,11 +68,14 @@ export const initialiserPhasesVol = async (crvId, typeOperation = null, horaireI
     // ========== EXTENSION 9 - Calcul temps prévus par cascade ==========
     // NON-REGRESSION: horaireId = null par défaut, try/catch non-bloquant
     // Si horaire disponible, on calcule heureDebutPrevue/heureFinPrevue pour chaque phase
-    // Cascade : fin phase N = début phase N+1
+    // Cascade : fin phase N = début phase N+1 (pour phases DUREE)
+    // EXTENSION PALIER 2 : phases DEADLINE = calcul depuis ETD/ETA + config SLA
     let tempsReference = null;
+    let horaire = null;
+    let slaConfig = null;
     if (horaireId) {
       try {
-        const horaire = await Horaire.findById(horaireId);
+        horaire = await Horaire.findById(horaireId);
         if (horaire) {
           if (typeOperation === 'ARRIVEE' || typeOperation === 'TURN_AROUND') {
             tempsReference = horaire.heureAtterrisagePrevue;
@@ -92,15 +99,96 @@ export const initialiserPhasesVol = async (crvId, typeOperation = null, horaireI
         statut: 'NON_COMMENCE'
       };
 
-      // Ajout temps prévus si référence temporelle disponible
-      if (tempsReference) {
+      // EXTENSION PALIER 2 : Phases DEADLINE (boarding, check-in)
+      // heureDebutPrevue/heureFinPrevue calculées depuis ETD + config SLA compagnie
+      if (phase.slaMode === 'DEADLINE' && horaire) {
+        try {
+          const etd = horaire.heureDecollagePrevue;
+          const eta = horaire.heureAtterrisagePrevue;
+          const ref = phase.referenceTemporelle === 'ETA' ? eta : etd;
+
+          if (ref) {
+            // Charger la config SLA compagnie si pas encore fait (lazy, une seule fois)
+            if (!slaConfig && horaire.vol) {
+              try {
+                const vol = await Vol.findById(horaire.vol).select('codeIATA').lean();
+                if (vol?.codeIATA) {
+                  slaConfig = await SLAConfig.findOne({ codeIATA: vol.codeIATA, actif: true }).lean();
+                }
+              } catch (_) { /* non-bloquant */ }
+              if (!slaConfig) slaConfig = {}; // éviter de recharger
+            }
+
+            // Résoudre les minutes depuis la config SLA (ex: 'checkin.ouverture' → 120 min)
+            const resolveMinutes = (key, fallback) => {
+              if (!key) return fallback;
+              const parts = key.split('.');
+              let val = slaConfig;
+              for (const p of parts) { val = val?.[p]; }
+              return val ?? fallback;
+            };
+
+            // Defaults SLA (identiques à useSLA.js côté front)
+            const DEFAULTS = {
+              'checkin.ouverture': 120, 'checkin.fermeture': 45,
+              'boarding.debut': 40, 'boarding.fermetureGate': 15
+            };
+
+            const minutesDebut = resolveMinutes(phase.slaConfigKeyDebut, DEFAULTS[phase.slaConfigKeyDebut] || 0);
+            const minutesFin = resolveMinutes(phase.slaConfigKeyFin, DEFAULTS[phase.slaConfigKeyFin] || 0);
+
+            // DEADLINE = minutes AVANT la référence (ETD/ETA)
+            createData.heureDebutPrevue = new Date(ref.getTime() - minutesDebut * 60000);
+            createData.heureFinPrevue = new Date(ref.getTime() - minutesFin * 60000);
+          }
+        } catch (err) {
+          console.warn('[CRV][SERVICE][INIT_PHASES_DEADLINE_WARN]', {
+            crvId, phaseCode: phase.code,
+            reason: 'Calcul deadline échoué (non-bloquant)',
+            error: err.message
+          });
+        }
+      } else if (horaire) {
+        // PALIER 4 : Positionnement temporel par offset
+        // Priorité : SLAConfig.phaseOffsets[code] > Phase.offsetMinutesDefaut > cascade séquentielle
+        const phaseCode = phase.code;
+        const offset = slaConfig?.phaseOffsets?.get?.(phaseCode)
+          ?? (slaConfig?.phaseOffsets?.[phaseCode])
+          ?? phase.offsetMinutesDefaut;
+
+        if (offset != null && phase.referenceTemporelle) {
+          const etd = horaire.heureDecollagePrevue;
+          const eta = horaire.heureAtterrisagePrevue;
+          const calage = horaire.heureArriveeAuParcPrevue || eta;
+          const refMap = { ETA: eta, ETD: etd, CALAGE: calage };
+          const ref = refMap[phase.referenceTemporelle];
+
+          if (ref) {
+            // offset positif = AVANT la référence, négatif = APRÈS la référence
+            createData.heureDebutPrevue = new Date(ref.getTime() - offset * 60000);
+            const duree = phase.dureeStandardMinutes || 0;
+            createData.heureFinPrevue = new Date(ref.getTime() - offset * 60000 + duree * 60000);
+          }
+        }
+
+        // Fallback : cascade séquentielle si pas d'offset et tempsReference dispo
+        if (!createData.heureDebutPrevue && tempsReference) {
+          createData.heureDebutPrevue = tempsReference;
+          const fin = new Date(tempsReference.getTime() + (phase.dureeStandardMinutes || 0) * 60000);
+          createData.heureFinPrevue = fin;
+          tempsReference = fin; // Cascade : fin phase N = début phase N+1
+        }
+      } else if (tempsReference) {
+        // Pas d'horaire du tout : cascade séquentielle pure
         createData.heureDebutPrevue = tempsReference;
         const fin = new Date(tempsReference.getTime() + (phase.dureeStandardMinutes || 0) * 60000);
         createData.heureFinPrevue = fin;
-        tempsReference = fin; // Cascade : fin phase N = début phase N+1
+        tempsReference = fin;
       }
 
-      const chrono = await ChronologiePhase.create(createData);
+      // Support session transactionnelle (optionnel, rétro-compatible)
+      const createOpts = options.session ? { session: options.session } : {};
+      const [chrono] = await ChronologiePhase.create([createData], createOpts);
       chronologies.push(chrono);
     }
 
@@ -246,6 +334,9 @@ export const demarrerPhase = async (chronoPhaseId, userId) => {
       { new: true }
     ).populate('phase');
 
+    // Synchronisation Horaire pour phases DEADLINE (boarding/check-in)
+    await syncPhaseDeadlineToHoraire(chronoPhase, 'debut');
+
     console.log('[CRV][SERVICE][PHASE_STATUS_TRANSITION]', {
       crvId: chronoPhase.crv,
       userId,
@@ -334,6 +425,9 @@ export const terminerPhase = async (chronoPhaseId) => {
 
     await chronoPhase.save();
 
+    // Synchronisation Horaire pour phases DEADLINE (boarding/check-in)
+    await syncPhaseDeadlineToHoraire(chronoPhase, 'fin');
+
     // Calcul durée
     let dureeMinutes = null;
     if (chronoPhase.heureDebutReelle) {
@@ -372,3 +466,113 @@ export const terminerPhase = async (chronoPhaseId) => {
     throw error;
   }
 };
+
+/**
+ * Synchronise les heures réelles d'une phase DEADLINE (ou phase fine SLA)
+ * avec l'Horaire et éventuellement la ChargeOperationnelle du CRV.
+ *
+ * Mapping phase code → cible (modèle + champ) :
+ *   DEP_CHECKIN / TA_CHECKIN / SLA_CHECKIN_OUVERTURE / SLA_CHECKIN_FERMETURE
+ *     → Horaire.ouvertureComptoirAt / fermetureComptoirAt
+ *   DEP_BOARDING / TA_BOARDING / SLA_BOARDING_DEBUT / SLA_BOARDING_FERMETURE_GATE
+ *     → Horaire.debutBoardingAt / fermetureGateAt
+ *   SLA_BAGAGES_PREMIER / SLA_BAGAGES_DERNIER
+ *     → Horaire.heureLivraisonBagagesDebut / heureLivraisonBagagesFin
+ *     → ChargeOperationnelle.premierBagageAt / dernierBagageAt (si charge BAGAGES existe)
+ *
+ * Tolérance : on n'écrase JAMAIS une valeur existante dans Horaire avec null/undefined.
+ * Non-bloquant : échec silencieux (log warning, pas d'exception).
+ *
+ * Entrées :
+ *   chronoPhase : ChronologiePhase populée (phase)
+ *   moment      : 'debut' | 'fin'
+ */
+const PHASE_HORAIRE_MAP = {
+  // ── Phases historiques ──
+  DEP_CHECKIN:  { debut: 'ouvertureComptoirAt', fin: 'fermetureComptoirAt' },
+  TA_CHECKIN:   { debut: 'ouvertureComptoirAt', fin: 'fermetureComptoirAt' },
+  DEP_BOARDING: { debut: 'debutBoardingAt',     fin: 'fermetureGateAt' },
+  TA_BOARDING:  { debut: 'debutBoardingAt',     fin: 'fermetureGateAt' },
+
+  // ── Phases fines SLA (Mission SLA_FULL_COVERAGE_BACK) ──
+  SLA_CHECKIN_OUVERTURE:       { debut: 'ouvertureComptoirAt' },
+  SLA_CHECKIN_FERMETURE:       { debut: 'fermetureComptoirAt' },
+  SLA_BOARDING_DEBUT:          { debut: 'debutBoardingAt' },
+  SLA_BOARDING_FERMETURE_GATE: { debut: 'fermetureGateAt' },
+  SLA_BAGAGES_PREMIER:         { debut: 'heureLivraisonBagagesDebut' },
+  SLA_BAGAGES_DERNIER:         { debut: 'heureLivraisonBagagesFin' }
+};
+
+// Phases fines SLA qui doivent aussi écrire sur ChargeOperationnelle (unification bagages).
+// moment → champ ChargeOperationnelle (filtre: typeCharge='BAGAGES').
+const PHASE_CHARGE_BAGAGES_MAP = {
+  SLA_BAGAGES_PREMIER: { debut: 'premierBagageAt' },
+  SLA_BAGAGES_DERNIER: { debut: 'dernierBagageAt' }
+};
+
+export async function syncPhaseDeadlineToHoraire(chronoPhase, moment) {
+  try {
+    const phase = chronoPhase?.phase;
+    if (!phase) {
+      console.warn('[SYNC_HORAIRE] phase non peuplée, skip');
+      return;
+    }
+
+    // Accepter si phase DEADLINE OU phase fine SLA (mapping connu)
+    const mapping = PHASE_HORAIRE_MAP[phase.code];
+    const chargeMapping = PHASE_CHARGE_BAGAGES_MAP[phase.code];
+    if (!mapping && !chargeMapping) return;
+
+    const fieldName = mapping?.[moment];
+
+    const value = moment === 'debut' ? chronoPhase.heureDebutReelle : chronoPhase.heureFinReelle;
+    // Tolérance : jamais écraser avec null/undefined
+    if (!value) return;
+
+    const crv = await CRVModel.findById(chronoPhase.crv).select('horaire').lean();
+    if (!crv?.horaire) {
+      console.warn('[SYNC_HORAIRE] CRV ou horaire introuvable', { crvId: chronoPhase.crv });
+    }
+
+    // ── 1. Synchro Horaire ──
+    if (fieldName && crv?.horaire) {
+      const result = await Horaire.findByIdAndUpdate(
+        crv.horaire,
+        { [fieldName]: value },
+        { new: true }
+      );
+      console.log('[CRV][SERVICE][SYNC_PHASE_HORAIRE]', {
+        crvId: chronoPhase.crv, phaseCode: phase.code, moment, fieldName,
+        value: value.toISOString(),
+        horaireId: crv.horaire,
+        updated: !!result
+      });
+    }
+
+    // ── 2. Synchro ChargeOperationnelle (bagages uniquement) ──
+    if (chargeMapping?.[moment]) {
+      try {
+        const ChargeOperationnelle = (await import('../../models/charges/ChargeOperationnelle.js')).default;
+        const chargeFieldName = chargeMapping[moment];
+        const result = await ChargeOperationnelle.updateMany(
+          { crv: chronoPhase.crv, typeCharge: 'BAGAGES' },
+          { [chargeFieldName]: value }
+        );
+        console.log('[CRV][SERVICE][SYNC_PHASE_CHARGE_BAGAGES]', {
+          crvId: chronoPhase.crv, phaseCode: phase.code, moment, chargeFieldName,
+          value: value.toISOString(),
+          modifiedCount: result.modifiedCount
+        });
+      } catch (err) {
+        console.warn('[SYNC_CHARGE_BAGAGES] échec non bloquant:', err.message);
+      }
+    }
+  } catch (err) {
+    console.error('[CRV][SERVICE][SYNC_PHASE_HORAIRE_ERROR]', {
+      crvId: chronoPhase?.crv, phaseCode: chronoPhase?.phase?.code,
+      moment,
+      error: err.message,
+      stack: err.stack?.split('\n').slice(0, 3).join(' | ')
+    });
+  }
+}
