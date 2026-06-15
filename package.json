@@ -12,7 +12,8 @@
     "seed:programme-vols": "node src/utils/seedProgrammeVols.js",
     "generate:programme-vols": "node src/utils/generateProgrammeVols.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:metrics": "node test-metrics.js"
   },
   "keywords": [
     "crv",
