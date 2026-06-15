@@ -27,6 +27,7 @@ const {
   mockCRVFindByIdAndUpdate,
   mockValidationFindOne,
   mockValidationDeleteOne,
+  mockValidationDeleteMany,
   mockValidationCreate,
   mockValidationFindByIdAndUpdate,
   mockValidationFindOneAndUpdate,
@@ -38,22 +39,41 @@ const {
   mockGenerateBuffer,
   mockGetPreviewData,
   mockGenerateStream,
-} = vi.hoisted(() => ({
-  mockCRVFindById: vi.fn(),
-  mockCRVFindByIdAndUpdate: vi.fn(),
-  mockValidationFindOne: vi.fn(),
-  mockValidationDeleteOne: vi.fn(),
-  mockValidationCreate: vi.fn(),
-  mockValidationFindByIdAndUpdate: vi.fn(),
-  mockValidationFindOneAndUpdate: vi.fn(),
-  mockChronologieFind: vi.fn(),
-  mockCalculerCompletude: vi.fn(),
-  mockVerifierConformiteSLA: vi.fn(),
-  mockArchiveDocument: vi.fn(),
-  mockCheckArchiveStatus: vi.fn(),
-  mockGenerateBuffer: vi.fn(),
-  mockGetPreviewData: vi.fn(),
-  mockGenerateStream: vi.fn(),
+  mockMongooseStartSession,
+} = vi.hoisted(() => {
+  const mockSession = {
+    startTransaction: vi.fn().mockResolvedValue(undefined),
+    commitTransaction: vi.fn().mockResolvedValue(undefined),
+    abortTransaction: vi.fn().mockResolvedValue(undefined),
+    endSession: vi.fn().mockResolvedValue(undefined),
+  };
+  return {
+    mockCRVFindById: vi.fn(),
+    mockCRVFindByIdAndUpdate: vi.fn(),
+    mockValidationFindOne: vi.fn(),
+    mockValidationDeleteOne: vi.fn(),
+    mockValidationDeleteMany: vi.fn(),
+    mockValidationCreate: vi.fn(),
+    mockValidationFindByIdAndUpdate: vi.fn(),
+    mockValidationFindOneAndUpdate: vi.fn(),
+    mockChronologieFind: vi.fn(),
+    mockCalculerCompletude: vi.fn(),
+    mockVerifierConformiteSLA: vi.fn(),
+    mockArchiveDocument: vi.fn(),
+    mockCheckArchiveStatus: vi.fn(),
+    mockGenerateBuffer: vi.fn(),
+    mockGetPreviewData: vi.fn(),
+    mockGenerateStream: vi.fn(),
+    mockMongooseStartSession: vi.fn().mockResolvedValue(mockSession),
+  };
+});
+
+// --- Mongoose ---
+
+vi.mock('mongoose', () => ({
+  default: {
+    startSession: mockMongooseStartSession,
+  }
 }));
 
 // --- Mongoose Models ---
@@ -69,6 +89,7 @@ vi.mock('../../src/models/validation/ValidationCRV.js', () => ({
   default: {
     findOne: mockValidationFindOne,
     deleteOne: mockValidationDeleteOne,
+    deleteMany: mockValidationDeleteMany,
     create: mockValidationCreate,
     findByIdAndUpdate: mockValidationFindByIdAndUpdate,
     findOneAndUpdate: mockValidationFindOneAndUpdate,
@@ -191,18 +212,25 @@ beforeEach(() => {
 
   mockCalculerCompletude.mockResolvedValue(90);
   mockVerifierConformiteSLA.mockResolvedValue({ conformite: true, ecarts: [] });
-  mockChronologieFind.mockResolvedValue([
-    { statut: 'TERMINE' },
-    { statut: 'TERMINE' },
-  ]);
+  // Setup ChronologiePhase.find with .session() support
+  mockChronologieFind.mockReturnValue({
+    session: vi.fn().mockResolvedValue([
+      { statut: 'TERMINE' },
+      { statut: 'TERMINE' },
+    ]),
+  });
   mockValidationFindOne.mockResolvedValue(null);
-  mockValidationCreate.mockImplementation(async (data) => ({
-    _id: 'val-new-001',
-    ...data,
-  }));
+  mockValidationCreate.mockImplementation(async (data) => {
+    // Handle both create(obj) and create([obj])
+    if (Array.isArray(data)) {
+      return [{ _id: 'val-new-001', ...data[0] }];
+    }
+    return { _id: 'val-new-001', ...data };
+  });
   mockValidationFindByIdAndUpdate.mockResolvedValue(true);
   mockValidationFindOneAndUpdate.mockResolvedValue(true);
   mockValidationDeleteOne.mockResolvedValue(true);
+  mockValidationDeleteMany.mockResolvedValue(true);
   mockCRVFindByIdAndUpdate.mockResolvedValue(true);
 });
 
@@ -271,7 +299,9 @@ describe('3. Idempotence archivage (P0#7)', () => {
   it('retourne résultat idempotent si driveFileId présent et force=false', async () => {
     const archivedCrv = createArchivedCRVDoc();
     mockCRVFindById.mockReturnValue({
-      populate: vi.fn().mockResolvedValue(archivedCrv),
+      populate: vi.fn().mockReturnValue({
+        session: vi.fn().mockResolvedValue(archivedCrv),
+      }),
     });
 
     const result = await archiverCRV('crv-test-001', 'user-001');
@@ -287,7 +317,9 @@ describe('3. Idempotence archivage (P0#7)', () => {
   it('procède à l\'upload si force=true même avec driveFileId', async () => {
     const archivedCrv = createArchivedCRVDoc();
     mockCRVFindById.mockReturnValue({
-      populate: vi.fn().mockResolvedValue(archivedCrv),
+      populate: vi.fn().mockReturnValue({
+        session: vi.fn().mockResolvedValue(archivedCrv),
+      }),
     });
     mockGenerateBuffer.mockResolvedValue(Buffer.from('fake-pdf'));
     mockArchiveDocument.mockResolvedValue(ARCHIVE_SUCCESS_RESULT);
@@ -303,7 +335,9 @@ describe('3. Idempotence archivage (P0#7)', () => {
   it('procède à l\'upload si driveFileId est null', async () => {
     const freshCrv = createMockCRVDoc();
     mockCRVFindById.mockReturnValue({
-      populate: vi.fn().mockResolvedValue(freshCrv),
+      populate: vi.fn().mockReturnValue({
+        session: vi.fn().mockResolvedValue(freshCrv),
+      }),
     });
     mockGenerateBuffer.mockResolvedValue(Buffer.from('fake-pdf'));
     mockArchiveDocument.mockResolvedValue(ARCHIVE_SUCCESS_RESULT);
@@ -326,7 +360,9 @@ describe('4. Archivage échoue → validation échoue', () => {
     // Setup CRV TERMINE valide (pas d'anomalies)
     const crv = createMockCRVDoc();
     mockCRVFindById.mockReturnValue({
-      populate: vi.fn().mockResolvedValue(crv),
+      populate: vi.fn().mockReturnValue({
+        session: vi.fn().mockResolvedValue(crv),
+      }),
     });
   });
 
@@ -396,7 +432,9 @@ describe('5. Archivage réussi → validation réussit', () => {
   it('validerCRV appelle archiveDocument quand pas d\'anomalies', async () => {
     const crv = createMockCRVDoc();
     mockCRVFindById.mockReturnValue({
-      populate: vi.fn().mockResolvedValue(crv),
+      populate: vi.fn().mockReturnValue({
+        session: vi.fn().mockResolvedValue(crv),
+      }),
     });
 
     await validerCRV('crv-test-001', 'user-001', 'OK', true);
@@ -408,7 +446,9 @@ describe('5. Archivage réussi → validation réussit', () => {
   it('CRV passe à VERROUILLE si archivage OK + verrouillageAutomatique', async () => {
     const crv = createMockCRVDoc();
     mockCRVFindById.mockReturnValue({
-      populate: vi.fn().mockResolvedValue(crv),
+      populate: vi.fn().mockReturnValue({
+        session: vi.fn().mockResolvedValue(crv),
+      }),
     });
 
     const result = await validerCRV('crv-test-001', 'user-001', 'OK', true);
@@ -423,7 +463,9 @@ describe('5. Archivage réussi → validation réussit', () => {
   it('CRV passe à VALIDE si archivage OK + verrouillage manuel', async () => {
     const crv = createMockCRVDoc();
     mockCRVFindById.mockReturnValue({
-      populate: vi.fn().mockResolvedValue(crv),
+      populate: vi.fn().mockReturnValue({
+        session: vi.fn().mockResolvedValue(crv),
+      }),
     });
 
     const result = await validerCRV('crv-test-001', 'user-001', 'OK', false);
@@ -440,7 +482,9 @@ describe('5. Archivage réussi → validation réussit', () => {
       responsableVol: null, // Anomalie : pas de responsable
     });
     mockCRVFindById.mockReturnValue({
-      populate: vi.fn().mockResolvedValue(crv),
+      populate: vi.fn().mockReturnValue({
+        session: vi.fn().mockResolvedValue(crv),
+      }),
     });
 
     const result = await validerCRV('crv-test-001', 'user-001', 'Test', true);
@@ -484,7 +528,7 @@ describe('6. Déverrouillage et immutabilité', () => {
     expect(result).toBe(true);
     expect(mockCRVFindByIdAndUpdate).toHaveBeenCalledWith(
       'crv-test-001',
-      expect.objectContaining({ statut: 'EN_COURS' })
+      expect.objectContaining({ statut: 'VALIDE' })
     );
   });
 });

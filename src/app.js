@@ -38,6 +38,8 @@ import notificationRecipientsRoutes from './routes/notifications/notificationRec
 import avionRoutes from './routes/referentials/avion.routes.js';
 // Routes - MVS 12: OPS Control Center (temps réel)
 import opsRoutes from './routes/ops.routes.js';
+// Routes - AGENTS: IA Agents & Automation
+import agentRoutes from './routes/agents/agentRoutes.js';
 
 const app = express();
 
@@ -102,6 +104,8 @@ app.use('/api/notification-rules', notificationRulesRoutes);
 app.use('/api/notification-recipients', notificationRecipientsRoutes);
 // EXTENSION 12 - OPS Control Center temps réel (NON-RÉGRESSION: endpoint nouveau /api/ops/*)
 app.use('/api/ops', opsRoutes);
+// AGENTS - IA Agents & Automation (NON-RÉGRESSION: endpoint nouveau /api/agents/*)
+app.use('/api/agents', agentRoutes);
 
 // ✅ ALIGNÉ SUR MAGASIN : Audit finalize middleware (fin de chaque requête)
 app.use(auditFinalizeMiddleware);

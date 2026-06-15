@@ -227,18 +227,6 @@ const phasesDepart = [
     obligatoire: true,
     description: 'Roulage vers la piste de décollage'
   },
-  {
-    code: 'DEP_DECOLLAGE',
-    libelle: 'Décollage',
-    typeOperation: 'DEPART',
-    categorie: 'PISTE',
-    macroPhase: 'FIN',
-    typeTemporel: 'INSTANT',
-    ordre: 10,
-    dureeStandardMinutes: 5,
-    obligatoire: true,
-    description: 'Décollage de l\'avion'
-  }
 ];
 
 const phasesTurnAround = [
@@ -398,18 +386,6 @@ const phasesTurnAround = [
     obligatoire: true,
     description: 'Fermeture et sécurisation des portes'
   },
-  {
-    code: 'TA_REPOUSSAGE',
-    libelle: 'Repoussage',
-    typeOperation: 'TURN_AROUND',
-    categorie: 'PISTE',
-    macroPhase: 'FIN',
-    typeTemporel: 'INSTANT',
-    ordre: 14,
-    dureeStandardMinutes: 5,
-    obligatoire: true,
-    description: 'Repoussage de l\'avion'
-  }
 ];
 
 const phasesCommunes = [

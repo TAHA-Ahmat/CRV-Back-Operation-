@@ -173,8 +173,8 @@ export function canArchiveCRV(crv) {
     return { canArchive: false, reason: 'CRV non trouvé' };
   }
 
-  // Archivage autorisé uniquement après validation
-  const STATUTS_AUTORISES = ['VALIDE', 'VERROUILLE'];
+  // Archivage autorisé uniquement après validation (ou termin status)
+  const STATUTS_AUTORISES = ['TERMINE', 'VALIDE', 'VERROUILLE'];
 
   if (crv.statut === 'ANNULE') {
     return { canArchive: false, reason: 'Archivage impossible : CRV annulé' };

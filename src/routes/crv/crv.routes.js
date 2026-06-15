@@ -441,8 +441,8 @@ router.post('/:id/annuler', protect, authorize(...ROLES_SUPERVISION), auditLog('
 /**
  * @route   POST /api/crv/:id/reactiver
  * @desc    Réactiver un CRV annulé
- * @access  Private (tous sauf QUALITE)
+ * @access  Private (SUPERVISEUR, MANAGER only)
  */
-router.post('/:id/reactiver', protect, excludeQualite, auditLog('MISE_A_JOUR'), reactiverCRV);
+router.post('/:id/reactiver', protect, authorize(...ROLES_SUPERVISION), auditLog('MISE_A_JOUR'), reactiverCRV);
 
 export default router;

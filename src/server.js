@@ -2,10 +2,14 @@ import app from './app.js';
 import { config } from './config/env.js';
 import { connectDB } from './config/db.js';
 import { initNotificationEngine } from './services/notifications/initNotificationEngine.js';
+import { initializeDailyReportScheduler } from './jobs/dailyReportScheduler.js';
 
 const startServer = async () => {
   try {
     await connectDB();
+
+    // AGENT 4: Initialiser Daily Report Scheduler (rapports auto 21:00 NDJ)
+    initializeDailyReportScheduler(app);
 
     // Initialiser le module de notification (seed + listeners) — non-bloquant
     initNotificationEngine().catch(err => {
