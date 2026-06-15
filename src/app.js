@@ -8,6 +8,9 @@ import { errorHandler, notFound } from './middlewares/error.middleware.js';
 // ✅ ALIGNÉ SUR MAGASIN : Middlewares d'audit
 import auditRequestMiddleware from './middlewares/auditRequest.middleware.js';
 import auditFinalizeMiddleware from './middlewares/auditFinalize.middleware.js';
+// 📊 MONITORING: Sentry + Prometheus
+import { initSentry, attachErrorHandler } from './config/sentry.js';
+import { metricsMiddleware, getMetrics } from './metrics.js';
 
 // Routes - MVS 1: Security
 import authRoutes from './routes/security/auth.routes.js';
@@ -43,6 +46,9 @@ import agentRoutes from './routes/agents/agentRoutes.js';
 
 const app = express();
 
+// 📊 Initialize Sentry error tracking (MUST be first middleware)
+initSentry(app);
+
 app.use(helmet());
 
 app.use(cors({
@@ -56,6 +62,9 @@ if (config.nodeEnv === 'development') {
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// 📊 Prometheus metrics middleware
+app.use(metricsMiddleware);
 
 // ✅ ALIGNÉ SUR MAGASIN : Audit request middleware (début de chaque requête)
 app.use(auditRequestMiddleware);
@@ -75,6 +84,12 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     environment: config.nodeEnv
   });
+});
+
+// 📊 Prometheus metrics endpoint
+app.get('/metrics', (req, res) => {
+  res.set('Content-Type', 'text/plain');
+  res.send(getMetrics());
 });
 
 app.use('/api/auth', authRoutes);
@@ -109,6 +124,9 @@ app.use('/api/agents', agentRoutes);
 
 // ✅ ALIGNÉ SUR MAGASIN : Audit finalize middleware (fin de chaque requête)
 app.use(auditFinalizeMiddleware);
+
+// 📊 Attach Sentry error handler (MUST be last middleware)
+attachErrorHandler(app);
 
 app.use(notFound);
 app.use(errorHandler);

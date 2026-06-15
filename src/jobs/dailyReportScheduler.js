@@ -28,25 +28,31 @@ let reportScheduler = null;
 /**
  * Initialise le scheduler et déclenche le rapport quotidien
  * @param {Express} app - Express app (optionnel, pour context)
+ * @returns {Object} Status du scheduler
  */
 export function initializeDailyReportScheduler(app) {
-  logger.info('🚀 [Scheduler] Initialisation Daily Report Scheduler...');
+  try {
+    logger.info(`🚀 [Scheduler] Initialisation Daily Report Scheduler...`);
 
-  // Calcul du prochain runtime
-  const nextRun = calculateNextRunTime();
-  const delayMs = nextRun.getTime() - new Date().getTime();
-  const delayMinutes = Math.round(delayMs / 1000 / 60);
+    const nextRun = calculateNextRunTime();
+    const now = new Date();
+    const delayMs = nextRun.getTime() - now.getTime();
+    const delayMinutes = Math.round(delayMs / 60000);
 
-  logger.info(`⏰ [Scheduler] Prochain rapport: ${nextRun.toLocaleString('fr-FR')} (dans ${delayMinutes} min)`);
+    logger.info(`⏰ [Scheduler] Prochain rapport: ${nextRun.toLocaleString('fr-FR', { timeZone: TIMEZONE_NDJ })} (dans ${delayMinutes} min)`);
 
-  // Premier scheduling
-  scheduleNextReport(delayMs);
+    // Premier scheduling
+    scheduleNextReport(delayMs);
 
-  return {
-    status: 'initialized',
-    nextRun: nextRun.toISOString(),
-    timezone: TIMEZONE_NDJ,
-  };
+    return {
+      status: 'initialized',
+      nextRun: nextRun.toISOString(),
+      timezone: TIMEZONE_NDJ,
+    };
+  } catch (error) {
+    logger.error('[Scheduler] Erreur initialisation:', error.message);
+    throw error;
+  }
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
@@ -54,15 +60,19 @@ export function initializeDailyReportScheduler(app) {
 // ════════════════════════════════════════════════════════════════════════════════
 
 function calculateNextRunTime() {
-  // Pour simplifier: utilise l'heure système + offset UTC+1 (NDJ = UTC+1)
+  // UTC+1 offset (NDJ timezone)
+  const UTC_OFFSET_MINUTES = 60;
+  
   const now = new Date();
-  const ndjDate = new Date(now.toLocaleString('fr-FR', { timeZone: TIMEZONE_NDJ }));
+  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+  const ndjMs = utcMs + UTC_OFFSET_MINUTES * 60000;
+  const ndjDate = new Date(ndjMs);
 
-  let nextRun = new Date(ndjDate);
+  let nextRun = new Date(ndjMs);
   nextRun.setHours(REPORT_TIME.hour, REPORT_TIME.minute, 0, 0);
 
   // Si l'heure est déjà passée aujourd'hui, scheduler pour demain
-  if (nextRun <= new Date()) {
+  if (nextRun.getTime() <= ndjMs) {
     nextRun.setDate(nextRun.getDate() + 1);
   }
 
@@ -85,57 +95,43 @@ function scheduleNextReport(delayMs) {
     logger.info(`📋 [Scheduler] Déclenchement rapport quotidien...`);
 
     try {
-      const result = await dailyReporter(reportDate);
-
-      if (result.success) {
-        logger.info(`✅ [Scheduler] Rapport quotidien complété:`, {
-          crvCount: result.stats.total,
-          email: result.emailSent,
-        });
-      } else {
-        logger.error(`❌ [Scheduler] Rapport quotidien échoué:`, {
-          error: result.error,
-        });
-      }
+      // Exécuter Agent 4
+      await dailyReporter();
+      logger.info(`✅ [Scheduler] Rapport généré avec succès`);
     } catch (error) {
-      logger.error(`❌ [Scheduler] Exception lors du rapport:`, {
-        error: error.message,
-      });
+      logger.error(`❌ [Scheduler] Erreur génération rapport:`, error.message);
     }
 
-    // Re-scheduler pour demain
-    const nextRun = calculateNextRunTime();
-    const nextDelay = nextRun.getTime() - new Date().getTime();
-
-    logger.info(`⏰ [Scheduler] Re-scheduling pour ${nextRun.toLocaleString('fr-FR')}`);
+    // Reschedule pour le prochain jour
+    const nextDelay = 24 * 60 * 60 * 1000; // 24h
     scheduleNextReport(nextDelay);
   }, delayMs);
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// MANUAL TRIGGER (FOR TESTING)
-// ════════════════════════════════════════════════════════════════════════════════
-
-export async function triggerDailyReportManually(reportDate) {
-  logger.info(`🔫 [Scheduler] Déclenchement manuel du rapport...`);
-
-  try {
-    const result = await dailyReporter(reportDate || new Date());
-    return result;
-  } catch (error) {
-    logger.error(`❌ [Scheduler] Erreur déclenchement manuel:`, {
-      error: error.message,
-    });
-
-    throw error;
+/**
+ * Arrête le scheduler
+ */
+export function stopDailyReportScheduler() {
+  if (reportScheduler) {
+    clearTimeout(reportScheduler);
+    reportScheduler = null;
+    logger.info(`⏹️  [Scheduler] Daily Report Scheduler arrêté`);
   }
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// EXPORT
-// ════════════════════════════════════════════════════════════════════════════════
-
-export default {
-  initializeDailyReportScheduler,
-  triggerDailyReportManually,
-};
+/**
+ * Déclenche manuellement un rapport (pour tests/admin)
+ * @param {Date} reportDate - Date du rapport
+ * @returns {Object} Résultat du rapport
+ */
+export async function triggerDailyReportManually(reportDate = new Date()) {
+  try {
+    logger.info(`📋 [Manual Trigger] Déclenchement rapport manuel...`);
+    const result = await dailyReporter();
+    logger.info(`✅ [Manual Trigger] Rapport généré avec succès`);
+    return result;
+  } catch (error) {
+    logger.error(`❌ [Manual Trigger] Erreur:`, error.message);
+    throw error;
+  }
+}

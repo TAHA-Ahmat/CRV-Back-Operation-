@@ -87,7 +87,7 @@ router.get('/status', protect, (req, res) => {
         status: 'planned',
         description: 'Détecteur anomalies SLA (TODO)',
       },
-      horaireS uggestor: {
+      horaireSuggestor: {
         status: 'planned',
         description: 'Suggesteur horaires (TODO)',
       },

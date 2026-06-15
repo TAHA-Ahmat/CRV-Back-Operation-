@@ -1,0 +1,145 @@
+{
+  "dashboard": {
+    "title": "CRV API Monitoring",
+    "description": "Prometheus metrics dashboard for CRV API (Back service)",
+    "tags": ["crv", "monitoring", "prometheus"],
+    "timezone": "UTC",
+    "panels": [
+      {
+        "title": "HTTP Request Rate",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "title": "HTTP Request Duration (95th percentile)",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, http_request_duration_ms)"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "title": "Active Requests In Progress",
+        "targets": [
+          {
+            "expr": "http_requests_in_progress"
+          }
+        ],
+        "type": "gauge"
+      },
+      {
+        "title": "HTTP Request Status Codes (5m rate)",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[5m])) by (status_code)"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "title": "Database Query Rate",
+        "targets": [
+          {
+            "expr": "rate(db_queries_total[5m])"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "title": "Database Query Duration (avg)",
+        "targets": [
+          {
+            "expr": "avg(db_query_duration_ms)"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "title": "Authentication Attempts",
+        "targets": [
+          {
+            "expr": "sum(rate(authentication_attempts_total[5m])) by (status)"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "title": "Notifications Sent",
+        "targets": [
+          {
+            "expr": "sum(rate(notifications_sent_total[5m])) by (type, status)"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "title": "CRV Processing Time",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, crv_processing_time_ms)"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "title": "Active Users",
+        "targets": [
+          {
+            "expr": "active_users_current"
+          }
+        ],
+        "type": "gauge"
+      },
+      {
+        "title": "Flights by Status",
+        "targets": [
+          {
+            "expr": "flights_by_status"
+          }
+        ],
+        "type": "piechart"
+      },
+      {
+        "title": "Report Generation Time",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, report_generation_time_ms)"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "title": "CPU Usage (%)",
+        "targets": [
+          {
+            "expr": "rate(process_cpu_seconds_total[5m]) * 100"
+          }
+        ],
+        "type": "gauge"
+      },
+      {
+        "title": "Memory Usage (MB)",
+        "targets": [
+          {
+            "expr": "process_resident_memory_bytes / 1024 / 1024"
+          }
+        ],
+        "type": "gauge"
+      },
+      {
+        "title": "Error Rate (5m)",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{status_code=~'5..'}[5m]))"
+          }
+        ],
+        "type": "gauge"
+      }
+    ]
+  }
+}
