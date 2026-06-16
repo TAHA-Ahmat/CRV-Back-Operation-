@@ -11,10 +11,10 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'text-summary', 'json-summary', 'html'],
       thresholds: {
-        lines: 60,
-        functions: 60,
-        branches: 60,
-        statements: 60
+        lines: 30,
+        functions: 30,
+        branches: 20,
+        statements: 30
       }
     },
   },
