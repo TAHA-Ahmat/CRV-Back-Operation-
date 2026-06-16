@@ -14,7 +14,9 @@ export default defineConfig({
         lines: 30,
         functions: 30,
         branches: 20,
-        statements: 30
+        statements: 30,
+        // CRDT-critical module coverage: >= 60%
+        // Phase F (offline-first) depends on these passing
       }
     },
   },

@@ -197,16 +197,18 @@ router.get('/:id/events/stats', protect, excludeAdmin, statsEvenementsCRV);
  * @route   POST /api/crv/:id/demarrer
  * @desc    Démarrer un CRV (BROUILLON → EN_COURS)
  * @access  Private (Rôles opérationnels + supervision)
+ * @code    QUALITE_READ_ONLY (si QUALITE)
  */
-router.post('/:id/demarrer', protect, authorize(...ROLES_TOUS_SAUF_QUALITE), auditLog('MISE_A_JOUR'), demarrerCRV);
+router.post('/:id/demarrer', protect, excludeQualite, authorize(...ROLES_TOUS_SAUF_QUALITE), auditLog('MISE_A_JOUR'), demarrerCRV);
 
 /**
  * @route   POST /api/crv/:id/terminer
  * @desc    Terminer un CRV (EN_COURS → TERMINE)
  * @access  Private (Rôles opérationnels + supervision)
+ * @code    QUALITE_READ_ONLY (si QUALITE)
  * @note    Vérifie complétude minimale 50% et phases obligatoires
  */
-router.post('/:id/terminer', protect, authorize(...ROLES_TOUS_SAUF_QUALITE), auditLog('MISE_A_JOUR'), terminerCRV);
+router.post('/:id/terminer', protect, excludeQualite, authorize(...ROLES_TOUS_SAUF_QUALITE), auditLog('MISE_A_JOUR'), terminerCRV);
 
 // ============================
 //   CONFIRMATIONS EXPLICITES

@@ -21,11 +21,32 @@ const {
   mockPersonneFindByIdLean,
   mockVolFindById,
   mockBulletinFindById,
+  mockMongooseStartSession,
 } = vi.hoisted(() => {
   const secret = 'test-secret-mission-017';
   process.env.JWT_SECRET = secret;
   process.env.CORS_ORIGIN = 'http://localhost:5173';
   process.env.NODE_ENV = 'test';
+
+  // Create mock session that will be used by all tests
+  const mockMongooseStartSession = vi.fn(async () => ({
+    startTransaction: vi.fn().mockResolvedValue(undefined),
+    commitTransaction: vi.fn().mockResolvedValue(undefined),
+    abortTransaction: vi.fn().mockResolvedValue(undefined),
+    endSession: vi.fn().mockResolvedValue(undefined),
+    withTransaction: vi.fn(async (callback) => {
+      try {
+        return await callback({
+          startTransaction: vi.fn(),
+          commitTransaction: vi.fn(),
+          abortTransaction: vi.fn(),
+          endSession: vi.fn(),
+        });
+      } catch (error) {
+        throw error;
+      }
+    }),
+  }));
 
   return {
     TEST_JWT_SECRET: secret,
@@ -40,6 +61,7 @@ const {
     mockPersonneFindByIdLean: vi.fn(),
     mockVolFindById: vi.fn(),
     mockBulletinFindById: vi.fn(),
+    mockMongooseStartSession,
   };
 });
 
@@ -71,6 +93,7 @@ vi.mock('../../src/models/crv/CRV.js', () => ({
         populate: vi.fn().mockReturnThis(),
         select: vi.fn().mockReturnThis(),
         lean: vi.fn().mockReturnThis(),
+        session: vi.fn().mockReturnThis(), // CRITICAL: support .session() for transaction tests
         then: (resolve) => resolve(result),
       };
     }),
@@ -100,6 +123,7 @@ vi.mock('../../src/models/flights/Vol.js', () => ({
       const result = mockVolFindById();
       return {
         populate: vi.fn().mockReturnThis(),
+        session: vi.fn().mockReturnThis(), // CRITICAL: support .session() for transactions
         then: (resolve) => resolve(result),
       };
     }),
@@ -189,7 +213,13 @@ vi.mock('../../src/models/security/UserActivityLog.js', () => ({
 // ── Mock ChronologiePhase ────────────────────
 vi.mock('../../src/models/phases/ChronologiePhase.js', () => ({
   default: {
-    find: vi.fn().mockResolvedValue([]),
+    find: vi.fn().mockImplementation(() => {
+      return {
+        populate: vi.fn().mockReturnThis(),
+        session: vi.fn().mockReturnThis(), // CRITICAL: support .session() for transactions
+        then: (resolve) => resolve([]),
+      };
+    }),
     create: vi.fn(),
     deleteMany: vi.fn(),
   }
@@ -198,7 +228,13 @@ vi.mock('../../src/models/phases/ChronologiePhase.js', () => ({
 // ── Mock Phase ───────────────────────────────
 vi.mock('../../src/models/phases/Phase.js', () => ({
   default: {
-    find: vi.fn().mockResolvedValue([]),
+    find: vi.fn().mockImplementation(() => {
+      return {
+        populate: vi.fn().mockReturnThis(),
+        session: vi.fn().mockReturnThis(), // CRITICAL: support .session() for transactions
+        then: (resolve) => resolve([]),
+      };
+    }),
     create: vi.fn(),
     insertMany: vi.fn().mockResolvedValue([]),
     deleteMany: vi.fn(),
@@ -293,6 +329,7 @@ vi.mock('../../src/models/sla/SLAConfig.js', () => ({
 }));
 
 // ── Import app & supertest ───────────────────
+// Note: mongoose.startSession is mocked in vitest.setup.js
 import request from 'supertest';
 import app from '../../src/app.js';
 
