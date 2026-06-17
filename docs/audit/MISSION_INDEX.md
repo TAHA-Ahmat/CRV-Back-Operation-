@@ -91,3 +91,5 @@
 - [ ] Nettoyage abstractions cosmétiques
 - [ ] Harmonisation documentaire
 - [ ] Brancher notifications eventRegistry sur CRVEvent
+
+| GOOGLE_DRIVE_ARCHIVAGE | Backend / Documents | FAIT ET BRANCHÉ | MERGEABLE | — | — | Fix crvArchivageService.js (pas DocumentArchiver). 3 options auth: fichier→JSON inline→env vars. GOOGLE_DRIVE_CREDENTIALS_JSON sur Render. Test prod: fileId 1KfnNUccCaUZ9lQNJjr-kSagIXe95kE_M. 396/396 tests. |
