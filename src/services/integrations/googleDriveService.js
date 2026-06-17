@@ -49,8 +49,8 @@ let drive = null;
 
 if (GOOGLE_DRIVE_ENABLED) {
   const authConfig = CREDENTIALS_JSON
-    ? { credentials: CREDENTIALS_JSON, scopes: ['https://www.googleapis.com/auth/drive'] }
-    : { keyFile: CREDENTIALS_PATH, scopes: ['https://www.googleapis.com/auth/drive'] };
+    ? { credentials: CREDENTIALS_JSON, scopes: ['https://www.googleapis.com/auth/drive.file'] }
+    : { keyFile: CREDENTIALS_PATH, scopes: ['https://www.googleapis.com/auth/drive.file'] };
 
   auth = new google.auth.GoogleAuth(authConfig);
   drive = google.drive({ version: 'v3', auth });
@@ -385,24 +385,6 @@ export const uploadFileToDriveAdvanced = async (
     'UPLOAD_FILE_ADV:CREATE'
   );
 
-  // Partage public (anyone + reader) pour accès via lien
-  try {
-    await withRetry(
-      async () =>
-        await drive.permissions.create({
-          fileId: response.data.id,
-          requestBody: {
-            role: 'reader',
-            type: 'anyone',
-          },
-        }),
-      'UPLOAD_FILE_ADV:SHARE'
-    );
-    console.log(`[UPLOAD_FILE_ADV] 🔓 Partage public activé pour ${response.data.id}`);
-  } catch (shareError) {
-    console.warn(`[UPLOAD_FILE_ADV] ⚠️ Partage public échoué:`, shareError.message);
-  }
-
   const d = response.data || {};
   return {
     fileId: d.id,
@@ -411,7 +393,6 @@ export const uploadFileToDriveAdvanced = async (
     mimeType: d.mimeType,
     size: d.size ? Number(d.size) : undefined,
     appProperties: d.appProperties || undefined,
-    publicAccess: true,
   };
 };
 
@@ -442,24 +423,6 @@ export const uploadFileToDrive = async (fileName, fileBuffer, metadata = null) =
         }),
       'UPLOAD_FILE:CREATE'
     );
-
-    // Partage public (anyone + reader) pour accès via lien
-    try {
-      await withRetry(
-        async () =>
-          await drive.permissions.create({
-            fileId: response.data.id,
-            requestBody: {
-              role: 'reader',
-              type: 'anyone',
-            },
-          }),
-        'UPLOAD_FILE:SHARE'
-      );
-      console.log(`[UPLOAD_FILE] 🔓 Partage public activé pour ${response.data.id}`);
-    } catch (shareError) {
-      console.warn(`[UPLOAD_FILE] ⚠️ Partage public échoué:`, shareError.message);
-    }
 
     return response.data.id;
   } catch (error) {

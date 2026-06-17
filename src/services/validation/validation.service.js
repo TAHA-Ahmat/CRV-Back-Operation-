@@ -304,6 +304,24 @@ export const verrouillerCRV = async (crvId, userId) => {
     });
     // ─────────────────────────────────────────────────────────────
 
+    // ============================================================
+    // ARCHIVAGE DRIVE — DÉCLENCHEMENT SUR VERROUILLE (asynchrone)
+    // Archivage non-bloquant : si Drive échoue, verrouillage reste OK
+    // ============================================================
+    try {
+      await archiverCRV(crvId, userId);
+      console.log('[CRV][SERVICE][ARCHIVAGE_OK_VERROUILLE]', { crvId, timestamp: new Date().toISOString() });
+    } catch (archiveError) {
+      console.error('[CRV][SERVICE][ARCHIVAGE_ECHEC_VERROUILLE_NON_BLOQUANT]', {
+        crvId, error: archiveError.message, timestamp: new Date().toISOString()
+      });
+      await CRV.findByIdAndUpdate(crvId, {
+        'archivage.statut': 'EN_ATTENTE',
+        'archivage.erreur': archiveError.message,
+        'archivage.derniereErreurAt': new Date()
+      });
+    }
+
     return true;
   } catch (error) {
     console.log('[CRV][SERVICE][VERROUILLER_CRV_ERROR]', {
