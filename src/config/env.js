@@ -31,6 +31,7 @@ export const config = {
   // Google Drive Configuration
   googleDriveCredentialsPath: process.env.GOOGLE_DRIVE_CREDENTIALS_PATH || './config/archivagebonsdecommande.json',
   googleDriveFolderId: process.env.GOOGLE_DRIVE_FOLDER_ID || '',
+  googleDriveCredentialsJson: process.env.GOOGLE_DRIVE_CREDENTIALS_JSON || '',
   googleClientEmail: process.env.GOOGLE_CLIENT_EMAIL || '',
   googlePrivateKey: (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n')
 };

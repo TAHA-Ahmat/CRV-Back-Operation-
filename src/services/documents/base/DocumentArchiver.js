@@ -30,14 +30,25 @@ let configError = null;
 let drive = null;
 
 // Validation configuration au démarrage
-const useEnvCredentials = !fs.existsSync(CREDENTIALS_PATH) &&
+// Option 1: fichier local (dev)
+// Option 2: JSON complet via GOOGLE_DRIVE_CREDENTIALS_JSON (Render — déjà configuré)
+// Option 3: client_email + private_key séparés
+
+const credentialsJson = config.googleDriveCredentialsJson;
+const parsedCredentials = (() => {
+  if (!credentialsJson) return null;
+  try { return JSON.parse(credentialsJson); } catch { return null; }
+})();
+
+const useJsonCredentials = !fs.existsSync(CREDENTIALS_PATH) && parsedCredentials;
+const useEnvCredentials = !fs.existsSync(CREDENTIALS_PATH) && !parsedCredentials &&
   config.googleClientEmail && config.googlePrivateKey;
 
 try {
-  if (!fs.existsSync(CREDENTIALS_PATH) && !useEnvCredentials) {
-    configError = `Fichier credentials non trouvé : ${CREDENTIALS_PATH} et GOOGLE_CLIENT_EMAIL/GOOGLE_PRIVATE_KEY non configurés`;
+  if (!fs.existsSync(CREDENTIALS_PATH) && !useJsonCredentials && !useEnvCredentials) {
+    configError = 'Aucune source credentials Drive configurée';
   } else if (!DRIVE_ROOT_FOLDER_ID || DRIVE_ROOT_FOLDER_ID === 'ID_DU_DOSSIER_DRIVE_RACINE') {
-    configError = 'GOOGLE_DRIVE_FOLDER_ID non configuré dans .env';
+    configError = 'GOOGLE_DRIVE_FOLDER_ID non configuré';
   } else {
     isConfigured = true;
   }
@@ -49,7 +60,12 @@ try {
 if (isConfigured) {
   try {
     let auth;
-    if (useEnvCredentials) {
+    if (useJsonCredentials) {
+      auth = new google.auth.GoogleAuth({
+        credentials: parsedCredentials,
+        scopes: ['https://www.googleapis.com/auth/drive'],
+      });
+    } else if (useEnvCredentials) {
       auth = new google.auth.GoogleAuth({
         credentials: {
           client_email: config.googleClientEmail,
