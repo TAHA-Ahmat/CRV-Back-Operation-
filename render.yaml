@@ -31,9 +31,11 @@ services:
         sync: false
       - key: SENDGRID_FROM_NAME
         value: CRV Operations
-      - key: GOOGLE_DRIVE_CREDENTIALS_PATH
+      - key: GOOGLE_DRIVE_CREDENTIALS_JSON
         sync: false
       - key: GOOGLE_DRIVE_FOLDER_ID
+        sync: false
+      - key: GOOGLE_DRIVE_FOLDER_ID_CRV
         sync: false
       - key: FRONTEND_URL
         sync: false
