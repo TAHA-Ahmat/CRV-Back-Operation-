@@ -37,5 +37,9 @@ services:
         sync: false
       - key: GOOGLE_DRIVE_FOLDER_ID_CRV
         sync: false
+      - key: GOOGLE_CLIENT_EMAIL
+        sync: false
+      - key: GOOGLE_PRIVATE_KEY
+        sync: false
       - key: FRONTEND_URL
         sync: false

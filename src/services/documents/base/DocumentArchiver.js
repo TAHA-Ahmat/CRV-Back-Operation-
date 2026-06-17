@@ -30,9 +30,12 @@ let configError = null;
 let drive = null;
 
 // Validation configuration au démarrage
+const useEnvCredentials = !fs.existsSync(CREDENTIALS_PATH) &&
+  config.googleClientEmail && config.googlePrivateKey;
+
 try {
-  if (!fs.existsSync(CREDENTIALS_PATH)) {
-    configError = `Fichier credentials non trouvé : ${CREDENTIALS_PATH}`;
+  if (!fs.existsSync(CREDENTIALS_PATH) && !useEnvCredentials) {
+    configError = `Fichier credentials non trouvé : ${CREDENTIALS_PATH} et GOOGLE_CLIENT_EMAIL/GOOGLE_PRIVATE_KEY non configurés`;
   } else if (!DRIVE_ROOT_FOLDER_ID || DRIVE_ROOT_FOLDER_ID === 'ID_DU_DOSSIER_DRIVE_RACINE') {
     configError = 'GOOGLE_DRIVE_FOLDER_ID non configuré dans .env';
   } else {
@@ -45,10 +48,21 @@ try {
 // Authentification Google Drive
 if (isConfigured) {
   try {
-    const auth = new google.auth.GoogleAuth({
-      keyFile: CREDENTIALS_PATH,
-      scopes: ['https://www.googleapis.com/auth/drive'],
-    });
+    let auth;
+    if (useEnvCredentials) {
+      auth = new google.auth.GoogleAuth({
+        credentials: {
+          client_email: config.googleClientEmail,
+          private_key: config.googlePrivateKey,
+        },
+        scopes: ['https://www.googleapis.com/auth/drive'],
+      });
+    } else {
+      auth = new google.auth.GoogleAuth({
+        keyFile: CREDENTIALS_PATH,
+        scopes: ['https://www.googleapis.com/auth/drive'],
+      });
+    }
     drive = google.drive({ version: 'v3', auth });
   } catch (err) {
     configError = `Erreur initialisation Google Drive : ${err.message}`;
