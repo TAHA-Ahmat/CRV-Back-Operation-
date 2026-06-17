@@ -46,6 +46,9 @@ import agentRoutes from './routes/agents/agentRoutes.js';
 
 const app = express();
 
+// Trust Render's reverse proxy so express-rate-limit can read X-Forwarded-For per user
+app.set('trust proxy', 1);
+
 // 📊 Initialize Sentry error tracking (MUST be first middleware)
 initSentry(app);
 
