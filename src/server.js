@@ -3,10 +3,21 @@ import { config } from './config/env.js';
 import { connectDB } from './config/db.js';
 import { initNotificationEngine } from './services/notifications/initNotificationEngine.js';
 import { initializeDailyReportScheduler } from './jobs/dailyReportScheduler.js';
+import { seedPhases } from './utils/seedPhases.js';
+import Phase from './models/phases/Phase.js';
 
 const startServer = async () => {
   try {
     await connectDB();
+
+    // Auto-seed phases maîtres si absentes (ex: premier déploiement Render)
+    const phaseCount = await Phase.countDocuments();
+    if (phaseCount === 0) {
+      console.log('[Server] 0 phases maîtres détectées — seed automatique...');
+      await seedPhases(false).catch(err => {
+        console.error('[Server] seedPhases failed (non-fatal):', err.message);
+      });
+    }
 
     // AGENT 4: Initialiser Daily Report Scheduler (rapports auto 21:00 NDJ)
     initializeDailyReportScheduler(app);
