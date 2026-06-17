@@ -24,12 +24,26 @@ const CREDENTIALS_PATH = path.resolve(config.googleDriveCredentialsPath);
 const DRIVE_FOLDER_ID = config.googleDriveFolderId;
 
 // Validation de la configuration au démarrage
+// Option 1: fichier local (dev)
+// Option 2: JSON complet via GOOGLE_DRIVE_CREDENTIALS_JSON (Render)
+// Option 3: client_email + private_key séparés
+
+const credentialsJson = config.googleDriveCredentialsJson;
+const parsedCredentials = (() => {
+  if (!credentialsJson) return null;
+  try { return JSON.parse(credentialsJson); } catch { return null; }
+})();
+
+const useJsonCredentials = !fs.existsSync(CREDENTIALS_PATH) && parsedCredentials;
+const useEnvCredentials = !fs.existsSync(CREDENTIALS_PATH) && !parsedCredentials &&
+  config.googleClientEmail && config.googlePrivateKey;
+
 let isConfigured = false;
 let configError = null;
 
 try {
-  if (!fs.existsSync(CREDENTIALS_PATH)) {
-    configError = `Fichier credentials non trouvé : ${CREDENTIALS_PATH}`;
+  if (!fs.existsSync(CREDENTIALS_PATH) && !useJsonCredentials && !useEnvCredentials) {
+    configError = 'Aucune source credentials Drive configurée';
   } else if (!DRIVE_FOLDER_ID || DRIVE_FOLDER_ID === 'ID_DU_DOSSIER_DRIVE_RACINE') {
     configError = 'GOOGLE_DRIVE_FOLDER_ID non configuré dans .env';
   } else {
@@ -44,10 +58,26 @@ let drive = null;
 
 if (isConfigured) {
   try {
-    const auth = new google.auth.GoogleAuth({
-      keyFile: CREDENTIALS_PATH,
-      scopes: ['https://www.googleapis.com/auth/drive'],
-    });
+    let auth;
+    if (useJsonCredentials) {
+      auth = new google.auth.GoogleAuth({
+        credentials: parsedCredentials,
+        scopes: ['https://www.googleapis.com/auth/drive'],
+      });
+    } else if (useEnvCredentials) {
+      auth = new google.auth.GoogleAuth({
+        credentials: {
+          client_email: config.googleClientEmail,
+          private_key: config.googlePrivateKey,
+        },
+        scopes: ['https://www.googleapis.com/auth/drive'],
+      });
+    } else {
+      auth = new google.auth.GoogleAuth({
+        keyFile: CREDENTIALS_PATH,
+        scopes: ['https://www.googleapis.com/auth/drive'],
+      });
+    }
     drive = google.drive({ version: 'v3', auth });
   } catch (err) {
     configError = `Erreur initialisation Google Drive : ${err.message}`;
