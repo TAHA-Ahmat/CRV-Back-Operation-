@@ -27,7 +27,6 @@ const enginSchema = new mongoose.Schema({
   timestamps: true
 });
 
-enginSchema.index({ numeroEngin: 1 });
 enginSchema.index({ typeEngin: 1 });
 enginSchema.index({ statut: 1 });
 

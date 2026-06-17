@@ -438,9 +438,6 @@ const bulletinMouvementSchema = new Schema({
 // INDEX
 // ══════════════════════════════════════════════════════════════════════════
 
-// Index unique sur le numero de bulletin
-bulletinMouvementSchema.index({ numeroBulletin: 1 }, { unique: true });
-
 // Index par escale et periode
 bulletinMouvementSchema.index({ escale: 1, dateDebut: 1, dateFin: 1 });
 

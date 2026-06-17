@@ -276,9 +276,6 @@ const programmeVolSchema = new Schema({
 // INDEX
 // ══════════════════════════════════════════════════════════════════════════
 
-// Index unique sur le nom
-programmeVolSchema.index({ nom: 1 }, { unique: true });
-
 // Index par statut et actif
 programmeVolSchema.index({ statut: 1, actif: 1 });
 
