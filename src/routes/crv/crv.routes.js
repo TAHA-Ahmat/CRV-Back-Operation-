@@ -14,7 +14,8 @@ import {
   obtenirTransitionsPossibles,
   confirmerAbsence,
   annulerConfirmationAbsence,
-  obtenirVolsSansCRV
+  obtenirVolsSansCRV,
+  initialiserPhasesCRV
 } from '../../controllers/crv/crv.controller.js';
 import {
   ajouterCharge,
@@ -369,6 +370,13 @@ router.delete('/:id/engins/:affectationId', protect, excludeQualite, verifierCRV
 // 🔒 Mission 009: Verrouillage — empêcher modification phase sur CRV verrouillé
 // 🔒 Mission 022: Autorisations hiérarchiques — rôles opérationnels + supervision
 router.put('/:crvId/phases/:phaseId', protect, authorize(...ROLES_TOUS_SAUF_QUALITE), verifierCRVNonVerrouilleViaPhase, auditLog('MISE_A_JOUR'), mettreAJourPhaseCRV);
+
+/**
+ * @route   POST /api/crv/:id/initialiser-phases
+ * @desc    Initialise les phases pour un CRV qui n'en a pas (rattrapage)
+ * @access  Private (QUALITE exclu)
+ */
+router.post('/:id/initialiser-phases', protect, authorize(...ROLES_TOUS_SAUF_QUALITE), initialiserPhasesCRV);
 
 // ============================
 //   MISE À JOUR HORAIRES

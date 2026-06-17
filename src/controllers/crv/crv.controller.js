@@ -2920,3 +2920,24 @@ export const supprimerCRV = async (req, res, next) => {
     next(error);
   }
 };
+
+export const initialiserPhasesCRV = async (req, res, next) => {
+  try {
+    const crv = await CRV.findById(req.params.id).populate('vol');
+    if (!crv) return res.status(404).json({ success: false, message: 'CRV non trouvé' });
+
+    const typeOperation = crv.vol?.typeOperation;
+    if (!typeOperation) return res.status(400).json({ success: false, message: 'typeOperation manquant sur le vol' });
+
+    const existing = await ChronologiePhase.countDocuments({ crv: crv._id });
+    if (existing > 0) return res.status(409).json({ success: false, message: `${existing} phases déjà initialisées` });
+
+    await initialiserPhasesVol(crv._id, typeOperation, crv.horaire || null);
+    await updateCompletude(crv._id);
+
+    const count = await ChronologiePhase.countDocuments({ crv: crv._id });
+    res.status(200).json({ success: true, message: `${count} phases initialisées`, data: { count, typeOperation } });
+  } catch (error) {
+    next(error);
+  }
+};
