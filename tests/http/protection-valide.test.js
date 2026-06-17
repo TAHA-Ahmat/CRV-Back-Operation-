@@ -310,9 +310,9 @@ describe('Mission 019 — Protection statut VALIDE', () => {
   });
 
   // ═══════════════════════════════════════════════════
-  // TEST 4 — PATCH CRV TERMINE → autorisé
+  // TEST 4 — PATCH CRV TERMINE → refusé (BUG-04 FIX)
   // ═══════════════════════════════════════════════════
-  it('PATCH /api/crv/:id → passe le middleware si CRV TERMINE', async () => {
+  it('PATCH /api/crv/:id → 403 si CRV TERMINE', async () => {
     mockAuthenticatedUser();
     const crv = fakeCRV({ statut: 'TERMINE' });
     mockCRVFindById.mockReturnValue(crv);
@@ -323,7 +323,7 @@ describe('Mission 019 — Protection statut VALIDE', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({ escale: 'TEST' });
 
-    expect(res.status).not.toBe(403);
+    expect(res.status).toBe(403);
   });
 
   // ═══════════════════════════════════════════════════

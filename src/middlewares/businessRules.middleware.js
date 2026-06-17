@@ -5,11 +5,12 @@ import Phase from '../models/phases/Phase.js';
 
 /**
  * RÈGLE MÉTIER CRITIQUE : Vérifier que le CRV n'est pas figé
- * Un CRV validé (VALIDE) ou verrouillé (VERROUILLE) est non modifiable.
- * Seuls EN_COURS, BROUILLON et TERMINE restent éditables.
+ * Un CRV validé (VALIDE), verrouillé (VERROUILLE), terminé (TERMINE) ou annulé (ANNULE) est non modifiable.
+ * Seuls EN_COURS et BROUILLON restent éditables.
  */
 // MISSION 022 — Ajout ANNULE aux statuts non modifiables + protection archivage
-const STATUTS_NON_MODIFIABLES = ['VALIDE', 'VERROUILLE', 'ANNULE'];
+// BUG-04 FIX — Ajouter TERMINE aux statuts non modifiables (empêcher PATCH sur CRV finalisé)
+const STATUTS_NON_MODIFIABLES = ['TERMINE', 'VALIDE', 'VERROUILLE', 'ANNULE'];
 
 export const verifierCRVNonVerrouille = async (req, res, next) => {
   try {
