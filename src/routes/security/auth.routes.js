@@ -3,6 +3,8 @@ import { body } from 'express-validator';
 import { login, register, getMe, changerMotDePasse, validerCompte } from '../../controllers/security/auth.controller.js';
 import { protect, authorize } from '../../middlewares/auth.middleware.js';
 import { validate } from '../../middlewares/validation.middleware.js';
+import { seedPhases } from '../../utils/seedPhases.js';
+import Phase from '../../models/phases/Phase.js';
 
 const router = express.Router();
 
@@ -64,6 +66,20 @@ router.post('/valider-compte', protect, authorize('ADMIN'), [
 // Alias pour /deconnexion → /me (logout est géré côté client)
 router.post('/deconnexion', (req, res) => {
   res.status(200).json({ success: true, message: 'Déconnexion réussie' });
+});
+
+// Seed phases maîtres (ADMIN uniquement — usage unique déploiement)
+router.post('/admin/seed-phases', protect, authorize('ADMIN'), async (req, res, next) => {
+  try {
+    const count = await Phase.countDocuments();
+    if (count > 0 && !req.query.force) {
+      return res.status(200).json({ success: true, message: `${count} phases déjà présentes`, data: { count } });
+    }
+    const result = await seedPhases(!!req.query.force);
+    res.status(200).json({ success: true, message: 'Seed terminé', data: result });
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;
