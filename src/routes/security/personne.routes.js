@@ -16,11 +16,11 @@ const router = express.Router();
 // Routes publiques (nécessitent authentification)
 router.use(protect);
 
-// GET /api/personnes - Liste tous les utilisateurs
-router.get('/', getAllPersonnes);
+// GET /api/personnes - Liste tous les utilisateurs (ADMIN UNIQUEMENT)
+router.get('/', authorize('ADMIN'), getAllPersonnes);
 
-// GET /api/personnes/stats/global - Statistiques des utilisateurs
-router.get('/stats/global', getPersonnesStats);
+// GET /api/personnes/stats/global - Statistiques des utilisateurs (ADMIN UNIQUEMENT)
+router.get('/stats/global', authorize('ADMIN'), getPersonnesStats);
 
 // GET /api/personnes/:id - Obtenir un utilisateur
 router.get('/:id', getPersonneById);
