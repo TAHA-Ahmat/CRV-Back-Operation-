@@ -4,7 +4,7 @@ services:
     env: node
     region: frankfurt
     plan: free
-    branch: mission/SLA_FULL_COVERAGE_BACK
+    branch: master
     buildCommand: npm install
     startCommand: node src/server.js
     healthCheckPath: /health

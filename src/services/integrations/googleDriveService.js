@@ -16,20 +16,48 @@ const __dirname = dirname(__filename);
 // ============================
 //   CONFIG & AUTHENTICATION
 // ============================
-const CREDENTIALS_PATH =
-  process.env.GOOGLE_DRIVE_CREDENTIALS_PATH ||
-  path.join(__dirname, '../../config/archivagebonsdecommande.json');
 
-// ⚠️ Scope élargi à "drive" (permet move/list/metadata sur des fichiers non créés par le service)
-const auth = new google.auth.GoogleAuth({
-  keyFile: CREDENTIALS_PATH,
-  scopes: ['https://www.googleapis.com/auth/drive'],
-});
+// Déterminer source des credentials
+let CREDENTIALS_PATH = process.env.GOOGLE_DRIVE_CREDENTIALS_PATH || null;
+let CREDENTIALS_JSON = null;
+let GOOGLE_DRIVE_ENABLED = false;
 
-const drive = google.drive({ version: 'v3', auth });
+// Essayer de charger credentials depuis JSON env var
+if (process.env.GOOGLE_DRIVE_CREDENTIALS_JSON) {
+  try {
+    CREDENTIALS_JSON = JSON.parse(process.env.GOOGLE_DRIVE_CREDENTIALS_JSON);
+    GOOGLE_DRIVE_ENABLED = true;
+  } catch (e) {
+    console.warn('[GOOGLE_DRIVE] GOOGLE_DRIVE_CREDENTIALS_JSON invalide (JSON parse failed). Google Drive disabled.');
+  }
+}
 
-// Racine métier (obligatoire)
-const DRIVE_ROOT_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID;
+// Fallback fichier si path fourni
+if (!GOOGLE_DRIVE_ENABLED && CREDENTIALS_PATH) {
+  GOOGLE_DRIVE_ENABLED = true;
+}
+
+// Si aucune source → warning et service disabled
+if (!GOOGLE_DRIVE_ENABLED) {
+  console.warn('[GOOGLE_DRIVE] ⚠️  Aucune source de credentials (GOOGLE_DRIVE_CREDENTIALS_PATH ni GOOGLE_DRIVE_CREDENTIALS_JSON). Service Google Drive DÉSACTIVÉ.');
+  console.warn('[GOOGLE_DRIVE] Les archivages PDF ne fonctionneront pas. Archivage optionnel pour développement local.');
+}
+
+// Initialiser auth + drive UNIQUEMENT si credentials disponibles
+let auth = null;
+let drive = null;
+
+if (GOOGLE_DRIVE_ENABLED) {
+  const authConfig = CREDENTIALS_JSON
+    ? { credentials: CREDENTIALS_JSON, scopes: ['https://www.googleapis.com/auth/drive'] }
+    : { keyFile: CREDENTIALS_PATH, scopes: ['https://www.googleapis.com/auth/drive'] };
+
+  auth = new google.auth.GoogleAuth(authConfig);
+  drive = google.drive({ version: 'v3', auth });
+}
+
+// Racine métier (optionnel si service disabled)
+const DRIVE_ROOT_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || null;
 
 // Petite aide pour IDs Drive (validation soft)
 const DRIVE_ID_RE = /^[a-zA-Z0-9_-]{10,}$/;
