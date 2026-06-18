@@ -44,6 +44,8 @@
 | CRV_SUPERVISOR_LIST_POLISH | PRODUIT / UX Superviseur | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../docs/architecture/CRV_SUPERVISOR_LIST_FINAL_POLISH_REPORT.md) | [Non-régression](../../docs/architecture/CRV_SUPERVISOR_LIST_FINAL_POLISH_NON_REGRESSION_PROOF.md) | Cockpit liste : cartes vol-first, bandes criticité, actions icônes, header compteurs. +177/-72. 1 fichier front. 0 backend. |
 | CRV_SUPERVISOR_DETAIL_PARETO | PRODUIT / UX Superviseur | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../docs/architecture/CRV_SUPERVISOR_DETAIL_MODAL_PARETO_REPORT.md) | [Non-régression](../../docs/architecture/CRV_SUPERVISOR_DETAIL_MODAL_PARETO_NON_REGRESSION_PROOF.md) | Fiche Pareto : verdict coloré, événements avant phases, synthèse chips phases, 4 sections repliables. +179/-118. 1 fichier front. 0 backend. Zone rouge: AUCUNE. |
 
+| UX_AUDIT_SESSION7 | Frontend / UX terrain | FAIT ET BRANCHÉ | MERGEABLE | [Rapport](../../Front/docs/audit/UX_AUDIT_RAPPORT_COMPLET.md) | — | Audit UX complet sur crv-front-operation.vercel.app (desktop + code review responsive). 6 fichiers Front. Commit 8968bbe. Voir détails ci-dessous. |
+
 ## Backlog restant
 
 ### P0 — sécurité / prod
@@ -84,6 +86,19 @@
 ### P2 — tests
 - [x] ~~Tests d'intégration CRVEvent wrappers sous-ressources~~ → Corrigé P2_CRVEVENT_INTEGRATION_001 (10/10 pass)
 - [ ] Tests permissions / verrouillage / auth sur routes sensibles
+
+### LIVRAISON — état au 18/06/2026
+- [x] ~~**Intégration Google Drive**~~ → LIVRÉ ba7c552 (archivage PDF à la validation TERMINE→VALIDE)
+- [x] ~~**Audit UX + fixes terrain**~~ → LIVRÉ 8968bbe. 4 types de fixes :
+  - `Login.vue` : œil show/hide MDP + spinner "Connexion en cours..."
+  - `AppFooter.vue` : © 2025 → © 2026
+  - `AppHeader.vue` : bouton thème jour/nuit dans menu mobile (hamburger < 768px)
+  - `CRVTurnAround.vue` + `CRVArrivee.vue` + `CRVDepart.vue` : **bug critique** — bouton "Continuer" masqué sur CRV VERROUILLE (`v-if="!isLocked"`). L'agent terrain ne pouvait pas naviguer entre les 7 étapes d'un CRV verrouillé sans cliquer les petits cercles. Fix : bouton toujours visible, texte `"Voir la suite →"` si verrouillé.
+- [ ] **Render keep-alive** — à faire EN DERNIER (instruction utilisateur)
+- [ ] **Rotation credentials** — MONGO_URI + JWT_SECRET + SendGrid
+- [ ] **RUNBOOK THS Aéro** — guide utilisateur terrain en français (priorité haute)
+- [ ] **Test tablette physique** — jamais testé device réel
+- [ ] **Nettoyage données test** — avant prod
 
 ### P3 — améliorations futures
 - [ ] **Données vol vides sur cartes bulletin avant sélection** (BUG-006 audit E2E)

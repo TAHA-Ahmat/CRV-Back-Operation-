@@ -17,43 +17,62 @@
 | `SKILL.md` | Comportement agent (lecture avant action, mémoire, gouvernance) | `.claude/skills/pilotage-critique/SKILL.md` |
 | `MISSION_INDEX.md` | État vivant (missions faites, backlog, priorités) | `Back/docs/audit/MISSION_INDEX.md` |
 
-## État global réel
+## État global réel — 18/06/2026
 
-- **15 missions exécutées** — toutes FAIT ET BRANCHÉ, toutes MERGEABLE
-- **P0 sécurité** : couvert (auth bypass corrigé sur routes CRV + phases/charges)
-- **P1 bugs UX** : couvert (champs vol, wizard navigation, personnel)
-- **P1 cohérence UI/API** : couvert (journal CRVEvent branché sur Personnel, Engins, Charges, Événements, Observations)
-- **Gouvernance documentaire** : verrouillée (CLAUDE.md réaligné, skill créé, chemins corrigés)
+- **Missions exécutées** : 40+ toutes FAIT ET BRANCHÉ / MERGEABLE
+- **P0 sécurité** : couvert (auth bypass, VersionError 500, zones rouges stables)
+- **P1 bugs UX** : couvert (wizard, charges, phases, binding, pré-remplissage)
+- **P1 cohérence UI/API** : couvert (CRVEvent branché sur toutes les sous-ressources)
+- **Gouvernance documentaire** : verrouillée
+- **Google Drive** : ✅ LIVRÉ ba7c552 — archivage PDF à VALIDE, prouvé en prod
+- **Audit UX terrain** : ✅ LIVRÉ 8968bbe — 6 fichiers Front, voir ci-dessous
 
-## Chantiers restants (priorité décroissante)
+## Derniers livraisons (session 7, 18/06/2026)
 
-### P2 — dette technique
-- Exposer `GET /api/crv/:id/events` (journal CRVEvent consultable)
-- `crvTransaction.service.js` potentiellement mort
-- Logs excessifs front/backend
-- Double rechargement CRV après chaque action
-- Code mort / payloads incohérents
+### Commit 8968bbe — Audit UX terrain (6 fichiers Front)
 
-### P2 — tests
-- Tests d'intégration sur périmètres critiques
-- Tests permissions / verrouillage / auth
+| Fichier | Fix |
+|---|---|
+| `Login.vue` | Œil show/hide MDP + spinner "Connexion en cours..." pendant isLoading |
+| `AppFooter.vue` | © 2025 → © 2026 |
+| `AppHeader.vue` | Bouton thème jour/nuit dans menu hamburger mobile (< 768px) |
+| `CRVTurnAround.vue` | Bug critique : bouton nav masqué sur CRV VERROUILLE → "Voir la suite →" toujours visible |
+| `CRVArrivee.vue` | Idem (6 étapes) |
+| `CRVDepart.vue` | Idem (6 étapes) |
 
-### P3 — améliorations
-- Composant UI observations (backend prêt, pas d'UI)
-- Brancher notifications eventRegistry sur CRVEvent
-- Nettoyage abstractions cosmétiques
+**Bug critique résolu** : sur un CRV VERROUILLÉ, les boutons "Continuer" étaient masqués par `v-if="!crvStore.isLocked"`. Un agent terrain ouvrant un CRV verrouillé pour consultation ne pouvait naviguer entre les 7 étapes qu'en cliquant les petits cercles. Fix : bouton toujours présent, texte conditionnel.
 
-## Prochaine mission recommandée
+### Commit ba7c552 — Google Drive (session 6)
+Archivage PDF automatique à la validation (TERMINE→VALIDE). Prod prouvé : fileId `1KfnNUccCaUZ9lQNJjr-kSagIXe95kE_M`.
 
-**P2_ENDPOINT_001** — Exposer `GET /api/crv/:id/events`
+## Chantiers restants avant livraison prod
 
-## Branches actives (non mergées)
+| Priorité | Chantier | Contrainte |
+|---|---|---|
+| 1 (HAUTE) | RUNBOOK THS Aéro | Guide terrain en français — livraison terrain |
+| 2 | Rotation credentials | MONGO_URI + JWT_SECRET + SendGrid — alerte haute |
+| 3 | Test tablette physique | Jamais testé device réel |
+| 4 | Nettoyage données test | CRV/vols/comptes recette → supprimer avant prod |
+| DERNIER | Render keep-alive | Instruction utilisateur explicite : régler ça vraiment à la fin |
 
-- `mission/P1-UI-API-001` (Back) — 8 commits : P1_UI_API_001→005 + CLAUDE_MD_REALIGNMENT + DOC_GOV_HARDENING + DOC_FINAL_LOCK
-- `mission/P1-UX-004` (Front) — 1 commit : P1_UX_004
-- Missions P0/P1_UX_001-003 — sur branches antérieures (voir git log)
-
-## Zones rouges (NE JAMAIS MODIFIER)
+## Zones rouges (NE JAMAIS MODIFIER sans autorisation explicite)
 
 **Backend** : `validation.service.js`, `crvArchivage.service.js`, `businessRules.middleware.js`, `crv.controller.js`
 **Frontend** : `authStore.js`, `permissions.js`, `router/index.js`, `useAuth.js`
+
+## Comptes de recette THS Aéro
+
+| Email | Password | Rôle |
+|---|---|---|
+| admin@crv.ths | THS2026! | ADMIN |
+| agent@crv.ths | THS2026! | AGENT_ESCALE |
+| chef@crv.ths | THS2026! | CHEF_EQUIPE |
+| superviseur2@crv.ths | THS2026Recette! | SUPERVISEUR |
+| manager2@crv.ths | THS2026Recette! | MANAGER |
+
+## CRV de référence
+
+- ID : 6a32f701efcc2b379a18b758
+- Numéro : CRV260617-0011
+- Vol : THS-TA-0001 (TURN_AROUND)
+- Statut : **VERROUILLE** (17/06/2026 20:37 UTC) — cycle complet prouvé
