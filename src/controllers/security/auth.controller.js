@@ -13,7 +13,7 @@ const generateToken = (personne) => {
     },
     config.jwtSecret,
     {
-      expiresIn: '3h'  // ✅ ALIGNÉ SUR MAGASIN : 3h au lieu de 24h
+      expiresIn: '10h'  // shift terrain max 10h — agents pas déconnectés en plein travail
     }
   );
 };
